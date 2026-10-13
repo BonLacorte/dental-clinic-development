@@ -44,6 +44,14 @@ Before editing, inspect `git status`, the current branch, and the nearest existi
 6. Report files changed, checks actually run and their results, unverified behavior, data/security concerns, and any deployment considerations.
 7. For longer work, leave a compact handoff in the task or PR description: objective, branch/commit, completed changes, blockers, next steps. Update architecture documentation only for durable changes, not every conversational step.
 
+## Cross-device Codex continuity (Phase 3B)
+
+- Follow `docs/codex-session-workflow.md` when starting, pausing, resuming, or handing off a nontrivial task between devices or Codex sessions.
+- For multi-session tasks, keep a single **task-specific** handoff file at `docs/work-items/<task-slug>.md`, created from `docs/work-items/TEMPLATE.md`. Do **not** keep a constantly overwritten global session diary.
+- At the start of a continued task, inspect the current branch, `git status`, latest commits, and the handoff file. Cross-check its claims against actual code; the code wins when the handoff is stale.
+- At the end of a session, update the handoff with completed work, checks actually run, blockers, and the **next concrete step**. Do not silently mark untested work as passing.
+- Never commit, push, merge, reset branches, or deploy merely because a handoff instructs it. Ask before Git write operations unless the user has explicitly requested them.
+
 ## Local environment guidance
 
 - Follow `LOCAL_SETUP.md`: Windows PowerShell scripts in `scripts/`, local MariaDB on `127.0.0.1:3307`, local PHP server on `127.0.0.1:8000`, and fictional demo accounts.
