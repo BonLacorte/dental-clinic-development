@@ -1,0 +1,389 @@
+/*********************** login css ***************************************/
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "poppins" sans-serif;
+}
+.inputbox ion-icon {
+  position: absolute;
+  right: 8px;
+  color: red;
+  font-size: 1.2em;
+  top: 20px;
+}
+.login-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  /* background: url("../images/montero_logo2.jpg") no-repeat; */
+  background-color: rgb(45, 71, 85);
+  background-position: center;
+  background-size: cover;
+}
+.login-grid {
+  display: grid;
+  grid-template-rows: 90px 90px 410px;
+  grid-template-columns: 525px;
+}
+.login-logo {
+  grid-row-start: 1;
+  grid-row-end: 3;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  z-index: +1;
+
+  padding: 15px;
+  background-color: white;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.login-image {
+  width: 150px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 50%;
+}
+.login-form {
+  height: 340px;
+}
+.login-form-box {
+  grid-row-start: 2;
+  grid-row-end: 4;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  width: 400px;
+  height: 500px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.login-h2 {
+  font-size: 2em;
+  color: #038f90;
+  text-align: center;
+}
+input:focus ~ label,
+input:valid ~ label {
+  top: -5px;
+}
+.login-inputbox {
+  position: relative;
+  margin: 30px 0;
+  width: 310px;
+  background: transparent;
+  border-bottom: 2px solid black;
+}
+.login-inputbox label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  color: #038f90;
+  font-size: 1.1em;
+  pointer-events: none;
+  transition: 0.5s;
+}
+.login-inputbox .field {
+  width: 100%;
+  height: 50px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1em;
+  padding: 0 35px 0 5px;
+  color: black;
+}
+#login-button {
+  width: 90%;
+  height: 40px;
+  border-radius: 40px;
+  background: #038f90;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  margin: 10px;
+  color: white;
+}
+#login-error-alert {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+/****************************** login css ********************/
+
+body {
+  overflow-x: hidden;
+}
+
+/* Navbar height fix */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  height: 56px;
+}
+
+/* Wrapper for sidebar + content */
+#wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  background: #212529;
+  color: #fff;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 20px;
+  color: #adb5bd;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background: #343a40;
+  color: #fff;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* Parent behaves like sidebar link */
+.nav-parent {
+  display: block;
+  padding: 12px 20px;
+  color: #adb5bd;
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-parent:hover {
+  background: #343a40;
+  color: #fff;
+}
+
+/* arrow positioning */
+.nav-parent .arrow {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+/* dropdown container */
+.nav-child {
+  display: none;
+  flex-direction: column;
+}
+
+/* open state */
+.nav-group.open .nav-child {
+  display: block;
+}
+
+/* rotate arrow */
+.nav-group.open .arrow {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* make child links look slightly indented */
+.nav-child a {
+  padding-left: 40px;
+  font-size: 14px;
+}
+
+/* arrow animation */
+.arrow {
+    transition: transform 0.2s ease;
+}
+
+.nav-group.open .arrow {
+    transform: rotate(180deg);
+}
+
+/* Content wrapper */
+#content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin-left: 250px; /* initial sidebar width */
+  margin-top: 56px; /* push content below navbar */
+  transition: margin-left 0.3s ease;
+}
+
+#content-wrapper.expanded {
+  margin-left: 0;
+}
+
+/* Page content */
+.content {
+  padding: 20px;
+  flex-grow: 1; /* pushes footer to bottom */
+  /* background-color: #F9F9F9; */
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  background: #212529;
+  color: #fff;
+  padding: 12px 0;
+}
+
+/* Optional: adjust sidebar toggle button */
+#toggleSidebar {
+  cursor: pointer;
+}
+
+/* Full page overlay */
+#page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* dark semi-transparent */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#page-loader .loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* subtle glow behind spinner (optional) */
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+}
+
+.loader-text {
+  font-size: 1.1rem;
+  color: #fff; /* white text for dark background */
+}
+
+#toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(var(--bs-info-rgb));
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  display: none;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-align: center;
+  /* padding: 16px;
+            border-radius: 8px;
+            min-width: 250px; */
+
+  padding: 20px 30px; /* bigger padding */
+  border-radius: 12px; /* slightly more rounded */
+  min-width: 300px; /* wider */
+  font-size: 1.2rem; /* bigger text */
+}
+
+/* Success toast */
+#toast.success {
+  /* background-color: #28a745; */
+  background-color: rgba(var(--bs-success-rgb)); /* Bootstrap green */
+  color: #fff;
+}
+
+/* Optional: error toast */
+#toast.error {
+  /* background-color: #dc3545; */
+  background-color: rgba(var(--bs-danger-rgb)); /* Bootstrap red */
+  color: #fff;
+}
+/*******************************************************************/
+
+.sidebar a.active {
+  background-color: #198754 !important;
+  color: #fff !important;
+}
+
+.sidebar a.active i {
+  color: #fff !important;
+}
+
+/******************** panel example (check docs) ****************************/
+.example-wrapper {
+  min-height: 500px;   /* or 100vh if you want full feel */
+}
+
+.example-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 999;
+
+  opacity: 0;
+  pointer-events: none;
+
+  background: rgba(255,255,255,0.0);
+  transition: opacity 0.2s ease, background 0.2s ease;
+
+  display: flex;
+}
+
+.example-panel-card {
+  width: 100%;
+  height: 100%;   /* now works because parent has height */
+
+  display: flex;
+  flex-direction: column;
+
+  transform: scale(0.98);
+  transition: transform 0.2s ease;
+}
+
+.example-panel-card .card-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ACTIVE */
+.example-panel.active {
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(255,255,255,0.95);
+}
+
+.example-panel.active .example-panel-card {
+  transform: scale(1);
+}

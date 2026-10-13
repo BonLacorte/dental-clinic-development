@@ -1,0 +1,64 @@
+# Installed Composer dependencies (composer.json and composer.lock are tracked).
+/vendor/
+
+# Machine-specific configuration and private credentials.
+/config/config.php
+/config/local.php
+/config/secrets.php
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime storage: uploads, database files, logs, sessions and caches.
+# Keep placeholders so a fresh checkout contains the required directories.
+/storage/*
+!/storage/attachments/
+!/storage/logs/
+!/storage/sessions/
+/storage/attachments/*
+!/storage/attachments/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+
+# Downloaded development runtimes, installer archives and database exports.
+/.tools/
+/MVCLite-v*.zip
+*.sql
+*.sql.gz
+*.sql.zip
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Editor, OS and temporary files.
+/.idea/
+/.vscode/
+/.vs/
+/.codex/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+*.pid
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Optional local test tooling output.
+/.phpunit.cache/
+/.phpunit.result.cache
+/coverage/
+/node_modules/
+/playwright-report/
+/test-results/
