@@ -4,18 +4,28 @@ date_default_timezone_set('Asia/Manila');
 $root = dirname(__DIR__);
 try {
     $config = (require $root . '/config/local.php')['default'];
-    if ($config['host'] !== '127.0.0.1' || (int)$config['port'] !== 3307 || $config['dbname'] !== 'monterodental_demo' || $config['user'] !== 'montero_demo') {
-        throw new RuntimeException('Setup only supports the isolated monterodental_demo database on 127.0.0.1:3307.');
+    // Explicit dev-only Docker mode; the existing Windows/XAMPP path stays unchanged.
+    $dockerDemo = getenv('MONTERO_DEMO_DOCKER') === '1';
+    $demoHost = $dockerDemo ? 'db' : '127.0.0.1';
+    $demoPort = $dockerDemo ? 3306 : 3307;
+    if ($config['host'] !== $demoHost || (int)$config['port'] !== $demoPort || $config['dbname'] !== 'monterodental_demo' || $config['user'] !== 'montero_demo') {
+        throw new RuntimeException('Setup only supports the isolated monterodental_demo database on the configured local demo transport.');
     }
-    $db = new PDO('mysql:host=127.0.0.1;port=3307;charset=utf8mb4', 'root', 'LocalDemoRoot2026!', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $rootPassword = $dockerDemo ? getenv('MONTERO_DEMO_DB_ROOT_PASSWORD') : 'LocalDemoRoot2026!';
+    if (!is_string($rootPassword) || $rootPassword === '') {
+        throw new RuntimeException('Docker demo root password was not provided.');
+    }
+    $db = new PDO("mysql:host={$demoHost};port={$demoPort};charset=utf8mb4", 'root', $rootPassword, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     $db->exec('CREATE DATABASE IF NOT EXISTS monterodental_demo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
     $db->exec('USE monterodental_demo');
     $tables = $db->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
     if ($tables && !in_array('local_demo_metadata', $tables, true)) {
         throw new RuntimeException('Database contains unrecognized tables; refusing to modify it.');
     }
-    $db->exec("CREATE USER IF NOT EXISTS 'montero_demo'@'127.0.0.1' IDENTIFIED BY " . $db->quote($config['pass']));
-    $db->exec("GRANT SELECT, INSERT, UPDATE, DELETE ON monterodental_demo.* TO 'montero_demo'@'127.0.0.1'");
+    // The MariaDB image initializes its demo user for the container network.
+    $userHost = $dockerDemo ? '%' : '127.0.0.1';
+    $db->exec("CREATE USER IF NOT EXISTS 'montero_demo'@'{$userHost}' IDENTIFIED BY " . $db->quote($config['pass']));
+    $db->exec("GRANT SELECT, INSERT, UPDATE, DELETE ON monterodental_demo.* TO 'montero_demo'@'{$userHost}'");
     $schema = require __DIR__ . '/demo-schema.php';
     foreach ($schema as $table => $columns) {
         $db->exec("CREATE TABLE IF NOT EXISTS `$table` ($columns) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");

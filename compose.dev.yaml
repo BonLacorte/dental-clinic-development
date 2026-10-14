@@ -1,0 +1,84 @@
+name: montero-dental-dev
+
+# Local fictional-data development only. This file does not connect to production.
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: "LocalDemoRoot2026!"
+      MARIADB_ROOT_HOST: "%"
+      MARIADB_DATABASE: monterodental_demo
+      MARIADB_USER: montero_demo
+      MARIADB_PASSWORD: "LocalDemo2026!"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - demo_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - demo_db
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /workspace/public
+    command:
+      - sh
+      - -ec
+      - |
+        composer install --working-dir=/workspace --no-interaction --prefer-dist --no-progress
+        php ../scripts/setup-demo.php
+        exec php -S 0.0.0.0:8000 dev-router.php
+    environment:
+      MONTERO_DEMO_DOCKER: "1"
+      MONTERO_DEMO_DB_ROOT_PASSWORD: "LocalDemoRoot2026!"
+      TZ: Asia/Manila
+    volumes:
+      # Live source editing from VS Code; do not mount production directories.
+      - type: bind
+        source: .
+        target: /workspace
+      - type: volume
+        source: composer_vendor
+        target: /workspace/vendor
+      # Overrides only INSIDE the container, without overwriting Windows local config.
+      - type: bind
+        source: ./config/config.example.php
+        target: /workspace/config/config.php
+        read_only: true
+      - type: bind
+        source: ./config/docker.example.php
+        target: /workspace/config/local.php
+        read_only: true
+      - type: volume
+        source: php_sessions
+        target: /workspace/storage/sessions
+      - type: volume
+        source: attachments
+        target: /workspace/storage/attachments
+    ports:
+      - "127.0.0.1:${MONTERO_WEB_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - demo_db
+      - default
+
+volumes:
+  demo_mysql:
+  composer_vendor:
+  php_sessions:
+  attachments:
+
+networks:
+  # MariaDB cannot be reached directly from the Windows host or outside Docker.
+  demo_db:
+    internal: true
