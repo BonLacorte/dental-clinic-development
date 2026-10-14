@@ -1,0 +1,23 @@
+# Do not send machine-specific, sensitive, or runtime files as Docker build context.
+.git
+.gitignore
+.env
+.env.*
+!*.example
+config/config.php
+config/local.php
+config/secrets.php
+storage/*
+.tools/
+vendor/
+*.sql
+*.sql.gz
+*.sql.zip
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+*.p12
+*.pfx
