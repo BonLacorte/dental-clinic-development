@@ -46,6 +46,26 @@ $_SESSION['user'] = [
 ];
 
 */
+// Display-only navigation matching; route handling remains unchanged.
+$navPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
+$navIsCurrent = static fn(string $path): bool => $navPath === $path;
+$navIsSection = static fn(string $path): bool => $navPath === $path || str_starts_with($navPath, $path . '/');
+$navCurrentAttribute = static fn(string $path): string => $navIsCurrent($path) ? ' aria-current="page"' : '';
+
+// Mirror the existing session checks in Tenant/Module/PermissionMiddleware.
+// These flags only control links; server middleware remains authoritative.
+$navUser = $_SESSION['user'] ?? [];
+$navHasTenant = !empty($navUser['id']) && !empty($navUser['tenant_id'])
+    && ($_SESSION['tenant']['status'] ?? 'ACTIVE') === 'ACTIVE';
+$navCanPermission = static fn(string $permission): bool => $navHasTenant
+    && (!empty($navUser['is_super_admin']) || isset($navUser['permission_map'][$permission]));
+$navCanModule = static fn(string $module): bool => $navHasTenant
+    && (!empty($navUser['is_super_admin']) || isset($navUser['modules'][$module]));
+$navHris = $navCanModule('HRIS');
+$navHrisHome = $navHris && $navCanPermission('hris.view');
+$navHrisEmployees = $navHris && $navCanPermission('hris.employee.view');
+$navPayroll = $navCanModule('PAYROLL');
+$navPayrollHome = $navPayroll && $navCanPermission('payroll.view');
 ?>
 <!DOCTYPE html>
 <html lang="en">

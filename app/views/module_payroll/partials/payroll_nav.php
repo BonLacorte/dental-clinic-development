@@ -1,33 +1,36 @@
 <?php
-$current = parse_url($_SERVER['REQUEST_URI'] ?? '/payroll', PHP_URL_PATH);
 $payrollItems = [
     '/payroll/allowances' => 'Allowances',
     '/payroll/cash-advances' => 'Cash Advances',
     '/payroll/commissions' => 'Commissions',
     '/payroll/compensations' => 'Compensations',
     '/payroll/deductions' => 'Deductions',
-    '/payroll/incentives' => 'Incentives'
+    '/payroll/incentives' => 'Incentives',
 ];
-$isPayrollItem = array_key_exists($current, $payrollItems);
+$isPayrollItem = (bool) array_filter(array_keys($payrollItems), $navIsSection);
 ?>
-<div>
+<nav class="module-navigation" aria-label="Payroll navigation">
     <ul class="nav nav-underline">
+        <?php if ($navPayrollHome): ?>
         <li class="nav-item">
-            <a class="nav-link <?= ($current === '/payroll') ? 'active' : ''; ?>" aria-current="page" href="/payroll">Home</a>
+            <a class="nav-link <?= $navIsCurrent('/payroll') ? 'active' : '' ?>" href="/payroll"<?= $navCurrentAttribute('/payroll') ?>>Home</a>
         </li>
+        <?php endif; ?>
+        <?php if ($navPayroll): ?>
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle <?= $isPayrollItem ? 'active' : ''; ?>" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Payroll Items</a>
+            <button class="nav-link dropdown-toggle <?= $isPayrollItem ? 'active' : '' ?>" type="button" data-bs-toggle="dropdown" aria-expanded="false">Payroll Items</button>
             <ul class="dropdown-menu">
                 <?php foreach ($payrollItems as $href => $label): ?>
-                    <li><a class="dropdown-item <?= ($current === $href) ? 'active' : ''; ?>" href="<?= e($href); ?>"><?= e($label); ?></a></li>
+                <li><a class="dropdown-item <?= $navIsCurrent($href) ? 'active' : '' ?>" href="<?= e($href) ?>"<?= $navCurrentAttribute($href) ?>><?= e($label) ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?= ($current === '/payroll/schedules') ? 'active' : ''; ?>" href="/payroll/schedules">Schedules</a>
+            <a class="nav-link <?= $navIsSection('/payroll/runs') ? 'active' : '' ?>" href="/payroll/runs"<?= $navCurrentAttribute('/payroll/runs') ?>>Payroll Runs</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link disabled" href="/payroll/reports" tabindex="-1" aria-disabled="true">Reports</a>
+            <a class="nav-link <?= $navIsSection('/payroll/attendance/import') ? 'active' : '' ?>" href="/payroll/attendance/import"<?= $navCurrentAttribute('/payroll/attendance/import') ?>>Attendance Import</a>
         </li>
+        <?php endif; ?>
     </ul>
-</div>
+</nav>

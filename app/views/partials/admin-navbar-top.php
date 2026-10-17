@@ -6,7 +6,7 @@
             <span aria-hidden="true">☰</span>
         </button>
 
-        <a class="navbar-brand" href="/home">APP Name</a>
+        <a class="navbar-brand" href="/home">Montero Dental</a>
 
         <div class="admin-account text-white">
             <span class="admin-account-name"><?= e($data['name']) ?></span>
