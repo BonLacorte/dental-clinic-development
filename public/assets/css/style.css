@@ -126,140 +126,278 @@ input:valid ~ label {
 }
 /****************************** login css ********************/
 
-body {
-  overflow-x: hidden;
+/* UI-01A: shared admin shell. Login/scanner styles remain page-owned. */
+.admin-shell {
+  --admin-header-height: 56px;
+  --admin-sidebar-width: 250px;
+  font-family: var(--bs-font-sans-serif, system-ui, sans-serif);
+  font-size: 1rem;
 }
 
-/* Navbar height fix */
-.navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  height: 56px;
+.admin-shell .admin-navbar {
+  min-height: 56px;
+  padding: 4px 8px;
+  z-index: 1030;
 }
 
-/* Wrapper for sidebar + content */
-#wrapper {
+.admin-shell .admin-navbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 0;
+}
+
+.admin-shell .admin-navbar .navbar-brand {
+  flex: 0 1 auto;
+  margin: 0;
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-shell #toggleSidebar,
+.admin-shell #closeSidebar,
+.admin-shell .admin-logout,
+.admin-shell .admin-navbar .navbar-brand {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.admin-shell .admin-account {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px 12px;
+  min-width: 0;
+}
+
+.admin-shell .admin-account-name {
+  flex: 1 1 6rem;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.admin-shell .admin-logout {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: #ffb3bd;
+  text-underline-offset: 4px;
+}
+
+.admin-shell .admin-logout:hover {
+  color: #fff;
+}
+
+.admin-shell #wrapper {
   display: flex;
   min-height: 100vh;
+  padding-top: var(--admin-header-height);
 }
 
-/* Sidebar */
-.sidebar {
-  width: 250px;
-  height: 100vh;
-  position: fixed;
-  top: 56px;
-  left: 0;
-  background: #212529;
-  color: #fff;
-  transform: translateX(0);
-  transition: transform 0.3s ease;
-}
-
-.sidebar a {
-  display: block;
-  padding: 12px 20px;
-  color: #adb5bd;
-  text-decoration: none;
-}
-
-.sidebar a:hover {
-  background: #343a40;
-  color: #fff;
-}
-
-.sidebar.collapsed {
-  transform: translateX(-100%);
-}
-
-/* Parent behaves like sidebar link */
-.nav-parent {
-  display: block;
-  padding: 12px 20px;
-  color: #adb5bd;
-  cursor: pointer;
-  position: relative;
-}
-
-.nav-parent:hover {
-  background: #343a40;
-  color: #fff;
-}
-
-/* arrow positioning */
-.nav-parent .arrow {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: transform 0.2s ease;
-}
-
-/* dropdown container */
-.nav-child {
-  display: none;
-  flex-direction: column;
-}
-
-/* open state */
-.nav-group.open .nav-child {
-  display: block;
-}
-
-/* rotate arrow */
-.nav-group.open .arrow {
-  transform: translateY(-50%) rotate(180deg);
-}
-
-/* make child links look slightly indented */
-.nav-child a {
-  padding-left: 40px;
-  font-size: 14px;
-}
-
-/* arrow animation */
-.arrow {
-    transition: transform 0.2s ease;
-}
-
-.nav-group.open .arrow {
-    transform: rotate(180deg);
-}
-
-/* Content wrapper */
-#content-wrapper {
+.admin-shell #content-wrapper {
   display: flex;
+  flex: 1 1 0%;
   flex-direction: column;
-  flex-grow: 1;
-  margin-left: 250px; /* initial sidebar width */
-  margin-top: 56px; /* push content below navbar */
-  transition: margin-left 0.3s ease;
+  min-width: 0;
+  max-width: 100%;
 }
 
-#content-wrapper.expanded {
-  margin-left: 0;
+.admin-shell #content {
+  flex: 1 0 auto;
+  min-width: 0;
+  padding: 1rem;
+  scroll-margin-top: calc(var(--admin-header-height) + 8px);
 }
 
-/* Page content */
-.content {
-  padding: 20px;
-  flex-grow: 1; /* pushes footer to bottom */
-  /* background-color: #F9F9F9; */
+/* Let existing responsive table regions scroll, rather than grow flex items. */
+.admin-shell #content :where(.d-flex, .card, .card-body, .container, .container-fluid, [class*="col-"]) {
+  min-width: 0;
 }
 
-/* Footer */
-footer {
-  text-align: center;
+.admin-shell #content :where(.card, .table-responsive) {
+  max-width: 100%;
+}
+
+.admin-shell #content .table-responsive {
+  width: 100%;
+}
+
+.admin-shell #content :where(h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: anywhere;
+}
+
+.admin-shell #sidebar {
+  --bs-offcanvas-width: min(280px, calc(100vw - 32px));
+  --bs-offcanvas-bg: #212529;
+  --bs-offcanvas-color: #fff;
+  --bs-offcanvas-padding-x: 16px;
+  --bs-offcanvas-padding-y: 8px;
+  border: 0;
+}
+
+.admin-shell #sidebar .offcanvas-body {
+  padding: 0 0 16px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.admin-shell #sidebar a,
+.admin-shell #sidebar .nav-parent {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  width: 100%;
+  padding: 12px 20px;
+  color: #c2c7cc;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.admin-shell #sidebar .nav-parent {
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+
+.admin-shell #sidebar .nav-parent .arrow {
+  margin-left: auto;
+  transition: transform .2s ease;
+}
+
+.admin-shell #sidebar .nav-child {
+  display: none;
+}
+
+.admin-shell #sidebar .nav-group.open .nav-child {
+  display: block;
+}
+
+.admin-shell #sidebar .nav-group.open .arrow {
+  transform: rotate(180deg);
+}
+
+.admin-shell #sidebar .nav-child a {
+  padding-left: 40px;
+}
+
+.admin-shell #sidebar a:hover,
+.admin-shell #sidebar .nav-parent:hover {
+  background: #343a40;
+  color: #fff;
+}
+
+.admin-shell #sidebar a.active {
+  background: #198754;
+  color: #fff;
+}
+
+.admin-shell .admin-footer {
+  padding: 12px 16px;
   background: #212529;
   color: #fff;
-  padding: 12px 0;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
-/* Optional: adjust sidebar toggle button */
-#toggleSidebar {
-  cursor: pointer;
+.admin-shell .admin-skip-link {
+  position: fixed;
+  top: 4px;
+  left: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  color: #212529;
+  transform: translateY(-150%);
+  z-index: 1056;
+}
+
+.admin-shell .admin-skip-link:focus {
+  transform: none;
+}
+
+.admin-shell :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #0a58ca;
+  outline-offset: 2px;
+}
+
+.admin-shell :where(.admin-navbar, #sidebar, .admin-footer) :focus-visible {
+  outline-color: #ffdf70;
+  outline-offset: -4px;
+}
+
+.admin-shell #toast {
+  top: calc(var(--admin-header-height) + 8px);
+  right: 16px;
+  min-width: 0;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 16px 24px;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 992px) {
+  .admin-shell:not(.sidebar-overlay-active) #sidebar {
+    top: var(--admin-header-height);
+    bottom: 0;
+    width: var(--admin-sidebar-width);
+    height: auto;
+    visibility: visible;
+    transform: none;
+    z-index: 1020;
+  }
+
+  .admin-shell:not(.sidebar-overlay-active) #sidebar.collapsed {
+    visibility: hidden;
+    transform: translateX(-100%);
+  }
+
+  .admin-shell:not(.sidebar-overlay-active) #sidebar .offcanvas-header {
+    display: none;
+  }
+
+  .admin-shell:not(.sidebar-overlay-active) #content-wrapper {
+    margin-left: var(--admin-sidebar-width);
+  }
+
+  .admin-shell:not(.sidebar-overlay-active) #content-wrapper.expanded {
+    margin-left: 0;
+  }
+
+  .admin-shell #content {
+    padding: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell #sidebar,
+  .admin-shell #sidebar .arrow,
+  .admin-shell > .offcanvas-backdrop,
+  .admin-shell #toast {
+    transition: none !important;
+  }
+}
+
+/* Keep fixed shell chrome out of existing payroll print paths. */
+@media print {
+  .admin-shell .admin-navbar,
+  .admin-shell #sidebar,
+  .admin-shell .admin-skip-link,
+  .admin-shell .admin-footer {
+    display: none !important;
+  }
+
+  .admin-shell #wrapper,
+  .admin-shell #content-wrapper {
+    display: block;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0;
+  }
 }
 
 /* Full page overlay */
@@ -332,15 +470,6 @@ footer {
   color: #fff;
 }
 /*******************************************************************/
-
-.sidebar a.active {
-  background-color: #198754 !important;
-  color: #fff !important;
-}
-
-.sidebar a.active i {
-  color: #fff !important;
-}
 
 /******************** panel example (check docs) ****************************/
 .example-wrapper {
