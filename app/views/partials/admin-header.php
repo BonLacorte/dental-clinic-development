@@ -80,7 +80,8 @@ $_SESSION['user'] = [
         }
     </script>
 </head>
-<body>
+<body class="admin-shell">
+<a class="admin-skip-link" href="#content">Skip to content</a>
 <!-- TOP NAVBAR -->
 <?php include 'admin-navbar-top.php' ?>
 
@@ -110,5 +111,6 @@ $_SESSION['user'] = [
 
     <!-- CONTENT + FOOTER WRAPPER -->
         <div id="content-wrapper">
-            <div id="content" class="content">
+            <!-- A tab stop also lets Bootstrap contain focus on pages with no content controls. -->
+            <div id="content" class="content" tabindex="0">
             <!-- Page content goes here -->

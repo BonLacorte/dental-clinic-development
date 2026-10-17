@@ -2,24 +2,29 @@
 $current = $_SERVER['REQUEST_URI'];
 ?>
 
-<div class="sidebar" id="sidebar">
+<div class="sidebar offcanvas offcanvas-start" id="sidebar" tabindex="-1" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5" id="sidebarLabel">Navigation</h2>
+        <button class="btn-close btn-close-white" type="button" id="closeSidebar" aria-label="Close navigation"></button>
+    </div>
+    <nav class="offcanvas-body" aria-label="Main navigation">
     <a class="<?= ($current == '/home') ? 'active' : '' ?>" href="/home">
-        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        <i aria-hidden="true" class="fas fa-tachometer-alt me-2"></i>Dashboard
     </a>
     <a class="<?= ($current == '/about') ? 'active' : '' ?>" href="/about">
-        <i class="fas fa-info-circle me-2"></i>About
+        <i aria-hidden="true" class="fas fa-info-circle me-2"></i>About
     </a>
     <a class="<?= ($current == '/users') ? 'active' : '' ?>" href="/users">
-        <i class="fas fa-user me-2"></i>Users
+        <i aria-hidden="true" class="fas fa-user me-2"></i>Users
     </a>
     <a class="<?= ($current == '/roles') ? 'active' : '' ?>" href="/roles">
-        <i class="fas fa-user me-2"></i>Roles
+        <i aria-hidden="true" class="fas fa-user me-2"></i>Roles
     </a>
     <a class="<?= ($current == '/tenants') ? 'active' : '' ?>" href="/tenants">
-        <i class="fas fa-building me-2"></i>Tenants
+        <i aria-hidden="true" class="fas fa-building me-2"></i>Tenants
     </a>
     <a class="<?= ($current == '/branches') ? 'active' : '' ?>" href="/branches">
-        <i class="fas fa-building me-2"></i>Branches
+        <i aria-hidden="true" class="fas fa-building me-2"></i>Branches
     </a>
 
     <!-- Dropdown -->
@@ -35,12 +40,12 @@ $current = $_SERVER['REQUEST_URI'];
     ?>
     <!-- <div class="nav-group <?= (str_contains($current, '/hris')) ? 'open' : '' ?>"> -->
     <div class="nav-group <?= $isOpen ? 'open' : '' ?>">
-        <div class="nav-parent">
-            <i class="fa fa-bars"></i>
+        <button class="nav-parent" type="button" aria-controls="sidebarModules" aria-expanded="<?= $isOpen ? 'true' : 'false' ?>">
+            <i aria-hidden="true" class="fa fa-bars"></i>
             <span>Modules</span>
-            <i class="fas fa-chevron-down arrow"></i>
-        </div>
-        <div class="nav-child">
+            <i aria-hidden="true" class="fas fa-chevron-down arrow"></i>
+        </button>
+        <div class="nav-child" id="sidebarModules">
             <a class="<?= ($current == '/hris') ? 'active' : '' ?>" href="/hris">HRIS</a>
             <a class="<?= ($current == '/payroll') ? 'active' : '' ?>" href="/payroll">Payroll</a>
             
@@ -49,6 +54,7 @@ $current = $_SERVER['REQUEST_URI'];
     </div>
 
     <a class="<?= ($current == '/settings') ? 'active' : '' ?>" href="/settings">
-        <i class="fas fa-cog me-2"></i>Settings
+        <i aria-hidden="true" class="fas fa-cog me-2"></i>Settings
     </a>
+    </nav>
 </div>

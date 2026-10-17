@@ -1,6 +1,6 @@
         </div> <!-- end content -->
 
-        <footer>
+        <footer class="admin-footer">
             &copy; <?= e(date('Y')) ?> APP Name
         </footer>
     </div> <!-- end content-wrapper -->
