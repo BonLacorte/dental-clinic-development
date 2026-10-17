@@ -43,37 +43,30 @@ if ($_SESSION['login_attempts'] >= $maxAttempts && (time() - $_SESSION['last_att
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Montero | Login</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
     <link rel="icon" href="/assets/images/montero_logo2.jpg">
 </head>
-<body>
-    <section class="login-bg">
-        <grid class="login-grid">
-            <div class="login-logo">
-                <img class="login-image" src="/assets/images/montero_logo.jpg" >
-            </div>
-            <div class="login-form-box">
-                <div class="longin-form-value">
-                    <form action="/" id="loginForm" method="POST" class="form">
-                        <?= Csrf::input(); ?>
-                        <h2 class="login-h2">Login</h2>
-                        <div class="login-inputbox">
-                            <ion-icon name="person-outline"></ion-icon>
-                            <input type="email" name="email" class="field" id="email" required><label
-                                for="username">Email</label>
-                        </div>
-                        <div class="login-inputbox">
-                            <ion-icon name="lock-closed-outline"></ion-icon>
-                            <input type="password" name="password" class="field" id="password" autocomplete="off" required><label
-                                for="password">Password</label>
-                        </div>
-                        <button type="submit" name="submit" id="login-button">Login</button>
-                    </form>
+<body class="login-page">
+    <main class="login-bg">
+        <div class="login-card">
+            <img class="login-image" src="/assets/images/montero_logo.jpg" alt="Montero Dental">
+            <h1 class="login-heading">Login</h1>
+            <form action="/" id="loginForm" method="POST" class="form">
+                <?= Csrf::input(); ?>
+                <div class="login-field">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" class="field" id="email" autocomplete="username" required>
                 </div>
-            </div>
-        </grid>
-    </section>
+                <div class="login-field">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" class="field" id="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" name="submit" id="login-button">Login</button>
+            </form>
+        </div>
+    </main>
 </body>
 </html>
-

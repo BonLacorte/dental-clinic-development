@@ -1,7 +1,7 @@
         </div> <!-- end content -->
 
         <footer class="admin-footer">
-            &copy; <?= e(date('Y')) ?> APP Name
+            &copy; <?= e(date('Y')) ?> Montero Dental
         </footer>
     </div> <!-- end content-wrapper -->
 </div> <!-- end wrapper -->

@@ -1,55 +1,42 @@
-<div>
+<?php
+$hrisGroups = [
+    'Organization' => $navHrisHome ? [
+        '/hris/branches' => 'Branches',
+        '/hris/offices' => 'Offices',
+        '/hris/positions' => 'Positions',
+        '/hris/appointments' => 'Employment Types',
+    ] : [],
+    'Attendance' => array_merge($navHris ? ['/hris/dtr' => 'DTR'] : [], $navHrisHome ? [
+        '/hris/leaves' => 'Leaves',
+        '/hris/holidays' => 'Holidays',
+        '/hris/shifts' => 'Shifts',
+    ] : []),
+];
+?>
+<nav class="module-navigation" aria-label="HRIS navigation">
     <ul class="nav nav-underline">
+        <?php if ($navHrisHome): ?>
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/hris">Home</a>
+            <a class="nav-link <?= $navIsCurrent('/hris') ? 'active' : '' ?>" href="/hris"<?= $navCurrentAttribute('/hris') ?>>Home</a>
         </li>
+        <?php endif; ?>
+        <?php if ($navHrisEmployees): ?>
         <li class="nav-item">
-            <!-- Add employee, assign branch, shifts, position and other employee info here..  -->
-            <a class="nav-link" href="/hris/employees">Employees</a>
+            <a class="nav-link <?= $navIsSection('/hris/employees') ? 'active' : '' ?>" href="/hris/employees"<?= $navCurrentAttribute('/hris/employees') ?>>Employees</a>
         </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Organization</a>
-            <ul class="dropdown-menu">
-                <!-- create/update branches -->
-                <li><a class="dropdown-item" href="/hris/branches">Branches</a></li>
-
-                <!-- create/update offices (HRD, Property, etc.) -->
-                <li><a class="dropdown-item" href="/hris/offices">Offices</a></li>
-
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-
-                <!-- create/update positions (manager, staff, dentist, etc.) -->
-                <li><a class="dropdown-item" href="/hris/positions">Positions</a></li>
-
-                <!-- create/update appointments (permanent, contractual, JO) -->
-                <li><a class="dropdown-item" href="/hris/appointments">Appointments</a></li>
-            </ul>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Attendance</a>
-            <ul class="dropdown-menu">
-
-                <!-- view/print employee attendance -->
-                <li><a class="dropdown-item" href="/hris/dtr">DTR</a></li>
-
-                <!-- create/update/approve/assign leaves -->
-                <li><a class="dropdown-item" href="/hris/leaves">Leaves</a></li>
-
-                <!-- create/update/delete holidays (will reflect in the DTR module)-->
-                <li><a class="dropdown-item" href="/hris/holidays">Holidays</a></li>
-
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-
-                <!-- create/update/delete shifts (assign employee shifts in the employee page) -->
-                <li><a class="dropdown-item" href="/hris/shifts">Shifts</a></li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link disabled" href="/hris/reports" tabindex="-1" aria-disabled="true">Reports</a>
-        </li>
+        <?php endif; ?>
+        <?php foreach ($hrisGroups as $label => $links): ?>
+            <?php if ($links): ?>
+            <?php $groupActive = (bool) array_filter(array_keys($links), $navIsSection); ?>
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle <?= $groupActive ? 'active' : '' ?>" type="button" data-bs-toggle="dropdown" aria-expanded="false"><?= e($label) ?></button>
+                <ul class="dropdown-menu">
+                    <?php foreach ($links as $href => $linkLabel): ?>
+                    <li><a class="dropdown-item <?= $navIsCurrent($href) ? 'active' : '' ?>" href="<?= e($href) ?>"<?= $navCurrentAttribute($href) ?>><?= e($linkLabel) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
     </ul>
-</div>
+</nav>
