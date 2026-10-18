@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../models/hris/EmployeeModel.php';
 require_once __DIR__ . '/../../models/hris/BranchModel.php';
 require_once __DIR__ . '/../../models/hris/ShiftModel.php';
+require_once __DIR__ . '/../../services/hris/EmployeeInput.php';
 
 class EmployeeController extends Controller
 {
@@ -127,20 +128,7 @@ class EmployeeController extends Controller
         try {
             $tenant_id = $_SESSION['user']['tenant_id'];
 
-            $rules = [
-                'employee_id' => ['type' => 'integer', 'required' => true],
-                'salary_type' => ['type' => 'string', 'required' => true],
-                'payroll_frequency' => ['type' => 'string', 'required' => true],
-                'salary_rate' => ['type' => 'numeric', 'required' => true],
-                'effective_from' => ['type' => 'date', 'required' => true],
-                'effective_to' => ['type' => 'date', 'required' => false]
-            ];
-
-
-
-            $result = validate($_POST, $rules);
-
-            $data = $result['data'];
+            $data = $this->validatedInput(EmployeeInput::compensation($_POST));
 
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
@@ -168,18 +156,7 @@ class EmployeeController extends Controller
         try {
             $tenant_id = $_SESSION['user']['tenant_id'];
 
-            $rules = [
-                'employee_id' => ['type' => 'integer', 'required' => true],
-                'salary_type' => ['type' => 'string', 'required' => true],
-                'payroll_frequency' => ['type' => 'string', 'required' => true],
-                'salary_rate' => ['type' => 'numeric', 'required' => true],
-                'effective_from' => ['type' => 'date', 'required' => true],
-                'effective_to' => ['type' => 'date', 'required' => false]
-            ];
-
-            $result = validate($_POST, $rules);
-
-            $data = $result['data'];
+            $data = $this->validatedInput(EmployeeInput::compensation($_POST), $id);
 
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
@@ -204,32 +181,7 @@ class EmployeeController extends Controller
     {
         $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $rules = [
-            'firstname' => ['type' => 'string', 'required' => true],
-            'middlename' => ['type' => 'string', 'required' => false],
-            'lastname' => ['type' => 'string', 'required' => true],
-            'email' => ['type' => 'email', 'required' => false],
-            'contact_no' => ['type' => 'string', 'required' => false, 'regex' => '/^[0-9+()\-\s]{7,20}$/'],
-            'branch_id' => ['type' => 'int', 'required' => true],
-            'position_id' => ['type' => 'int', 'required' => false],
-            'org_unit_id' => ['type' => 'int', 'required' => false],
-            'employment_type_id' => ['type' => 'int', 'required' => true],
-            'employment_status_id' => ['type' => 'int', 'required' => false],
-            'date_hired' => ['type' => 'date', 'required' => true],
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
-
-        $result = validate($_POST, $rules);
-        $data = $result['data'];
-
-
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
-        }
+        $data = $this->validatedInput(EmployeeInput::employee($_POST));
 
         $data['employee_no'] = $this->buildEmployeeNo((int) $data['branch_id'], $tenant_id);
         $data['status'] = 'ACTIVE';
@@ -251,44 +203,7 @@ class EmployeeController extends Controller
     {
         $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $rules = [
-            'firstname' => ['type' => 'string', 'required' => true],
-            'middlename' => ['type' => 'string', 'required' => false],
-            'lastname' => ['type' => 'string', 'required' => true],
-            'email' => ['type' => 'email', 'required' => false],
-            'contact_no' => ['type' => 'string', 'required' => false, 'regex' => '/^[0-9+()\-\s]{7,20}$/'],
-            'branch_id' => ['type' => 'int', 'required' => true],
-            'position_id' => ['type' => 'int', 'required' => false],
-            'org_unit_id' => ['type' => 'int', 'required' => false],
-            'employment_type_id' => ['type' => 'int', 'required' => true],
-            'employment_status_id' => ['type' => 'int', 'required' => false],
-            'date_hired' => ['type' => 'date', 'required' => true],
-            'date_resigned' => ['type' => 'date', 'required' => false],
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
-
-        $result = validate($_POST, $rules);
-
-        $data = $result['data'];
-
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
-        }
-
-        if (
-            !empty($data['date_resigned']) && !empty($data['date_hired'])
-            && $data['date_resigned'] < $data['date_hired']
-        ) {
-            je([
-                'message' => 'Date resigned cannot be earlier than date hired.',
-                'type' => 'error'
-            ], 'json');
-            exit;
-        }
+        $data = $this->validatedInput(EmployeeInput::employee($_POST, true), $id);
 
         $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
 
@@ -304,20 +219,7 @@ class EmployeeController extends Controller
     {
 
         $tenant_id = $_SESSION['user']['tenant_id'];
-        $rules = [
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
-
-        $result = validate($_POST, $rules);
-        $data = $result['data'];
-
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
-        }
+        $this->validatedInput(EmployeeInput::csrf($_POST));
 
         $success = $this->employeeModel->deleteEmployee($id, $tenant_id);
 
@@ -353,6 +255,29 @@ class EmployeeController extends Controller
     }
 
 
+
+    private function validatedInput(array $result, ?int $pathId = null): array
+    {
+        if (!empty($result['errors'])) {
+            $this->inputFailure('Please correct the submitted fields.', $result['errors']);
+        }
+        $data = $result['data'];
+        if ($pathId !== null && ($pathId < 1 || (isset($data['id']) && $data['id'] !== $pathId))) {
+            $this->inputFailure('The record identifier does not match the request.');
+        }
+        if (!Csrf::validate($data['csrf_token'], 'keep')) {
+            $this->inputFailure('Invalid CSRF token');
+        }
+        unset($data['csrf_token'], $data['id']);
+        return $data;
+    }
+
+    private function inputFailure(string $message, array $errors = []): never
+    {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => $message, 'type' => 'error', 'errors' => $errors]);
+        exit;
+    }
 
     private function listParams(array $input): array
     {

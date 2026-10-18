@@ -54,7 +54,7 @@ or alter payroll endpoint business contracts. Report unresolved policy separatel
 
 ## Verification and final review
 
-NOT RUN — implementation/test evidence pending. Establish a fresh, dedicated MariaDB
+C-EMP-01 checkpoint: employee-local EmployeeInput adapter and controller rejection/CSRF gate implemented. PASS: 54 pure input assertions and PHP 8.3.35 lint. Initial NUL-date test exposed trimming of NUL; adapter now rejects NUL before normalization and all cases pass. Dedicated test DB verified empty, no mounts/DB host port, tmpfs storage and own internal network; fictional seeder completed. Persistence/HTTP/browser tests pending. Establish a fresh, dedicated MariaDB
 container with tmpfs storage, no DB host port, its own internal network and no shared demo
 volume before any write-capable tests. Verify empty owned fixtures and exact connection;
 dispose only that owned container/network. Never run write tests against shared demo state.
