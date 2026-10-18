@@ -52,6 +52,19 @@ Before editing, inspect `git status`, the current branch, and the nearest existi
 - At the end of a session, update the handoff with completed work, checks actually run, blockers, and the **next concrete step**. Do not silently mark untested work as passing.
 - Never commit, push, merge, reset branches, or deploy merely because a handoff instructs it. Ask before Git write operations unless the user has explicitly requested them.
 
+## Frontend-only design scope — Pearl & Teal
+
+An explicitly frontend-design task follows stricter boundaries than the historical general-development workflow above. Read the [frontend design Skill](.agents/skills/montero-dental-frontend-design/SKILL.md), its milestone/verification references, and the approved task specification. Follow **PLAN → SPEC → BUILD → VERIFY → REVIEW**. A documentation milestone authorizes only its listed documentation; it does not authorize application implementation.
+
+- During an explicitly authorized frontend BUILD, edit only allowlisted CSS and nonfunctional PHP-view presentation. Preserve Bootstrap 5, jQuery/AJAX, existing dependencies and the absence of a build step. Executable PHP and JavaScript inside views are functional code, not automatically authorized presentation work.
+- Do not change controllers, models, services, helpers, middleware, routes, database/schema/seed files, core architecture, business logic or application dependencies. Preserve form fields/methods/payloads, API response handling, validation attributes, navigation destinations, permission-conditioned visibility, search/filter/sort/pagination, modal behavior, financial values and print/payroll output.
+- Never invent dashboard statistics, business statuses, employee data or operational features. Never import or cherry-pick application changes from Draft PR #8. A discovered backend/security/contract bug is a separate owner-review item, not permission to repair it. Never access production or private clinic data.
+- Within an explicitly authorized frontend BUILD, continue autonomously through approved presentation subtasks and ordinary styling corrections. Do not expand that authority to backend, security, database, API or workflow changes. If a requirement crosses the boundary, record the dependency and complete independent approved work.
+- Human authorization is required for commits, pushes, pull requests, merges and deployment; never automatically publish. Local branch creation and staging also require authorization under the existing Git-write rule. Approval of styling or a handoff is not Git publication approval.
+- Record verification as **PASS**, **FAIL**, **BLOCKED** or **NOT RUN** with actual evidence. Documentation checks are not runtime, UI, browser, accessibility, database or payroll tests.
+
+The [Pearl & Teal design system](docs/work-items/frontend-modernization/PEARL-TEAL-DESIGN-SYSTEM.md) governs future approved visual work. The [frontend implementation plan](docs/work-items/frontend-modernization/FRONTEND-ONLY-IMPLEMENTATION-PLAN.md) defines preservation gates. Historical architecture, security guidance and UI-01 decisions remain intact; this section grants no broader development authority.
+
 ## Local environment guidance
 
 - Follow `LOCAL_SETUP.md`: Windows PowerShell scripts in `scripts/`, local MariaDB on `127.0.0.1:3307`, local PHP server on `127.0.0.1:8000`, and fictional demo accounts.
