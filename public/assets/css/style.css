@@ -711,9 +711,9 @@
   }
 }
 
-/* Pearl & Teal: shared foundation and Premium presentation. Screen-only so payroll/print
-   retains its accepted typography, dimensions, colors and page breaks.
-   retains its baseline. Sidebar widths, breakpoints and behavior stay above. */
+/* Pearl & Teal: shared foundation and Premium presentation. Screen-only so
+   payroll/print retains its accepted typography, dimensions, colors and page
+   breaks. Sidebar widths, breakpoints and behavior stay above. */
 @media screen {
   .admin-shell,
   .login-page {
@@ -1285,7 +1285,7 @@
   }
 
   .admin-shell .module-dashboard {
-    padding: 24px 12px 0;
+    padding: 24px .75rem 0;
     background: transparent !important;
   }
 
@@ -1390,7 +1390,11 @@
     letter-spacing: normal;
   }
 
-  .admin-shell :is(.payroll-item-table, #attendanceTab .table) {
+  .admin-shell .payroll-item-table {
+    min-width: 28rem;
+  }
+
+  .admin-shell #attendanceTab .table {
     min-width: 40rem;
   }
 
