@@ -1181,7 +1181,7 @@
   }
 
   /* Existing payroll surfaces use body-bg locally; keep them white too. */
-  .admin-shell :is(.payroll-page-card, .payroll-summary-card, .payroll-total-box) {
+  .admin-shell :is(.payroll-page-card, .payroll-summary-card, .payroll-total-card, .payroll-total-box) {
     background-color: var(--montero-surface);
     border-color: var(--montero-divider);
     border-radius: var(--montero-card-radius);
@@ -1285,7 +1285,7 @@
   }
 
   .admin-shell .module-dashboard {
-    padding: 24px 0 0;
+    padding: 24px 12px 0;
     background: transparent !important;
   }
 
@@ -1296,6 +1296,106 @@
   .admin-shell .module-placeholder {
     flex: 0 0 100%;
     width: 100%;
+  }
+
+  /* Payroll keeps every business column, value, tab and print template. */
+  .admin-shell .payroll-runs-toolbar {
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  .admin-shell .payroll-runs-title {
+    flex: 1 1 21rem;
+  }
+
+  .admin-shell .payroll-runs-filters {
+    flex: 2 1 38rem;
+    align-items: center;
+  }
+
+  .admin-shell .payroll-runs-filters :is(.form-control, .form-select) {
+    flex: 1 1 10rem;
+    width: auto;
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  .admin-shell .payroll-runs-filters .btn {
+    flex: 0 0 auto;
+  }
+
+  .admin-shell #payrollRunsTable {
+    min-width: 82rem;
+  }
+
+  .admin-shell #payrollRunEmployeesTable {
+    min-width: 78rem;
+  }
+
+  .admin-shell :is(#payrollRunsTable, #payrollRunEmployeesTable) :is(th, td) {
+    white-space: nowrap;
+  }
+
+  .admin-shell #payrollRunsTable :is(th, td):first-child {
+    min-width: 12rem;
+    white-space: normal;
+  }
+
+  .admin-shell #payrollRunEmployeesTable :is(th, td):nth-child(2) {
+    min-width: 12rem;
+    white-space: normal;
+  }
+
+  .admin-shell .payroll-config-page :is(#recordsTable, #typesTable) {
+    min-width: 64rem;
+  }
+
+  .admin-shell .payroll-config-page .table :is(td.text-end, th:has([data-sort="amount"], [data-sort="salary_rate"], [data-sort="default_value"], [data-sort="installment_amount"], [data-sort="remaining_balance"])),
+  .admin-shell .payroll-config-page .table:has(th:nth-child(2) [data-sort="amount"]) tbody td:nth-child(2),
+  .admin-shell .payroll-config-page .table:has(th:nth-child(3) [data-sort="amount"]) tbody td:nth-child(3),
+  .admin-shell .payroll-config-page .table:has([data-sort="salary_rate"], [data-sort="default_value"], [data-sort="installment_amount"]) tbody td:nth-child(4),
+  .admin-shell .payroll-config-page .table:has([data-sort="remaining_balance"]) tbody td:nth-child(5) {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell :is(.payroll-summary-card, .payroll-total-card, .payroll-total-box) .label {
+    margin-bottom: 8px;
+    font-size: .875rem;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .admin-shell .payroll-summary-card .value {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell :is(.payroll-total-card, .payroll-total-box) {
+    border-top: 3px solid var(--montero-primary);
+  }
+
+  .admin-shell :is(.payroll-total-card, .payroll-total-box) .amount {
+    font-size: 1.375rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .payroll-section-title {
+    font-size: .9375rem;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .admin-shell :is(.payroll-item-table, #attendanceTab .table) {
+    min-width: 40rem;
+  }
+
+  .admin-shell .import-page .form-control[type="file"] {
+    min-height: 48px;
   }
 
   .admin-shell .table:not(.table-primary, .table-secondary, .table-success, .table-danger, .table-warning, .table-info, .table-dark) {

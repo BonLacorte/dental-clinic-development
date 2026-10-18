@@ -3,8 +3,8 @@
 
 
 
-<main class="container py-4">
-    <div class="card shadow-sm">
+<main class="container py-4 management-page import-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header">
             <h5 class="mb-0">Import Biometric Logs</h5>
         </div>
