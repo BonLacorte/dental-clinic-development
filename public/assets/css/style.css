@@ -520,3 +520,193 @@
 .example-panel.active .example-panel-card {
   transform: scale(1);
 }
+
+/* UI-01C: employee pilot only; shared shell/login and payroll stay untouched. */
+.employee-page {
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: 0;
+}
+
+.employee-page .employee-header,
+.employee-page .employee-toolbar,
+.employee-page .employee-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 16px;
+}
+
+.employee-page .employee-header,
+.employee-page .employee-pagination {
+  justify-content: space-between;
+}
+
+.employee-page .employee-header > div {
+  flex: 1 1 16rem;
+}
+
+.employee-page .employee-toolbar {
+  align-items: end;
+  padding: 0;
+}
+
+.employee-page .employee-search-field {
+  flex: 1 1 18rem;
+  max-width: 32rem;
+}
+
+.employee-page .employee-list-feedback {
+  font-size: 1rem;
+}
+
+.employee-page .employee-table-region {
+  overscroll-behavior-x: contain;
+}
+
+.employee-page #employeesTable {
+  min-width: 48rem;
+}
+
+.employee-page #employeesTable :where(th, td) {
+  padding: 12px 16px;
+}
+
+.employee-page #employeesTable :where(th, td):is(:first-child, :nth-child(4), :nth-child(5), :last-child) {
+  white-space: nowrap;
+}
+
+.employee-page #employeesTable :where(th, td):is(:nth-child(2), :nth-child(3)) {
+  min-width: 10rem;
+  max-width: 20rem;
+  overflow-wrap: anywhere;
+}
+
+.employee-page .employee-sort {
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  color: #0a58ca;
+}
+
+.employee-page .employee-sort-mark {
+  white-space: nowrap;
+}
+
+.employee-page .employee-row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.employee-page .employee-row-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.employee-page .pagination {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.employee-page :where(.btn, .page-link, .form-control, .form-select) {
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+.employee-page :where(.btn, .page-link) {
+  min-width: 44px;
+}
+
+.employee-page .employee-dialog .modal-dialog {
+  --bs-modal-width: 800px;
+}
+
+.employee-page #deleteEmployeeModal .modal-dialog {
+  --bs-modal-width: 500px;
+}
+
+.employee-page .employee-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.employee-page .employee-dialog .modal-header,
+.employee-page .employee-dialog .modal-footer {
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.employee-page .employee-dialog .modal-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.employee-page .employee-dialog .btn-close {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 12px;
+  margin: -8px -8px -8px auto;
+}
+
+.employee-page .employee-dialog :where(.modal-body, .employee-details dd) {
+  overflow-wrap: anywhere;
+}
+
+.employee-page :where(.form-control, .form-select) {
+  max-width: 100%;
+  border-color: #6c757d;
+}
+
+.employee-page .employee-dialog .form-control:read-only {
+  background: #e9ecef;
+}
+
+.employee-page .employee-field-group {
+  margin-bottom: 24px;
+}
+
+.employee-page .employee-field-group:last-child {
+  margin-bottom: 0;
+}
+
+.employee-page .employee-read-feedback:not([hidden]) {
+  margin-bottom: 16px;
+}
+
+.employee-page [hidden] {
+  display: none !important;
+}
+
+.employee-page :where(button, input, select, [tabindex]):focus-visible {
+  outline: 3px solid #0a58ca;
+  outline-offset: 2px;
+}
+
+.employee-page .employee-table-region:focus-visible {
+  outline-offset: -3px;
+}
+
+@media (max-width: 575.98px) {
+  .employee-page .employee-dialog .employee-form {
+    height: 100%;
+  }
+
+  .employee-page .employee-dialog .modal-header,
+  .employee-page .employee-dialog .modal-footer {
+    padding: 12px 16px;
+  }
+
+  .employee-page .employee-dialog .modal-footer > .btn {
+    flex: 1 1 auto;
+    white-space: normal;
+  }
+}
