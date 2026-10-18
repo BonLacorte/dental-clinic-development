@@ -59,6 +59,31 @@ reparenting), and require existing CSRF tokens on HRIS compensation writes. Do n
 new compensation permission, change financial calculations, select a current rate policy,
 or alter payroll endpoint business contracts. Report unresolved policy separately.
 
+C-EMP-03 checkpoint: scoped employee list/count/detail/update/delete SQL, tenant-safe display
+joins and reference validation implemented. HRIS compensation reads/writes require the same
+accessible employee; insert-select enforces that at SQL time and update matches both rate and
+employee without reparenting. CSRF applies to HRIS compensation writes. List permission now
+matches the employee page/detail's established hris.employee.view rule. Global employment
+catalogs and existing empty-assignment/Super Admin tenant-wide fallback are preserved.
+
+PASS: 85 guarded real HTTP/PDO assertions, including 2 tenants, branch tampering, permissions,
+module gates, no-op writes, compensation persistence and CSRF, missing/deleted/foreign IDs,
+reference ownership and generic JSON SQL failure (temporary trigger removed in finally).
+The 35 other table fingerprints stayed unchanged during the scoped mutation/security sweep.
+54 pure input assertions still pass. Browser/regression checks pending.
+
+BLOCKED policy decisions (pre-existing, not silently fixed): HRIS compensation routes remain
+available to HRIS-module users without explicit compensation rights, including an employee
+viewer. The separate PAYROLL compensation routes use auth/tenant/PAYROLL-module checks,
+CSRF and tenant references, but no operation permissions or assigned-branch scope. A real
+read-only fixture test confirmed a view-only user can read a different branch's rate through
+PAYROLL. HRIS-only scope fixes do not certify application-wide compensation isolation.
+The source does not establish which roles may view/create/update/delete compensation or
+whether payroll administrators intentionally span branches. User must approve that matrix
+before changes across those contracts. No new permission codes or payroll behavior added.
+Current-rate selection with multiple effective records, payroll route reassignment/no-op
+semantics, stale-session permission refresh and broader payroll correctness remain follow-ups.
+
 ## Verification and final review
 
 C-EMP-01 checkpoint: employee-local EmployeeInput adapter and controller rejection/CSRF gate implemented. PASS: 54 pure input assertions and PHP 8.3.35 lint. Initial NUL-date test exposed trimming of NUL; adapter now rejects NUL before normalization and all cases pass. Dedicated test DB verified empty, no mounts/DB host port, tmpfs storage and own internal network; fictional seeder completed. Persistence/HTTP/browser tests pending. Establish a fresh, dedicated MariaDB

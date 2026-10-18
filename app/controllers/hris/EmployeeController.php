@@ -15,6 +15,10 @@ class EmployeeController extends Controller
     public function __construct()
     {
         $this->employeeModel = new EmployeeModel();
+        // Mirror BranchMiddleware's established session whitelist and tenant-wide fallbacks.
+        $user = $_SESSION['user'];
+        $branches = !empty($user['is_super_admin']) || empty($user['branches']) ? null : $user['branches'];
+        $this->employeeModel->setAllowedBranches($branches);
         $this->branchModel = new BranchModel();
         $this->shiftModel = new ShiftModel();
     }
@@ -134,6 +138,10 @@ class EmployeeController extends Controller
 
             $data = $this->validatedInput(EmployeeInput::compensation($_POST));
 
+            if (!$this->employeeModel->getEmployeeById($data['employee_id'], $tenant_id)) {
+                $this->inputFailure('Employee not found.');
+            }
+
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
             $newId = $this->employeeModel->createEmployeeCompensation($tenant_id, $data);
@@ -161,6 +169,10 @@ class EmployeeController extends Controller
             $tenant_id = $_SESSION['user']['tenant_id'];
 
             $data = $this->validatedInput(EmployeeInput::compensation($_POST), $id);
+
+            if (!$this->employeeModel->getEmployeeById($data['employee_id'], $tenant_id)) {
+                $this->inputFailure('Employee not found.');
+            }
 
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
@@ -195,6 +207,8 @@ class EmployeeController extends Controller
                 $data['employment_status_id'] = $this->employeeModel->getDefaultEmploymentStatusId($tenant_id);
             }
 
+            $this->validateEmployeeReferences($tenant_id, $data);
+
             $newId = $this->employeeModel->createEmployee($tenant_id, $data);
 
             $this->json([
@@ -214,6 +228,8 @@ class EmployeeController extends Controller
             $tenant_id = $_SESSION['user']['tenant_id'];
 
             $data = $this->validatedInput(EmployeeInput::employee($_POST, true), $id);
+
+            $this->validateEmployeeReferences($tenant_id, $data);
 
             $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
 
@@ -274,6 +290,13 @@ class EmployeeController extends Controller
 
 
 
+    private function validateEmployeeReferences(int $tenant_id, array $data): void
+    {
+        if (!$this->employeeModel->employeeReferencesAllowed($tenant_id, $data)) {
+            $this->inputFailure('One or more selected employment values are unavailable for this tenant or branch.');
+        }
+    }
+
     private function json(array $payload): void
     {
         header('Content-Type: application/json');
@@ -298,7 +321,6 @@ class EmployeeController extends Controller
 
     private function inputFailure(string $message, array $errors = []): never
     {
-        header('Content-Type: application/json');
         $this->json(['success' => false, 'message' => $message, 'type' => 'error', 'errors' => $errors]);
         exit;
     }
@@ -312,7 +334,11 @@ class EmployeeController extends Controller
             'sort_dir' => ['type' => 'string', 'required' => false, 'default' => 'DESC']
         ];
 
+        foreach (array_intersect_key($input, $rules) as $value) {
+            if (!is_string($value) && !is_int($value)) $this->inputFailure('Invalid employee list parameters.');
+        }
         $result = validate($input, $rules, false);
+        if ($result['errors']) $this->inputFailure('Invalid employee list parameters.', $result['errors']);
         $data = $result['data'];
         $page = max(1, (int) ($data['page'] ?: 1));
         $limit = 10;
