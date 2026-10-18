@@ -89,7 +89,9 @@ Before/after: all 26 available shell screens at 1440 and 375; ten representative
 
 ## BUILD — checkpoints and conventions
 
-A — shell implemented: deep-teal sidebar with mint selected state, consistent icon slots/indentation, module divider, tooth-mark brand lockup, quieter account/Logout/footer, and refined wrapping module navigation. Existing width/breakpoint/offcanvas/selection/permission mechanisms unchanged. Actual desktop/320px browser screenshots inspected: root overflow 0px; desktop sidebar 250px; measured header offsets match 69px desktop / 118px narrow layout. B components, C HRIS/admin, D payroll/specialized, E regression/review pending.
+A — shell implemented (`eac8d21`): deep-teal sidebar with mint selected state, consistent icon slots/indentation, module divider, tooth-mark brand lockup, quieter account/Logout/footer, and refined wrapping module navigation. Existing width/breakpoint/offcanvas/selection/permission mechanisms unchanged. Actual desktop/320px browser screenshots inspected: root overflow 0px; desktop sidebar 250px; measured header offsets match 69px desktop / 118px narrow layout.
+
+B — shared component styling implemented: quiet secondary buttons, consistent 44px action targets, bordered icon actions, compact table cells, readable headers, segmented existing tabs, dropdown spacing, dialog surfaces, alerts/loaders/toasts and standalone pearl/teal login. Existing validation/status meanings retained; source rules outside screen media unchanged. Actual desktop/320px component screenshots inspected; Positions actions now sit together and rows are visibly denser. C HRIS/admin, D payroll/specialized, E regression/review pending.
 
 ## VERIFY — actual results
 
