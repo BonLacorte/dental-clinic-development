@@ -58,6 +58,19 @@ The built-in dev router, `public/dev-router.php`, serves actual public assets an
 - Tenant and branch scoping must be enforced in the actual data queries and operations as well as in route/middleware checks. A session tenant value or role bypass is not an adequate substitute for verifying the affected record belongs to the intended scope.
 - CSRF helpers are implemented in `app/services/Csrf.php`; encryption/password helpers are in `app/services/Crypto.php`. Their existence does not prove every handler applies them correctly.
 
+### Employee correctness boundary (C-EMP, 18 October 2026)
+
+`EmployeeController` uses the employee-local `app/services/hris/EmployeeInput.php` adapter
+and configures `EmployeeModel` from server session branch assignments. Employee list/count,
+detail, update/delete and HRIS compensation queries enforce tenant and assigned-branch scope;
+empty assignments and Super Admin retain BranchMiddleware's defined tenant-wide fallback.
+Employee references/display joins respect tenant ownership and global employment catalogs.
+Both employee and HRIS compensation writes validate CSRF; the employee compensation form
+submits the page token. This does not define compensation role permissions: HRIS compensation
+still lacks explicit action rights, and the separate PAYROLL compensation routes retain their
+existing tenant-wide access. See [C-EMP review](work-items/c-emp.md) for the unresolved policy
+matrix, response assumptions and isolated verification. No payroll calculation/schema change.
+
 ## Main functional areas
 
 | Module | Primary code and behavior |

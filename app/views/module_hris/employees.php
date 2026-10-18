@@ -177,6 +177,7 @@ $employeeActions = [
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
             <div class="modal-content">
                 <form id="compensationForm" class="employee-form">
+                    <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
                     <div class="modal-header"><h2 class="modal-title fs-5" id="compensationModalLabel" tabindex="-1">Employee Compensation</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Employee Compensation"></button></div>
                     <div class="modal-body">
                         <p id="compensationEmployeeName" class="fw-semibold"></p>

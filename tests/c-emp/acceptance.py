@@ -38,8 +38,13 @@ def guard():
     if ports != [{'HostIp': '127.0.0.1', 'HostPort': '8018'}]:
         raise RuntimeError('Refusing unexpected application transport')
     network = json.loads(subprocess.check_output(['docker', 'network', 'inspect', 'cemp-test-net'], text=True))[0]
-    if not network['Internal']:
-        raise RuntimeError('Refusing non-internal DB network')
+    if not network['Internal'] or network['Labels'].get('montero.cemp.disposable') != 'true':
+        raise RuntimeError('Refusing unowned or non-internal DB network')
+    if set(network['Containers']) != {db['Id'], app['Id']}:
+        raise RuntimeError('Refusing shared fixture network')
+    web = json.loads(subprocess.check_output(['docker','network','inspect','cemp-test-web'], text=True))[0]
+    if web['Labels'].get('montero.cemp.disposable') != 'true' or set(web['Containers']) != {app['Id']}:
+        raise RuntimeError('Refusing shared or unowned frontend network')
     if sql('SELECT @@hostname').strip() != db['Config']['Hostname']:
         raise RuntimeError('Wrong database instance')
     config_check = subprocess.check_output(['docker', 'exec', 'cemp-test-app', 'php', '-r',
@@ -109,15 +114,18 @@ def seed_security():
         VALUES (8001, 8001, 8001, 'DAILY', 'SEMI_MONTHLY', 123.45, '2026-01-01');
     INSERT IGNORE INTO roles (id, tenant_id, code, name) VALUES
         (8001, 1, 'CEMP_LIMITED', 'CEMP Limited'), (8002, 1, 'CEMP_BROAD', 'CEMP Broad Only'),
-        (8003, 1, 'CEMP_VIEW', 'CEMP View Only'), (8004, 1, 'CEMP_SUPER', 'Super Admin');
+        (8003, 1, 'CEMP_VIEW', 'CEMP View Only'), (8004, 1, 'CEMP_SUPER', 'Super Admin'),
+        (8006, 8002, 'CEMP_NOMODULE', 'CEMP No Module'), (8007, 8001, 'CEMP_FOREIGN', 'CEMP Foreign');
     INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 8001, id FROM permissions WHERE code IN
         ('hris.view', 'hris.employee.view', 'hris.employee.create', 'hris.employee.edit', 'hris.employee.delete');
+    INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 8006, permission_id FROM role_permissions WHERE role_id = 8001;
+    INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 8007, permission_id FROM role_permissions WHERE role_id = 8001;
     INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 8002, id FROM permissions WHERE code = 'hris.view';
     INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 8003, id FROM permissions WHERE code IN ('hris.view', 'hris.employee.view');
     """)
     for uid, tenant, role, branch, slug in [(8001,1,8001,1,'limited'), (8002,1,8002,1,'broad'),
             (8003,1,8003,1,'view'), (8004,1,8001,None,'empty'), (8005,1,8004,1,'super'),
-            (8006,8002,8001,None,'nomodule'), (8007,8001,8001,8001,'foreign')]:
+            (8006,8002,8006,None,'nomodule'), (8007,8001,8007,8001,'foreign')]:
         # Copy only the known fictional seed's password hash inside the disposable DB.
         sql(f"INSERT IGNORE INTO users (id, tenant_id, name, email, password) SELECT {uid}, {tenant}, 'CEMP {slug}', 'cemp-{slug}@example.test', password FROM users WHERE id = 1;"
             f"INSERT IGNORE INTO user_roles (user_id, role_id) VALUES ({uid}, {role});" +
@@ -217,6 +225,10 @@ def security(client):
 
 def run():
     guard()
+    anonymous = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    for body in (None, b'firstname=NoPersistence'):
+        res = anonymous.open(urllib.request.Request(BASE + '/hris/employees/create', data=body) if body else BASE + '/hris/employees/getallemployees')
+        check('Access denied. Please login.' in res.read().decode(), 'unauthenticated request denied before employee action')
     client = Client()
     check(bool(client.token), 'ordinary login and employee page token')
     initial = int(sql('SELECT COUNT(*) FROM hris_employees'))
