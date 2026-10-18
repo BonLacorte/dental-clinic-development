@@ -2,6 +2,10 @@
 
 **Purpose:** Continue the same development task from a work laptop, home PC, or an approved cloud workspace without depending on a previous Codex conversation. This is a development-copy workflow, **not** authorization to edit the live Remote SSH server.
 
+## Frontend-design clarification
+
+For explicitly frontend-design tasks, follow the stricter frontend-only section in [AGENTS.md](../AGENTS.md) and the [Montero Dental frontend design Skill](../.agents/skills/montero-dental-frontend-design/SKILL.md): **PLAN → SPEC → BUILD → VERIFY → REVIEW**. An approved documentation stage does not authorize application edits. An approved frontend BUILD permits autonomous presentation work only within its explicit file allowlist; executable PHP/JavaScript, backend, security, database, API and workflow changes remain outside that authority. Historical examples below are not permission to publish: obtain explicit human authorization for commits, pushes, pull requests, merges and deployment. Never automatically publish; verify current authorization before any Git write. Stage 1 ends at documentation review, with no application implementation or Git publication.
+
 ## The four pieces of state
 
 | State | Portable through Git? | How it is preserved |
