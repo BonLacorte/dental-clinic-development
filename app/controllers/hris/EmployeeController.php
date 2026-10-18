@@ -48,7 +48,7 @@ class EmployeeController extends Controller
             $params['sort_dir']
         );
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data,
             'currentPage' => $params['page'],
@@ -63,14 +63,14 @@ class EmployeeController extends Controller
         $employee = $this->employeeModel->getEmployeeById($id, $tenant_id);
 
         if (!$employee) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Employee not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $employee
         ]);
@@ -84,14 +84,14 @@ class EmployeeController extends Controller
         $result = $this->shiftModel->getAllShifts($tenant_id, 500, 0);
 
         if (!$result) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Data not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $result
         ]);
@@ -102,19 +102,23 @@ class EmployeeController extends Controller
 
         $tenant_id = $_SESSION['user']['tenant_id'];
 
+        if (!$this->employeeModel->getEmployeeById($id, $tenant_id)) {
+            $this->inputFailure('Employee not found.');
+        }
+
         $result = $this->employeeModel->getEmployeeCompensation($id, $tenant_id);
 
 
 
         if (!$result) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Data not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $result
         ]);
@@ -134,18 +138,18 @@ class EmployeeController extends Controller
 
             $newId = $this->employeeModel->createEmployeeCompensation($tenant_id, $data);
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Employee compensation created successfully.',
+            $this->json([
+                'success' => $newId > 0,
+                'message' => $newId > 0 ? 'Employee compensation created successfully.' : 'Employee compensation was not created.',
                 'id' => $newId
             ]);
 
         } catch (Throwable $e) {
             http_response_code(500);
 
-            echo json_encode([
+            $this->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'The request could not be completed. Check the record before trying again.'
             ]);
         }
     }
@@ -162,7 +166,7 @@ class EmployeeController extends Controller
 
             $success = $this->employeeModel->updateEmployeeCompensation($id, $tenant_id, $data);
 
-            echo json_encode([
+            $this->json([
                 'success' => $success,
                 'message' => $success
                     ? 'Employee compensation updated successfully.'
@@ -171,64 +175,78 @@ class EmployeeController extends Controller
         } catch (Throwable $e) {
             http_response_code(500);
 
-            echo json_encode([
+            $this->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'The request could not be completed. Check the record before trying again.'
             ]);
         }
     }
     public function create()
     {
-        $tenant_id = $_SESSION['user']['tenant_id'];
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $data = $this->validatedInput(EmployeeInput::employee($_POST));
+            $data = $this->validatedInput(EmployeeInput::employee($_POST));
 
-        $data['employee_no'] = $this->buildEmployeeNo((int) $data['branch_id'], $tenant_id);
-        $data['status'] = 'ACTIVE';
+            $data['employee_no'] = $this->buildEmployeeNo((int) $data['branch_id'], $tenant_id);
+            $data['status'] = 'ACTIVE';
 
-        if (empty($data['employment_status_id'])) {
-            $data['employment_status_id'] = $this->employeeModel->getDefaultEmploymentStatusId($tenant_id);
+            if (empty($data['employment_status_id'])) {
+                $data['employment_status_id'] = $this->employeeModel->getDefaultEmploymentStatusId($tenant_id);
+            }
+
+            $newId = $this->employeeModel->createEmployee($tenant_id, $data);
+
+            $this->json([
+                'success' => $newId > 0,
+                'message' => $newId > 0 ? 'Employee created successfully.' : 'Employee was not created.',
+                'id' => $newId
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
         }
-
-        $newId = $this->employeeModel->createEmployee($tenant_id, $data);
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'Employee created successfully.',
-            'id' => $newId
-        ]);
     }
 
     public function updateEmployee(int $id)
     {
-        $tenant_id = $_SESSION['user']['tenant_id'];
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $data = $this->validatedInput(EmployeeInput::employee($_POST, true), $id);
+            $data = $this->validatedInput(EmployeeInput::employee($_POST, true), $id);
 
-        $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
+            $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
 
-        echo json_encode([
-            'success' => $success,
-            'message' => $success
-                ? 'Employee updated successfully.'
-                : 'Failed to update employee.'
-        ]);
+            $this->json([
+                'success' => $success,
+                'message' => $success
+                    ? 'Employee updated successfully.'
+                    : 'Failed to update employee.'
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
+        }
     }
 
     public function deleteEmployee(int $id)
     {
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
+            $this->validatedInput(EmployeeInput::csrf($_POST));
 
-        $tenant_id = $_SESSION['user']['tenant_id'];
-        $this->validatedInput(EmployeeInput::csrf($_POST));
+            $success = $this->employeeModel->deleteEmployee($id, $tenant_id);
 
-        $success = $this->employeeModel->deleteEmployee($id, $tenant_id);
-
-        echo json_encode([
-            'success' => $success,
-            'message' => $success
-                ? 'Employee deleted successfully.'
-                : 'Failed to delete employee.'
-        ]);
+            $this->json([
+                'success' => $success,
+                'message' => $success
+                    ? 'Employee deleted successfully.'
+                    : 'Failed to delete employee.'
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
+        }
     }
 
     public function getEmploymentTypes()
@@ -237,7 +255,7 @@ class EmployeeController extends Controller
 
         $data = $this->employeeModel->getEmploymentTypes($tenant_id);
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data
         ]);
@@ -248,13 +266,19 @@ class EmployeeController extends Controller
         $tenant_id = $_SESSION['user']['tenant_id'];
         $data = $this->employeeModel->getEmploymentStatuses($tenant_id);
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data
         ]);
     }
 
 
+
+    private function json(array $payload): void
+    {
+        header('Content-Type: application/json');
+        echo json_encode($payload);
+    }
 
     private function validatedInput(array $result, ?int $pathId = null): array
     {
@@ -275,7 +299,7 @@ class EmployeeController extends Controller
     private function inputFailure(string $message, array $errors = []): never
     {
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => $message, 'type' => 'error', 'errors' => $errors]);
+        $this->json(['success' => false, 'message' => $message, 'type' => 'error', 'errors' => $errors]);
         exit;
     }
 

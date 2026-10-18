@@ -35,6 +35,13 @@ success:false/message/type and optional field errors, using existing HTTP-200 ap
 failure convention for compatible callers. Exceptions use generic HTTP 500 messages; callers
 preserve drafts for ambiguous failures and never automatically retry writes.
 
+C-EMP-02 checkpoint: explicit JSON failure/success responses, generic exception messages,
+missing/deleted update/delete failures, unchanged-edit success and distinct missing employee
+versus absent compensation implemented. Browser mutation guard rejects contradictory errors
+and shows structured server field failures without clearing drafts. PASS: changed PHP lint;
+25 real guarded HTTP/PDO assertions, including create/read/update/no-op/soft-delete and
+rejection without persistence. Browser response matrix still pending.
+
 ## C-EMP-03 — Security specification and checkpoint
 
 Review confirms auth/tenant/HRIS module group and per-action employee permissions, but list

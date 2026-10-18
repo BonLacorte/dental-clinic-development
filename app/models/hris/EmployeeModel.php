@@ -81,6 +81,7 @@ class EmployeeModel extends Model
             LEFT JOIN hris_org_units ou ON ou.id = e.org_unit_id
             WHERE e.id = :id
                 AND e.tenant_id = :tenant_id
+                AND e.deleted_at IS NULL
             LIMIT 1
         ");
 
@@ -120,7 +121,7 @@ class EmployeeModel extends Model
                  :date_hired, :date_resigned, :status, NOW())
         ");
 
-        $stmt->execute([
+        $success = $stmt->execute([
             'tenant_id' => $tenant_id,
             'employee_no' => $data['employee_no'],
 
@@ -144,7 +145,7 @@ class EmployeeModel extends Model
             'status' => $data['status'] ?? 'ACTIVE'
         ]);
 
-        return (int) $this->db->lastInsertId();
+        return $success ? (int) $this->db->lastInsertId() : 0;
     }
 
     public function updateEmployee(int $id, int $tenant_id, array $data): bool
@@ -160,9 +161,10 @@ class EmployeeModel extends Model
                 updated_at = NOW()
             WHERE id = :id
                 AND tenant_id = :tenant_id
+                AND deleted_at IS NULL
         ");
 
-        return $stmt->execute([
+        $success = $stmt->execute([
             'firstname' => $data['firstname'],
             'middlename' => $data['middlename'] ?? null,
             'lastname' => $data['lastname'],
@@ -185,12 +187,15 @@ class EmployeeModel extends Model
             'id' => $id,
             'tenant_id' => $tenant_id
         ]);
+        // An unchanged accessible row is a valid edit; a missing row is not.
+        return $success && $this->getEmployeeById($id, $tenant_id) !== false;
     }
 
     public function deleteEmployee(int $id, int $tenant_id): bool
     {
-        $stmt = $this->db->prepare("UPDATE hris_employees SET status = 'INACTIVE', deleted_at = NOW() WHERE id = :id AND tenant_id = :tenant_id");
-        return $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id]);
+        $stmt = $this->db->prepare("UPDATE hris_employees SET status = 'INACTIVE', deleted_at = NOW() WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL");
+        $success = $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id]);
+        return $success && $stmt->rowCount() > 0;
     }
 
     public function getEmploymentTypes(int $tenant_id): array
@@ -298,7 +303,7 @@ class EmployeeModel extends Model
 
         $stmt = $this->db->prepare($sql);
 
-        $stmt->execute([
+        $success = $stmt->execute([
             'tenant_id' => $tenant_id,
             'employee_id' => $data['employee_id'],
             'salary_type' => $data['salary_type'],
@@ -308,7 +313,7 @@ class EmployeeModel extends Model
             'effective_to' => $data['effective_to'],
         ]);
 
-        return (int) $this->db->lastInsertId();
+        return $success ? (int) $this->db->lastInsertId() : 0;
     }
 
     public function updateEmployeeCompensation(int $id, int $tenant_id, array $data): bool
