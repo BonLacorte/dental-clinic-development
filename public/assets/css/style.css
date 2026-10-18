@@ -711,9 +711,9 @@
   }
 }
 
-/* Stage 2A: shared Pearl & Teal foundation. Screen-only so payroll/print
+/* Pearl & Teal: shared foundation and Premium presentation. Screen-only so payroll/print
    retains its accepted typography, dimensions, colors and page breaks.
-   Login/scanner remain page-owned; shell geometry above stays unchanged. */
+   retains its baseline. Sidebar widths, breakpoints and behavior stay above. */
 @media screen {
   .admin-shell {
     --montero-primary: #11685D;
@@ -727,6 +727,9 @@
     --montero-divider: #D9E4E1;
     --montero-control-border: #738C85;
     --montero-focus: #087F8C;
+    --montero-sidebar: #153F3B;
+    --montero-sidebar-text: #E6F3EF;
+    --montero-sidebar-muted: #B5CFCA;
     --montero-card-radius: 14px;
     --montero-control-radius: 8px;
     --montero-shadow: 0 2px 8px rgb(25 51 48 / 6%);
@@ -770,6 +773,12 @@
     --bs-navbar-brand-hover-color: var(--montero-primary);
     background-color: var(--montero-surface) !important;
     border-bottom: 1px solid var(--montero-divider);
+    min-height: 64px;
+    padding: 8px 16px;
+  }
+
+  .admin-shell .admin-navbar-inner {
+    gap: 4px 12px;
   }
 
   .admin-shell .admin-account.text-white {
@@ -777,7 +786,42 @@
   }
 
   .admin-shell .admin-navbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 600;
+    letter-spacing: -.025em;
+    line-height: 1.25;
+  }
+
+  .admin-shell .admin-brand-mark {
+    display: inline-flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--montero-primary);
+    color: var(--montero-surface);
+    font-size: 20px;
+  }
+
+  .admin-shell .admin-account-name {
+    font-size: .9375rem;
+    font-weight: 500;
+  }
+
+  .admin-shell .admin-logout {
+    padding-inline: 12px;
+    border-radius: var(--montero-control-radius);
+    text-decoration: none;
+    font-size: .9375rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .admin-logout:hover {
+    background: var(--bs-danger-bg-subtle);
   }
 
   .admin-shell #toggleSidebar {
@@ -801,31 +845,95 @@
   }
 
   .admin-shell #sidebar {
-    --bs-offcanvas-bg: var(--montero-surface);
-    --bs-offcanvas-color: var(--montero-text);
-    border-right: 1px solid var(--montero-divider);
+    --bs-offcanvas-bg: var(--montero-sidebar);
+    --bs-offcanvas-color: var(--montero-sidebar-text);
+    border-right: 1px solid var(--montero-sidebar);
+  }
+
+  .admin-shell #sidebar .offcanvas-body {
+    padding: 16px 12px 24px;
+  }
+
+  .admin-shell #sidebar .offcanvas-header {
+    border-bottom: 1px solid rgb(230 243 239 / 18%);
+  }
+
+  .admin-shell #sidebar .offcanvas-title {
+    color: var(--montero-sidebar-text);
   }
 
   .admin-shell #sidebar a,
   .admin-shell #sidebar .nav-parent,
   .admin-shell #sidebar .sidebar-module-label {
-    color: var(--montero-text);
+    color: var(--montero-sidebar-text);
   }
 
-  .admin-shell #sidebar a:hover,
-  .admin-shell #sidebar .nav-parent:hover,
-  .admin-shell #sidebar a.active {
-    background-color: var(--montero-primary-tint);
-    color: var(--montero-primary);
+  .admin-shell #sidebar a,
+  .admin-shell #sidebar .nav-parent {
+    min-height: 48px;
+    padding: 12px;
+    gap: 12px;
+    border-radius: var(--montero-control-radius);
+    margin-bottom: 4px;
+    line-height: 1.5;
+    transition: background-color .15s ease, color .15s ease;
   }
 
-  .admin-shell #sidebar a.active {
-    box-shadow: inset 4px 0 var(--montero-primary);
+  .admin-shell #sidebar :is(a, .nav-parent) > i:first-child {
+    width: 20px;
+    flex: 0 0 20px;
+    margin-right: 0 !important;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--montero-sidebar-muted);
+  }
+
+  .admin-shell #sidebar .nav-group {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgb(230 243 239 / 18%);
+  }
+
+  .admin-shell #sidebar .nav-child a {
+    padding-left: 44px;
+  }
+
+  .admin-shell #sidebar .nav-child .sidebar-module-link {
+    padding-left: 56px;
+    font-size: .9375rem;
+    color: var(--montero-sidebar-muted);
+  }
+
+  .admin-shell #sidebar .sidebar-module-label {
+    padding: 12px 12px 8px 44px;
+    font-size: .875rem;
     font-weight: 600;
   }
 
+  .admin-shell #sidebar .arrow {
+    font-size: .75rem;
+  }
+
+  .admin-shell #sidebar a:hover,
+  .admin-shell #sidebar .nav-parent:hover {
+    background-color: rgb(230 243 239 / 10%);
+    color: var(--montero-surface);
+  }
+
+  .admin-shell #sidebar a.active,
+  .admin-shell #sidebar .nav-child a.active {
+    background-color: var(--montero-primary-tint);
+    color: var(--montero-primary-active);
+    box-shadow: inset 3px 0 var(--montero-control-border);
+    font-weight: 600;
+  }
+
+  .admin-shell #sidebar a.active > i:first-child {
+    color: var(--montero-primary);
+  }
+
   .admin-shell #closeSidebar {
-    filter: none;
+    filter: invert(1) grayscale(100%) brightness(200%);
     opacity: 1;
   }
 
@@ -833,15 +941,63 @@
     color: var(--montero-muted);
     background-color: var(--montero-surface);
     border-top: 1px solid var(--montero-divider);
+    padding: 16px 24px;
+    font-size: .875rem;
+    text-align: left;
   }
 
   .admin-shell .module-navigation {
     --bs-nav-link-color: var(--montero-primary);
     --bs-nav-link-hover-color: var(--montero-primary-hover);
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--montero-divider);
   }
 
   .admin-shell .module-navigation .nav-underline {
     --bs-nav-underline-link-active-color: var(--montero-primary-active);
+    gap: 4px 12px;
+  }
+
+  .admin-shell .module-navigation .nav-link {
+    padding: 10px 12px;
+    border-radius: 8px 8px 0 0;
+    font-size: .9375rem;
+  }
+
+  .admin-shell .module-navigation .nav-link:is(:hover, .active) {
+    background: var(--montero-primary-tint);
+  }
+
+  .admin-shell #sidebar :focus-visible {
+    outline-color: var(--montero-primary-tint);
+    box-shadow: none;
+  }
+
+  .admin-shell #sidebar a.active:focus-visible {
+    outline-color: var(--montero-primary);
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .admin-navbar {
+      padding-inline: 12px;
+    }
+
+    .admin-shell .admin-navbar .navbar-brand {
+      font-size: 1.125rem;
+    }
+
+    .admin-shell .admin-account {
+      flex-basis: 100%;
+      gap: 4px;
+      border-top: 1px solid var(--montero-divider);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-shell #sidebar a,
+    .admin-shell #sidebar .nav-parent {
+      transition: none;
+    }
   }
 
   .admin-shell .nav-tabs {

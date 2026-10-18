@@ -6,7 +6,7 @@
             <span aria-hidden="true">☰</span>
         </button>
 
-        <a class="navbar-brand" href="/home">Montero Dental</a>
+        <a class="navbar-brand" href="/home"><span class="admin-brand-mark" aria-hidden="true"><i class="fas fa-tooth"></i></span><span>Montero Dental</span></a>
 
         <div class="admin-account text-white">
             <span class="admin-account-name"><?= e($data['name']) ?></span>
