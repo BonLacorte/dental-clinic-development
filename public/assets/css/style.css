@@ -710,3 +710,393 @@
     white-space: normal;
   }
 }
+
+/* Stage 2A: shared Pearl & Teal foundation. Screen-only so payroll/print
+   retains its accepted typography, dimensions, colors and page breaks.
+   Login/scanner remain page-owned; shell geometry above stays unchanged. */
+@media screen {
+  .admin-shell {
+    --montero-primary: #11685D;
+    --montero-primary-hover: #0D544B;
+    --montero-primary-active: #09473F;
+    --montero-primary-tint: #E6F3EF;
+    --montero-canvas: #F4F7F7;
+    --montero-surface: #FFFFFF;
+    --montero-text: #193330;
+    --montero-muted: #5C716D;
+    --montero-divider: #D9E4E1;
+    --montero-control-border: #738C85;
+    --montero-focus: #087F8C;
+    --montero-card-radius: 14px;
+    --montero-control-radius: 8px;
+    --montero-shadow: 0 2px 8px rgb(25 51 48 / 6%);
+    --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+    --bs-body-bg: var(--montero-canvas);
+    --bs-body-color: var(--montero-text);
+    --bs-body-color-rgb: 25, 51, 48;
+    --bs-heading-color: inherit;
+    --bs-secondary-color: var(--montero-muted);
+    --bs-secondary-color-rgb: 92, 113, 109;
+    --bs-tertiary-bg: var(--montero-canvas);
+    --bs-border-color: var(--montero-divider);
+    --bs-primary: var(--montero-primary);
+    --bs-primary-rgb: 17, 104, 93;
+    --bs-primary-text-emphasis: var(--montero-primary-active);
+    --bs-primary-bg-subtle: var(--montero-primary-tint);
+    --bs-primary-border-subtle: var(--montero-control-border);
+    --bs-link-color: var(--montero-primary);
+    --bs-link-color-rgb: 17, 104, 93;
+    --bs-link-hover-color: var(--montero-primary-hover);
+    --bs-link-hover-color-rgb: 13, 84, 75;
+    font-family: var(--bs-font-sans-serif);
+    line-height: 1.5;
+    color: var(--montero-text);
+    background-color: var(--montero-canvas);
+  }
+
+  .admin-shell :where(h1, h2, h3, h4, h5, h6, .form-label) {
+    font-weight: 600;
+  }
+
+  .admin-shell a {
+    text-underline-offset: .2em;
+  }
+
+  /* Override only the legacy chrome's dark utility colors, not its layout. */
+  .admin-shell .admin-navbar {
+    --bs-navbar-color: var(--montero-text);
+    --bs-navbar-brand-color: var(--montero-text);
+    --bs-navbar-brand-hover-color: var(--montero-primary);
+    background-color: var(--montero-surface) !important;
+    border-bottom: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .admin-account.text-white {
+    color: var(--montero-text) !important;
+  }
+
+  .admin-shell .admin-navbar .navbar-brand {
+    font-weight: 600;
+  }
+
+  .admin-shell #toggleSidebar {
+    --bs-btn-color: var(--montero-text);
+    --bs-btn-bg: var(--montero-surface);
+    --bs-btn-border-color: var(--montero-control-border);
+    --bs-btn-hover-color: var(--montero-primary-hover);
+    --bs-btn-hover-bg: var(--montero-primary-tint);
+    --bs-btn-hover-border-color: var(--montero-primary);
+    --bs-btn-active-color: var(--montero-primary-active);
+    --bs-btn-active-bg: var(--montero-primary-tint);
+    --bs-btn-active-border-color: var(--montero-primary-active);
+  }
+
+  .admin-shell .admin-logout {
+    color: var(--bs-danger-text-emphasis);
+  }
+
+  .admin-shell .admin-logout:hover {
+    color: var(--bs-danger);
+  }
+
+  .admin-shell #sidebar {
+    --bs-offcanvas-bg: var(--montero-surface);
+    --bs-offcanvas-color: var(--montero-text);
+    border-right: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell #sidebar a,
+  .admin-shell #sidebar .nav-parent,
+  .admin-shell #sidebar .sidebar-module-label {
+    color: var(--montero-text);
+  }
+
+  .admin-shell #sidebar a:hover,
+  .admin-shell #sidebar .nav-parent:hover,
+  .admin-shell #sidebar a.active {
+    background-color: var(--montero-primary-tint);
+    color: var(--montero-primary);
+  }
+
+  .admin-shell #sidebar a.active {
+    box-shadow: inset 4px 0 var(--montero-primary);
+    font-weight: 600;
+  }
+
+  .admin-shell #closeSidebar {
+    filter: none;
+    opacity: 1;
+  }
+
+  .admin-shell .admin-footer {
+    color: var(--montero-muted);
+    background-color: var(--montero-surface);
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .module-navigation {
+    --bs-nav-link-color: var(--montero-primary);
+    --bs-nav-link-hover-color: var(--montero-primary-hover);
+  }
+
+  .admin-shell .module-navigation .nav-underline {
+    --bs-nav-underline-link-active-color: var(--montero-primary-active);
+  }
+
+  .admin-shell .nav-tabs {
+    --bs-nav-tabs-border-color: var(--montero-divider);
+    --bs-nav-tabs-link-active-color: var(--montero-primary-active);
+    --bs-nav-tabs-link-active-bg: var(--montero-surface);
+    --bs-nav-tabs-link-active-border-color: var(--montero-divider) var(--montero-divider) var(--montero-surface);
+  }
+
+  .admin-shell .dropdown-menu {
+    --bs-dropdown-color: var(--montero-text);
+    --bs-dropdown-bg: var(--montero-surface);
+    --bs-dropdown-border-color: var(--montero-divider);
+    --bs-dropdown-link-color: var(--montero-text);
+    --bs-dropdown-link-hover-color: var(--montero-primary-hover);
+    --bs-dropdown-link-hover-bg: var(--montero-primary-tint);
+    --bs-dropdown-link-active-color: var(--montero-surface);
+    --bs-dropdown-link-active-bg: var(--montero-primary);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell .btn {
+    --bs-btn-border-radius: var(--montero-control-radius);
+    --bs-btn-font-size: 1rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .admin-shell .btn-primary {
+    --bs-btn-color: var(--montero-surface);
+    --bs-btn-bg: var(--montero-primary);
+    --bs-btn-border-color: var(--montero-primary);
+    --bs-btn-hover-color: var(--montero-surface);
+    --bs-btn-hover-bg: var(--montero-primary-hover);
+    --bs-btn-hover-border-color: var(--montero-primary-hover);
+    --bs-btn-active-color: var(--montero-surface);
+    --bs-btn-active-bg: var(--montero-primary-active);
+    --bs-btn-active-border-color: var(--montero-primary-active);
+    --bs-btn-disabled-color: var(--montero-surface);
+    --bs-btn-disabled-bg: var(--montero-primary);
+    --bs-btn-disabled-border-color: var(--montero-primary);
+  }
+
+  .admin-shell .btn-outline-primary {
+    --bs-btn-color: var(--montero-primary);
+    --bs-btn-border-color: var(--montero-primary);
+    --bs-btn-hover-color: var(--montero-surface);
+    --bs-btn-hover-bg: var(--montero-primary-hover);
+    --bs-btn-hover-border-color: var(--montero-primary-hover);
+    --bs-btn-active-color: var(--montero-surface);
+    --bs-btn-active-bg: var(--montero-primary-active);
+    --bs-btn-active-border-color: var(--montero-primary-active);
+    --bs-btn-disabled-color: var(--montero-primary);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--montero-primary);
+  }
+
+  .admin-shell .btn-outline-secondary {
+    --bs-btn-color: var(--montero-muted);
+    --bs-btn-border-color: var(--montero-control-border);
+    --bs-btn-hover-color: var(--montero-text);
+    --bs-btn-hover-bg: var(--montero-canvas);
+    --bs-btn-hover-border-color: var(--montero-muted);
+    --bs-btn-active-color: var(--montero-text);
+    --bs-btn-active-bg: var(--montero-divider);
+    --bs-btn-active-border-color: var(--montero-muted);
+  }
+
+  .admin-shell .btn-link,
+  .admin-shell .employee-page .employee-sort {
+    --bs-btn-color: var(--montero-primary);
+    --bs-btn-hover-color: var(--montero-primary-hover);
+    --bs-btn-active-color: var(--montero-primary-active);
+    color: var(--montero-primary);
+  }
+
+  .admin-shell .btn-link:hover,
+  .admin-shell .employee-page .employee-sort:hover {
+    color: var(--montero-primary-hover);
+  }
+
+  .admin-shell .card {
+    --bs-card-bg: var(--montero-surface);
+    --bs-card-border-color: var(--montero-divider);
+    --bs-card-border-radius: var(--montero-card-radius);
+    --bs-card-inner-border-radius: calc(var(--montero-card-radius) - 1px);
+    --bs-card-cap-bg: var(--montero-surface);
+    --bs-card-spacer-x: 1.5rem;
+    --bs-card-spacer-y: 1.5rem;
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell .card.shadow-sm {
+    box-shadow: var(--montero-shadow) !important;
+  }
+
+  .admin-shell .card-header.d-flex {
+    flex-wrap: wrap;
+    gap: 12px 16px;
+  }
+
+  /* Existing generated office rows must also wrap around larger controls. */
+  .admin-shell #orgUnitsTree .d-flex {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .admin-shell #orgUnitsTree .fw-semibold {
+    overflow-wrap: anywhere;
+  }
+
+  /* Existing payroll surfaces use body-bg locally; keep them white too. */
+  .admin-shell :is(.payroll-page-card, .payroll-summary-card, .payroll-total-box) {
+    background-color: var(--montero-surface);
+    border-color: var(--montero-divider);
+    border-radius: var(--montero-card-radius);
+  }
+
+  .admin-shell #content > .row {
+    row-gap: 16px;
+  }
+
+  .admin-shell .table:not(.table-primary, .table-secondary, .table-success, .table-danger, .table-warning, .table-info, .table-dark) {
+    --bs-table-color: var(--montero-text);
+    --bs-table-bg: var(--montero-surface);
+    --bs-table-border-color: var(--montero-divider);
+    --bs-table-striped-color: var(--montero-text);
+    --bs-table-striped-bg: var(--montero-canvas);
+    --bs-table-hover-color: var(--montero-text);
+    --bs-table-hover-bg: var(--montero-primary-tint);
+    --bs-table-active-color: var(--montero-text);
+    --bs-table-active-bg: var(--montero-primary-tint);
+  }
+
+  .admin-shell .table-light {
+    --bs-table-color: var(--montero-text);
+    --bs-table-bg: var(--montero-canvas);
+    --bs-table-border-color: var(--montero-divider);
+  }
+
+  .admin-shell .table > :not(caption) > * > * {
+    padding: 12px 16px;
+  }
+
+  .admin-shell .badge {
+    --bs-badge-font-size: .8125rem;
+    --bs-badge-padding-x: .65em;
+    --bs-badge-padding-y: .4em;
+  }
+
+  .admin-shell .pagination {
+    --bs-pagination-color: var(--montero-primary);
+    --bs-pagination-bg: var(--montero-surface);
+    --bs-pagination-border-color: var(--montero-control-border);
+    --bs-pagination-border-radius: var(--montero-control-radius);
+    --bs-pagination-hover-color: var(--montero-primary-hover);
+    --bs-pagination-hover-bg: var(--montero-primary-tint);
+    --bs-pagination-hover-border-color: var(--montero-primary);
+    --bs-pagination-focus-color: var(--montero-primary-hover);
+    --bs-pagination-focus-bg: var(--montero-primary-tint);
+    --bs-pagination-active-color: var(--montero-surface);
+    --bs-pagination-active-bg: var(--montero-primary);
+    --bs-pagination-active-border-color: var(--montero-primary);
+    --bs-pagination-disabled-color: var(--montero-muted);
+    --bs-pagination-disabled-bg: var(--montero-canvas);
+    --bs-pagination-disabled-border-color: var(--montero-divider);
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .admin-shell .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    margin-left: 0;
+    border-radius: var(--montero-control-radius);
+  }
+
+  .admin-shell :is(.form-control, .form-select) {
+    min-height: 44px;
+    font-size: 1rem;
+    border-radius: var(--montero-control-radius);
+    color: var(--montero-text);
+    background-color: var(--montero-surface);
+  }
+
+  /* Keep Bootstrap's valid/invalid border, icon and feedback treatments. */
+  .admin-shell :is(.form-control, .form-select):not(.is-invalid, .is-valid, :disabled),
+  .admin-shell .form-check-input:not(.is-invalid, .is-valid, :disabled) {
+    border-color: var(--montero-control-border);
+  }
+
+  .admin-shell .was-validated :is(.form-control, .form-select, .form-check-input):invalid {
+    border-color: var(--bs-form-invalid-border-color);
+  }
+
+  .admin-shell .was-validated :is(.form-control, .form-select, .form-check-input):valid {
+    border-color: var(--bs-form-valid-border-color);
+  }
+
+  .admin-shell .form-control::placeholder {
+    color: var(--montero-muted);
+    opacity: 1;
+  }
+
+  .admin-shell .form-control:disabled,
+  .admin-shell .form-select:disabled,
+  .admin-shell .employee-dialog .form-control:read-only {
+    background-color: var(--montero-canvas);
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .form-check-input:checked {
+    background-color: var(--montero-primary);
+  }
+
+  .admin-shell .modal-content {
+    --bs-modal-bg: var(--montero-surface);
+    --bs-modal-color: var(--montero-text);
+    --bs-modal-border-color: var(--montero-divider);
+    --bs-modal-border-radius: var(--montero-card-radius);
+    --bs-modal-inner-border-radius: calc(var(--montero-card-radius) - 1px);
+  }
+
+  .admin-shell .modal-header .btn-close {
+    min-width: 44px;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .admin-shell .admin-skip-link {
+    color: var(--montero-primary);
+    border: 1px solid var(--montero-control-border);
+    border-radius: var(--montero-control-radius);
+  }
+
+  /* White separation keeps the focus ring visible on filled teal actions. */
+  .admin-shell :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+  .admin-shell .employee-page :where(button, input, select, [tabindex]):focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--montero-surface);
+  }
+
+  .admin-shell :where(.admin-navbar, #sidebar, .admin-footer) :focus-visible,
+  .admin-shell .employee-page .employee-table-region:focus-visible {
+    outline-offset: -3px;
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .card {
+      --bs-card-spacer-x: 1rem;
+      --bs-card-spacer-y: 1rem;
+    }
+  }
+}
