@@ -4,8 +4,8 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Offices</h5>
 

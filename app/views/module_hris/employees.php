@@ -9,8 +9,8 @@ $employeeActions = [
     'delete' => $navCanPermission('hris.employee.delete'),
 ];
 ?>
-<main class="employee-page container-fluid py-4" aria-labelledby="employeesHeading">
-    <div class="card shadow-sm">
+<main class="employee-page container-fluid py-4 management-page" aria-labelledby="employeesHeading">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white employee-header">
             <div>
                 <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Manage Employees</h1>

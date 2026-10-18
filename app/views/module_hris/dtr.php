@@ -1,7 +1,7 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-3 management-page attendance-page">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
