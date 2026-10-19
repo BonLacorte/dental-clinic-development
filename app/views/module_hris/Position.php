@@ -3,7 +3,7 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Positions</h5>
@@ -235,14 +235,14 @@ function getAllPositions() {
                             <td>${position.created_at ?? '-'}</td>
                             <td class="text-end pe-4">
 
-                                <button class="btn btn-link btn-sm text-primary editPositionBtn"
-                                    data-id="${position.id}">
-                                    <i class="bi bi-pencil"></i>
+                                <button class="btn btn-sm editPositionBtn hris-action"
+                                    data-id="${position.id}" aria-label="Edit position" title="Edit position">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                 </button>
 
-                                <button class="btn btn-link btn-sm text-danger deletePositionBtn"
-                                    data-id="${position.id}">
-                                    <i class="bi bi-trash"></i>
+                                <button class="btn btn-sm deletePositionBtn hris-action hris-action--danger"
+                                    data-id="${position.id}" aria-label="Delete position" title="Delete position">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
                                 </button>
 
                             </td>

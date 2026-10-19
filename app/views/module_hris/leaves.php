@@ -1,7 +1,7 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Leaves</h5>
@@ -47,6 +47,7 @@
                         <div class="col-auto">
                             <button class="btn btn-outline-secondary" type="button" id="clearRequestSearchBtn">Clear</button>
                         </div>
+                        <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary request-sort hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
                     </form>
                 </div>
 
@@ -62,7 +63,7 @@
                                     <th><button class="btn btn-link p-0 request-sort" data-sort="status">Status</button></th>
                                     <th><button class="btn btn-link p-0 request-sort" data-sort="approved_by_name">Approved By</button></th>
                                     <th><button class="btn btn-link p-0 request-sort" data-sort="approved_at">Approved At</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
+                                    <th class="hris-created-at"><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
                                     <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
@@ -93,6 +94,7 @@
                         <div class="col-auto">
                             <button class="btn btn-outline-secondary" type="button" id="clearTypeSearchBtn">Clear</button>
                         </div>
+                        <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary type-sort hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
                     </form>
                 </div>
 
@@ -103,7 +105,7 @@
                                 <tr>
                                     <th class="ps-4"><button class="btn btn-link p-0 type-sort" data-sort="name">Name</button></th>
                                     <th><button class="btn btn-link p-0 type-sort" data-sort="is_paid">Is Paid</button></th>
-                                    <th><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
+                                    <th class="hris-created-at"><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
                                     <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
@@ -570,16 +572,16 @@ function renderRequestRows(requests) {
                     <td>${esc(req.leave_type) || '-'}</td>
                     <td>${esc(req.date_from)}</td>
                     <td>${esc(req.date_to)}</td>
-                    <td><span class="badge text-bg-secondary">${esc(req.status)}</span></td>
+                    <td><span class="badge text-bg-secondary hris-status ${MonteroHris.statusClass(req.status, 'leave')}">${esc(req.status)}</span></td>
                     <td>${esc(req.approved_by_name) || '-'}</td>
                     <td>${esc(req.approved_at) || '-'}</td>
-                    <td>${esc(req.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(req.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editLeaveRequestBtn" data-id="${req.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editLeaveRequestBtn hris-action" data-id="${req.id}" aria-label="Edit leave request" title="Edit leave request">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteLeaveRequestBtn" data-id="${req.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteLeaveRequestBtn hris-action hris-action--danger" data-id="${req.id}" aria-label="Delete leave request" title="Delete leave request">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -629,13 +631,13 @@ function renderTypeRows(types) {
                 <tr>
                     <td class="ps-4">${esc(type.name)}</td>
                     <td>${type.is_paid == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(type.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(type.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editLeaveTypeBtn" data-id="${type.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editLeaveTypeBtn hris-action" data-id="${type.id}" aria-label="Edit leave type" title="Edit leave type">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteLeaveTypeBtn" data-id="${type.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteLeaveTypeBtn hris-action hris-action--danger" data-id="${type.id}" aria-label="Delete leave type" title="Delete leave type">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -668,6 +670,7 @@ function renderPagination(selector, page, totalPages, buttonClass) {
 
 function applySortIndicators(selector, sortBy, sortDir) {
     $(selector).each(function () {
+        if (MonteroHris.createdSort(this, sortBy, sortDir)) return;
         let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
         if ($(this).data('sort') === sortBy) {
             label += ' ' + sortDir;

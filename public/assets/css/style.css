@@ -1748,3 +1748,167 @@
     }
   }
 }
+
+/* HRIS refinement: opt-in presentation; pre-existing Payroll CSS is untouched. */
+@media print {
+  .admin-shell .hris-order-control {
+    display: none;
+  }
+}
+
+@media screen {
+  .admin-shell .hris-action {
+    --bs-btn-color: var(--montero-primary);
+    --bs-btn-bg: var(--montero-surface);
+    --bs-btn-border-color: var(--montero-control-border);
+    --bs-btn-hover-color: var(--montero-primary-hover);
+    --bs-btn-hover-bg: var(--montero-primary-tint);
+    --bs-btn-hover-border-color: var(--montero-primary);
+    --bs-btn-active-color: var(--montero-primary-active);
+    --bs-btn-active-bg: var(--montero-primary-tint);
+    --bs-btn-active-border-color: var(--montero-primary);
+    --bs-btn-disabled-color: var(--montero-muted);
+    --bs-btn-disabled-bg: var(--montero-canvas);
+    --bs-btn-disabled-border-color: var(--montero-control-border);
+    --bs-btn-disabled-opacity: 1;
+    display: inline-flex;
+    flex: 0 0 2.75rem;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-decoration: none;
+    vertical-align: middle;
+  }
+
+  .admin-shell :is(.hris-action--danger, .hris-action.btn-outline-danger) {
+    --bs-btn-color: #842029;
+    --bs-btn-border-color: #B02A37;
+    --bs-btn-hover-color: #842029;
+    --bs-btn-hover-bg: #F8D7DA;
+    --bs-btn-hover-border-color: #842029;
+    --bs-btn-active-color: #842029;
+    --bs-btn-active-bg: #F8D7DA;
+    --bs-btn-active-border-color: #842029;
+  }
+
+  .admin-shell .hris-action > .bi {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .admin-shell .hris-page td:has(.hris-action) {
+    white-space: nowrap;
+  }
+
+  .admin-shell .hris-action + .hris-action {
+    margin-left: 4px;
+  }
+
+  .admin-shell .employee-row-actions .hris-action,
+  .admin-shell #orgUnitsTree .hris-action {
+    margin-left: 0;
+  }
+
+  .admin-shell .hris-page #orgUnitsTree .text-end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .hris-page #orgUnitsTree .flex-grow-1 {
+    flex-basis: 12rem;
+  }
+
+  .admin-shell .hris-page :is(.org-toggle, .org-toggle-placeholder) {
+    display: inline-flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .admin-shell .hris-page .org-children {
+    margin-left: 12px;
+    border-left: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell :is(.hris-status, .hris-unit-chip) {
+    --hris-status-bg: #EDF2F1;
+    --hris-status-text: #435B56;
+    background-color: var(--hris-status-bg) !important;
+    color: var(--hris-status-text) !important;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .admin-shell .hris-status--positive {
+    --hris-status-bg: #E6F3EF;
+    --hris-status-text: #0D544B;
+  }
+
+  .admin-shell .hris-status--attention {
+    --hris-status-bg: #FFF3CD;
+    --hris-status-text: #664D03;
+  }
+
+  .admin-shell .hris-status--negative {
+    --hris-status-bg: #F8D7DA;
+    --hris-status-text: #842029;
+  }
+
+  .admin-shell .hris-unit-chip {
+    border-color: var(--montero-control-border);
+    font-weight: 500;
+  }
+
+  .admin-shell .hris-page .hris-created-at {
+    display: none;
+  }
+
+  .admin-shell .hris-created-sort {
+    min-height: 44px;
+    font-size: .9375rem;
+    white-space: normal;
+  }
+
+  .admin-shell .hris-page #leaveTypesTable {
+    min-width: 30rem;
+  }
+
+  .admin-shell .hris-page #holidaysTable {
+    min-width: 48rem;
+  }
+
+  .admin-shell .hris-page #shiftsTable {
+    min-width: 64rem;
+  }
+
+  .admin-shell .hris-navigation .dropdown-menu {
+    min-width: min(15rem, calc(100vw - 32px));
+  }
+
+  .admin-shell .hris-navigation .dropdown-item {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .hris-page .org-toggle-placeholder {
+      display: none;
+    }
+
+    .admin-shell .hris-navigation .dropdown-item {
+      white-space: normal;
+    }
+  }
+}

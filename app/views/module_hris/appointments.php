@@ -3,7 +3,7 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Appointments</h5>
@@ -287,18 +287,18 @@ function getAllAppointments() {
                 res.data.forEach((appointment) => {
 
                     let statusBadge = parseInt(appointment.is_active) === 1
-                        ? '<span class="badge bg-success">Active</span>'
-                        : '<span class="badge bg-secondary">Inactive</span>';
+                        ? '<span class="badge bg-success hris-status hris-status--positive">Active</span>'
+                        : '<span class="badge bg-secondary hris-status hris-status--neutral">Inactive</span>';
 
                     let actions = `
-                        <button class="btn btn-link btn-sm text-primary editAppointmentBtn"
-                            data-id="${appointment.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editAppointmentBtn hris-action"
+                            data-id="${appointment.id}" aria-label="Edit employment type" title="Edit employment type">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
 
-                        <button class="btn btn-link btn-sm text-danger deleteAppointmentBtn"
-                            data-id="${appointment.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteAppointmentBtn hris-action hris-action--danger"
+                            data-id="${appointment.id}" aria-label="Delete employment type" title="Delete employment type">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     `;
 

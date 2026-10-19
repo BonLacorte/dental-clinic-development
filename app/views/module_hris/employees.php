@@ -9,7 +9,7 @@ $employeeActions = [
     'delete' => $navCanPermission('hris.employee.delete'),
 ];
 ?>
-<main class="employee-page container-fluid py-4 management-page" aria-labelledby="employeesHeading">
+<main class="employee-page container-fluid py-4 management-page hris-page" aria-labelledby="employeesHeading">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white employee-header">
             <div>
@@ -254,13 +254,13 @@ $employeeActions = [
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
             const rows = res.data.map(emp => {
                 const name = employeeName(emp);
-                const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} ${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i></button>` : '';
+                const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i></button>` : '';
                 // Existing compensation access/visibility is deliberately unchanged.
                 const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
-                    + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil', 'primary')
+                    + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil-square', 'primary')
                     + action(true, 'editCompensationBtn', 'Compensation', 'cash-stack', 'primary')
                     + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
-                return `<tr><td>${esc(emp.employee_no) || '—'}</td><td>${esc(name)}</td><td>${esc(emp.branch_name) || '—'}</td><td>${esc(emp.date_hired) || '—'}</td><td><span class="badge ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}">${esc(emp.employment_status) || '—'}</span></td><td class="text-end"><div class="employee-row-actions">${actions || 'No available actions'}</div></td></tr>`;
+                return `<tr><td>${esc(emp.employee_no) || '—'}</td><td>${esc(name)}</td><td>${esc(emp.branch_name) || '—'}</td><td>${esc(emp.date_hired) || '—'}</td><td><span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span></td><td class="text-end"><div class="employee-row-actions">${actions || 'No available actions'}</div></td></tr>`;
             }).join('');
             $('#employeesTable tbody').html(rows || `<tr><td colspan="6" class="text-center py-4">${context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.'}</td></tr>`);
             const count = `${res.data.length} employee${res.data.length === 1 ? '' : 's'} loaded on this page`;

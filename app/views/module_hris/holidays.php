@@ -1,7 +1,7 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Holidays</h5>
@@ -27,6 +27,7 @@
                         Clear
                     </button>
                 </div>
+                <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary sortable hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
             </form>
         </div>
 
@@ -40,7 +41,7 @@
                             <th><button class="btn btn-link p-0 sortable" data-sort="holiday_type">Type</button></th>
                             <th><button class="btn btn-link p-0 sortable" data-sort="pay_multiplier">Pay Multiplier</button></th>
                             <th><button class="btn btn-link p-0 sortable" data-sort="allow_work">Allow Work</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
+                            <th class="hris-created-at"><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
                             <th class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
@@ -298,13 +299,13 @@ function renderHolidayRows(holidays) {
                     <td>${esc(h.holiday_type) || '-'}</td>
                     <td>${esc(h.pay_multiplier)}</td>
                     <td>${h.allow_work == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(h.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(h.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editHolidayBtn" data-id="${h.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editHolidayBtn hris-action" data-id="${h.id}" aria-label="Edit holiday" title="Edit holiday">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteHolidayBtn" data-id="${h.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteHolidayBtn hris-action hris-action--danger" data-id="${h.id}" aria-label="Delete holiday" title="Delete holiday">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -337,6 +338,7 @@ function renderPagination(page, totalPages) {
 
 function applySortIndicators() {
     $('.sortable').each(function () {
+        if (MonteroHris.createdSort(this, currentSortBy, currentSortDir)) return;
         let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
         if ($(this).data('sort') === currentSortBy) {
             label += ' ' + currentSortDir;

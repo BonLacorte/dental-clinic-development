@@ -1,7 +1,7 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Branches</h5>
@@ -252,15 +252,15 @@ function getAllBranches(page) {
                             <td class="text-end pe-4">
 
                                 <button
-                                    class="btn btn-link btn-sm text-primary editBranchBtn"
-                                    data-id="${b.id}">
-                                    <i class="bi bi-pencil"></i>
+                                    class="btn btn-sm editBranchBtn hris-action"
+                                    data-id="${b.id}" aria-label="Edit branch" title="Edit branch">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                 </button>
 
                                 <button
-                                    class="btn btn-link btn-sm text-danger deleteBranchBtn"
-                                    data-id="${b.id}">
-                                    <i class="bi bi-trash"></i>
+                                    class="btn btn-sm deleteBranchBtn hris-action hris-action--danger"
+                                    data-id="${b.id}" aria-label="Delete branch" title="Delete branch">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
                                 </button>
                             </td>
                         </tr>

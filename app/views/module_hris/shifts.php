@@ -1,7 +1,7 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Shifts</h5>
@@ -27,6 +27,7 @@
                         Clear
                     </button>
                 </div>
+                <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary sortable hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
             </form>
         </div>
 
@@ -44,7 +45,7 @@
                             <th><button class="btn btn-link p-0 sortable" data-sort="required_hours">Hours</button></th>
                             <th><button class="btn btn-link p-0 sortable" data-sort="break_minutes">Break</button></th>
                             <th><button class="btn btn-link p-0 sortable" data-sort="allow_overtime">OT</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
+                            <th class="hris-created-at"><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
                             <th class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
@@ -348,13 +349,13 @@ function renderShiftRows(shifts) {
                     <td>${esc(s.required_hours)}</td>
                     <td>${esc(s.break_minutes)}</td>
                     <td>${s.allow_overtime == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(s.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(s.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editShiftBtn" data-id="${s.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editShiftBtn hris-action" data-id="${s.id}" aria-label="Edit shift" title="Edit shift">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteShiftBtn" data-id="${s.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteShiftBtn hris-action hris-action--danger" data-id="${s.id}" aria-label="Delete shift" title="Delete shift">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -443,6 +444,7 @@ function renderPagination(page, totalPages) {
 
 function applySortIndicators() {
     $('.sortable').each(function () {
+        if (MonteroHris.createdSort(this, currentSortBy, currentSortDir)) return;
         let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
         if ($(this).data('sort') === currentSortBy) {
             label += ' ' + currentSortDir;

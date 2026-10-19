@@ -4,16 +4,16 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page">
+<div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage Offices</h5>
 
-            <div>
-                <button class="btn btn-outline-secondary btn-sm me-2" id="expandAllBtn">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">
                     <i class="bi bi-arrows-expand"></i> Expand All
                 </button>
-                <button class="btn btn-outline-secondary btn-sm me-2" id="collapseAllBtn">
+                <button class="btn btn-outline-secondary btn-sm" id="collapseAllBtn">
                     <i class="bi bi-arrows-collapse"></i> Collapse All
                 </button>
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
@@ -211,17 +211,21 @@ $(document).ready(function () {
         let $icon = $(this).find('i');
         let $children = $('#children-' + id);
 
-        $children.toggleClass('d-none');
-        $icon.toggleClass('bi-chevron-right bi-chevron-down');
+        let expanded = $children.hasClass('d-none');
+        $children.toggleClass('d-none', !expanded);
+        $(this).attr('aria-expanded', String(expanded));
+        $icon.toggleClass('bi-chevron-right', !expanded).toggleClass('bi-chevron-down', expanded);
     });
 
     $('#expandAllBtn').on('click', function () {
         $('.org-children').removeClass('d-none');
+        $('.org-toggle').attr('aria-expanded', 'true');
         $('.org-toggle i').removeClass('bi-chevron-right').addClass('bi-chevron-down');
     });
 
     $('#collapseAllBtn').on('click', function () {
         $('.org-children').addClass('d-none');
+        $('.org-toggle').attr('aria-expanded', 'false');
         $('.org-toggle i').removeClass('bi-chevron-down').addClass('bi-chevron-right');
     });
 });
@@ -382,33 +386,33 @@ function buildTreeHTML(byParent, parentKey, depth) {
             <div class="border-bottom">
                 <div class="d-flex align-items-center px-3 py-2 ${indentClass}">
                     ${hasChildren
-                        ? `<span class="org-toggle text-muted me-2" style="cursor:pointer;" data-id="${unit.id}">
-                                <i class="bi bi-chevron-right"></i>
-                           </span>`
-                        : `<span class="me-2 invisible"><i class="bi bi-chevron-right"></i></span>`
+                        ? `<button type="button" class="org-toggle btn btn-outline-secondary me-2" data-id="${unit.id}" aria-controls="children-${unit.id}" aria-expanded="false" aria-label="Toggle ${MonteroHris.escape(unit.name)}" title="Toggle ${MonteroHris.escape(unit.name)}">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                           </button>`
+                        : `<span class="org-toggle-placeholder me-2 invisible" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>`
                     }
 
                     <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
                         <span class="fw-semibold">${unit.name}</span>
-                        <span class="badge bg-secondary">${unit.type}</span>
+                        <span class="badge bg-secondary hris-unit-chip">${unit.type}</span>
                         <span class="small text-muted">${unit.code ?? '-'}</span>
                         <span class="small text-muted ms-auto">${unit.created_at}</span>
                     </div>
 
                     <div class="text-end">
-                        <button class="btn btn-link btn-sm text-info viewUnitEmployeesBtn" data-id="${unit.id}" data-name="${unit.name}">
-                            <i class="bi bi-eye"></i>
+                        <button class="btn btn-sm viewUnitEmployeesBtn hris-action" data-id="${unit.id}" data-name="${unit.name}" aria-label="View employees in this office" title="View employees in this office">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-primary editOfficeBtn" data-id="${unit.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editOfficeBtn hris-action" data-id="${unit.id}" aria-label="Edit office" title="Edit office">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteOfficeBtn" data-id="${unit.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteOfficeBtn hris-action hris-action--danger" data-id="${unit.id}" aria-label="Delete office" title="Delete office">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="d-none" id="children-${unit.id}">
+                <div class="org-children d-none" id="children-${unit.id}">
                     ${buildTreeHTML(byParent, unit.id, depth + 1)}
                 </div>
             </div>

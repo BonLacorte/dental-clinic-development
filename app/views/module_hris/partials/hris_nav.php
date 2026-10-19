@@ -13,7 +13,7 @@ $hrisGroups = [
     ] : []),
 ];
 ?>
-<nav class="module-navigation" aria-label="HRIS navigation">
+<nav class="module-navigation hris-navigation" aria-label="HRIS navigation">
     <ul class="nav nav-underline">
         <?php if ($navHrisHome): ?>
         <li class="nav-item">
@@ -40,3 +40,36 @@ $hrisGroups = [
         <?php endforeach; ?>
     </ul>
 </nav>
+<script>
+// HRIS presentation only. Returned values, requests and business rules stay intact.
+window.MonteroHris = Object.freeze({
+    escape(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+    },
+    statusClass(value, kind) {
+        const key = String(value ?? '').trim().toUpperCase();
+        const palettes = {
+            employment: {ACTIVE: 'positive', RESIGNED: 'neutral'},
+            leave: {PENDING: 'attention', APPROVED: 'positive', REJECTED: 'negative', CANCELLED: 'neutral'},
+            attendance: {PRESENT: 'positive'}
+        };
+        return 'hris-status--' + (palettes[kind]?.[key] || 'neutral');
+    },
+    createdSort(button, sortBy, sortDir) {
+        if (!button.classList.contains('hris-created-sort')) return false;
+        const active = sortBy === 'created_at';
+        button.textContent = active ? `Date added: ${sortDir === 'ASC' ? 'oldest first' : 'newest first'}` : 'Date added';
+        button.setAttribute('aria-pressed', String(active));
+        button.setAttribute('aria-label', `${button.textContent}. Sort ${active && sortDir === 'ASC' ? 'newest' : 'oldest'} first`);
+        button.title = button.getAttribute('aria-label');
+        return true;
+    }
+});
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hris-page .hris-status[data-hris-kind]').forEach(badge => {
+        badge.classList.add(MonteroHris.statusClass(badge.textContent, badge.dataset.hrisKind));
+    });
+});
+</script>
