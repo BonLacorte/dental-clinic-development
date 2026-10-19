@@ -6,7 +6,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Positions</h5>
+            <h1 class="h5 mb-0" id="positionsHeading">Positions</h1>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPositionModal">
                 <i class="bi bi-plus-lg"></i> Add Position
@@ -14,14 +14,16 @@ include '../app/views/module_hris/partials/hris_nav.php';
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="positionsTable">
+            <p class="hris-scroll-hint" id="positionsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="positionsHeading" aria-describedby="positionsTableScrollHelp">
+                <table class="table table-hover align-middle mb-0 hris-data-table" id="positionsTable">
+                    <caption class="visually-hidden">Positions and their existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th width="80" class="ps-4">#</th>
-                            <th>Position Name</th>
-                            <th width="180">Created At</th>
-                            <th width="120" class="text-end pe-4">Actions</th>
+                            <th scope="col" width="80" class="ps-4">#</th>
+                            <th scope="col">Position Name</th>
+                            <th scope="col" width="180">Created At</th>
+                            <th scope="col" width="120" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
 
@@ -39,7 +41,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Position -->
-<div class="modal fade" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addPositionModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -48,16 +50,16 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Position</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addPositionModalTitle">Add Position</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label">Position Name</label>
+                        <label for="addPositionForm_name" class="form-label">Position Name</label>
 
-                        <input
+                        <input id="addPositionForm_name"
                             type="text"
                             class="form-control"
                             name="name"
@@ -83,7 +85,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Position -->
-<div class="modal fade" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editPositionModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -93,16 +95,16 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Position</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editPositionModalTitle">Edit Position</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label">Position Name</label>
+                        <label for="editPositionForm_name" class="form-label">Position Name</label>
 
-                        <input
+                        <input id="editPositionForm_name"
                             type="text"
                             class="form-control"
                             name="name">
@@ -127,13 +129,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Delete Position Confirmation -->
-<div class="modal fade" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletePositionModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title">Delete Position</h5>
-                <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deletePositionModalTitle">Delete Position</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">

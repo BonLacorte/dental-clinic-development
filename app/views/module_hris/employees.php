@@ -42,7 +42,7 @@ $employeeActions = [
             </div>
         </div>
         <div class="table-responsive employee-table-region" tabindex="0" role="region" aria-label="Employee records" aria-describedby="employeeScrollHelp" aria-busy="true">
-            <table class="table table-hover align-middle mb-0" id="employeesTable">
+            <table class="table table-hover align-middle mb-0 hris-data-table" id="employeesTable">
                 <caption class="visually-hidden">Employee records. Sort using the column buttons; Actions apply to the named employee.</caption>
                 <thead class="table-light"><tr>
                     <?php foreach (['employee_no' => 'Employee No', 'name' => 'Name', 'branch_name' => 'Branch', 'date_hired' => 'Date Hired', 'employment_status' => 'Status'] as $key => $label): ?>

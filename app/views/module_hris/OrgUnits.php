@@ -7,7 +7,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <div class="container-fluid py-4 management-page hris-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Offices</h5>
+            <h1 class="h5 mb-0" id="officesHeading">Manage Offices</h1>
 
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">
@@ -29,29 +29,29 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Office -->
-<div class="modal fade" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addOfficeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Organizational Unit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addOfficeModalTitle">Add Organizational Unit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Parent Unit</label>
+                            <label for="parentSelect" class="form-label">Parent Unit</label>
                             <select class="form-select" name="parent_id" id="parentSelect">
                                 <option value="">-- None (Top Level) --</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="type">
+                            <label for="addOfficeForm_type" class="form-label">Type</label>
+                            <select id="addOfficeForm_type" class="form-select" name="type">
                                 <option value="DEPARTMENT">DEPARTMENT</option>
                                 <option value="TEAM">TEAM</option>
                                 <option value="SECTION">SECTION</option>
@@ -60,13 +60,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         </div>
 
                         <div class="col-md-8">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="addOfficeForm_name" class="form-label">Name</label>
+                            <input id="addOfficeForm_name" type="text" class="form-control" name="name">
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Code</label>
-                            <input type="text" class="form-control" name="code">
+                            <label for="addOfficeForm_code" class="form-label">Code</label>
+                            <input id="addOfficeForm_code" type="text" class="form-control" name="code">
                         </div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Office -->
-<div class="modal fade" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editOfficeForm">
@@ -89,22 +89,22 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Organizational Unit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editOfficeModalTitle">Edit Organizational Unit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Parent Unit</label>
+                            <label for="editParentSelect" class="form-label">Parent Unit</label>
                             <select class="form-select" name="parent_id" id="editParentSelect">
                                 <option value="">-- None (Top Level) --</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="type">
+                            <label for="editOfficeForm_type" class="form-label">Type</label>
+                            <select id="editOfficeForm_type" class="form-select" name="type">
                                 <option value="DEPARTMENT">DEPARTMENT</option>
                                 <option value="TEAM">TEAM</option>
                                 <option value="SECTION">SECTION</option>
@@ -113,13 +113,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         </div>
 
                         <div class="col-md-8">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="editOfficeForm_name" class="form-label">Name</label>
+                            <input id="editOfficeForm_name" type="text" class="form-control" name="name">
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Code</label>
-                            <input type="text" class="form-control" name="code">
+                            <label for="editOfficeForm_code" class="form-label">Code</label>
+                            <input id="editOfficeForm_code" type="text" class="form-control" name="code">
                         </div>
                     </div>
                 </div>
@@ -136,26 +136,28 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <!-- View Office Employees -->
-<div class="modal fade" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="viewUnitEmployeesHeading">
                     Employees in <span id="viewUnitEmployeesTitle" class="fw-semibold">-</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="unitEmployeesTable">
+                <p class="hris-scroll-hint" id="unitEmployeesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+                <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="unitEmployeesTableScrollHelp">
+                    <table class="table table-hover align-middle mb-0 hris-data-table" id="unitEmployeesTable">
+                        <caption class="visually-hidden">Employees assigned directly to the selected organizational unit.</caption>
                         <thead class="table-light">
                             <tr>
-                                <th>Employee No</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Branch</th>
-                                <th>Status</th>
+                                <th scope="col">Employee No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">Branch</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
