@@ -81,7 +81,7 @@ class EmployeeModel extends Model
                 throw new InvalidArgumentException('Invalid export branch scope.');
             }
         }
-        $allowedSorts = ['employee_no', 'name', 'branch_name', 'date_hired', 'employment_status', 'created_at'];
+        $allowedSorts = ['employee_no', 'name', 'branch_name', 'employment_type', 'date_hired', 'employment_status', 'created_at'];
         if (!in_array($sortBy, $allowedSorts, true) || !in_array($sortDir, ['ASC', 'DESC'], true)) {
             throw new InvalidArgumentException('Invalid export order.');
         }

@@ -14,7 +14,7 @@ $employeeActions = [
         <div class="card-header bg-white employee-header">
             <div>
                 <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Employees</h1>
-                <p class="mb-0 text-body-secondary">Employee records and employment details</p>
+                <p class="mb-0 text-body-secondary">Manage employee records across your clinics.</p>
             </div>
             <div class="employee-header-actions">
                 <?php if (!empty($can_export)): ?>
@@ -46,13 +46,14 @@ $employeeActions = [
         <p id="employeeListStatus" role="status" class="employee-result-context mb-0">Loading employees…</p>
         <p id="employeeSortSummary" class="employee-order-summary mb-0">Sorted by newest added.</p>
         <p id="employeeExportStatus" role="status" class="employee-export-status mb-0"></p>
+        <p id="employeePositionNotice" class="employee-position-notice mb-0" hidden>Position data is unavailable for some records. Refresh the directory or contact your administrator.</p>
         <p id="employeeScrollHelp" class="visually-hidden">Scroll the table horizontally to reach every column and action. Keyboard: focus the table region and use the arrow keys.</p>
             <div id="employeeListError" class="alert alert-danger m-3" hidden>
                 <p role="alert" class="mb-2"></p>
                 <button type="button" class="btn btn-outline-danger" id="retryEmployeeList">Retry employee list</button>
             </div>
         </div>
-        <form id="employeeMobileSortForm" class="employee-mobile-sort" aria-label="Sort employees">
+        <form id="employeeMobileSortForm" class="employee-mobile-sort employee-order-controls" aria-label="Sort employees">
             <div>
                 <label class="form-label" for="employeeMobileSortBy">Sort employees by</label>
                 <select class="form-select" id="employeeMobileSortBy">
@@ -60,6 +61,7 @@ $employeeActions = [
                     <option value="employee_no">Employee No</option>
                     <option value="name">Name</option>
                     <option value="branch_name">Branch</option>
+                    <option value="employment_type">Employment Type</option>
                     <option value="date_hired">Date Hired</option>
                     <option value="employment_status">Employment Status</option>
                 </select>
@@ -77,7 +79,9 @@ $employeeActions = [
             <table class="table table-hover align-middle mb-0 hris-data-table" id="employeesTable">
                 <caption class="visually-hidden">Employee records. Sort using the column buttons; Actions apply to the named employee.</caption>
                 <thead class="table-light"><tr>
-                    <?php foreach (['employee_no' => 'Employee No', 'name' => 'Name', 'branch_name' => 'Branch', 'date_hired' => 'Date Hired', 'employment_status' => 'Status'] as $key => $label): ?>
+                    <th scope="col"><button type="button" class="btn btn-link employee-sort" data-sort="name" data-label="Employee">Employee<span aria-hidden="true" class="employee-sort-mark"></span></button></th>
+                    <th scope="col">Position</th>
+                    <?php foreach (['branch_name' => 'Branch', 'employment_type' => 'Employment Type', 'employment_status' => 'Employment Status'] as $key => $label): ?>
                     <th scope="col"><button type="button" class="btn btn-link employee-sort" data-sort="<?= e($key) ?>" data-label="<?= e($label) ?>"><?= e($label) ?><span aria-hidden="true" class="employee-sort-mark"></span></button></th>
                     <?php endforeach; ?>
                     <th scope="col" class="text-end">Actions</th>
@@ -262,13 +266,14 @@ $employeeActions = [
     }
 
     function listDescription(context) {
-        const labels = {employee_no: 'Employee No', name: 'Name', branch_name: 'Branch', date_hired: 'Date Hired', employment_status: 'Status'};
+        const labels = {employee_no: 'Employee No', name: 'Employee', branch_name: 'Branch', employment_type: 'Employment Type', date_hired: 'Date Hired', employment_status: 'Employment Status'};
         return context.sortBy === 'created_at' ? `Sorted by ${context.sortDir === 'ASC' ? 'oldest' : 'newest'} added.` : `Sorted by ${labels[context.sortBy]}, ${context.sortDir === 'ASC' ? 'ascending' : 'descending'}.`;
     }
 
     // Both representations use these same escaped values and permission decisions.
     function employeePresentation(emp) {
         const name = employeeName(emp);
+        const identity = `data-id="${esc(emp.id)}" data-name="${esc(name)}" data-number="${esc(emp.employee_no)}" data-branch="${esc(emp.branch_name)}"`;
         const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-employee-action="${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i><span class="employee-action-label">${label}</span></button>` : '';
         // Legacy compensation visibility is unchanged; policy review stays separate.
         const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
@@ -277,17 +282,21 @@ $employeeActions = [
             + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
         return {
             name: esc(name), number: esc(emp.employee_no) || '—', branch: esc(emp.branch_name) || '—',
+            identity: employeeActions.view ? `<button type="button" class="employee-name viewEmployeeBtn" data-employee-action="viewEmployeeBtn" ${identity}>${esc(name)}</button>` : `<span class="employee-name">${esc(name)}</span>`,
+            positionProvided: Object.hasOwn(emp, 'position') && (emp.position === null || typeof emp.position === 'string'),
+            position: !Object.hasOwn(emp, 'position') || (emp.position !== null && typeof emp.position !== 'string') ? 'Position unavailable' : (esc(emp.position?.trim()) || 'Not assigned'),
+            employmentType: esc(emp.employment_type) || '—',
             dateHired: esc(emp.date_hired) || '—', actions,
             status: `<span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span>`
         };
     }
 
     function employeeTableRow(record) {
-        return `<tr><td>${record.number}</td><td>${record.name}</td><td>${record.branch}</td><td>${record.dateHired}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions">${record.actions}</div></td></tr>`;
+        return `<tr><td><div class="employee-identity">${record.identity}<span class="employee-number">${record.number}</span></div></td><td>${record.position}</td><td>${record.branch}</td><td>${record.employmentType}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions">${record.actions}</div></td></tr>`;
     }
 
     function employeeCard(record) {
-        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.name}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions" role="group" aria-label="Actions for ${record.name}">${record.actions}</div></article></li>`;
+        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.identity}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Position</dt><dd>${record.position}</dd></div><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Employment Type</dt><dd>${record.employmentType}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions" role="group" aria-label="Actions for ${record.name}">${record.actions}</div></article></li>`;
     }
 
     function focusEmployeeAction(trigger, employeeId) {
@@ -371,6 +380,7 @@ $employeeActions = [
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
             $('#exportEmployeesBtn').prop('disabled', employeeExportPending);
             const records = res.data.map(employeePresentation);
+            $('#employeePositionNotice').prop('hidden', !records.some(record => !record.positionProvided));
             const emptyText = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
             $('#employeesTable tbody').html(records.map(employeeTableRow).join('') || `<tr><td colspan="6" class="text-center py-4">${emptyText}</td></tr>`);
             $('#employeeCards').html(records.map(employeeCard).join('') || `<li class="employee-card-empty">${emptyText}</li>`);

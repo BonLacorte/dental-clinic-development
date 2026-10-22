@@ -18,6 +18,9 @@ def methods(text):
 
 for path in ['app/controllers/hris/EmployeeController.php', 'app/models/hris/EmployeeModel.php']:
     before, after = methods(original(path)), methods((ROOT / path).read_text())
+    if path.endswith('EmployeeModel.php'):
+        # v2's explicitly authorized backward-compatible Position projection/join.
+        after['getAllEmployees'] = after['getAllEmployees'].replace('                p.name AS position,\n', '').replace('            LEFT JOIN hris_positions p ON p.id = e.position_id AND p.tenant_id = e.tenant_id\n', '')
     protected = [name for name in before if name != 'index']
     assert all(before[name] == after.get(name) for name in protected), path + ': protected method changed'
     print('PASS:', path, len(protected), 'protected existing methods byte-identical')
@@ -44,6 +47,7 @@ allowlist = {
     'routes/hris-routes.php', 'public/assets/css/style.css',
     'scripts/verify-employees-frontend.cjs', 'scripts/verify-employee-export.php',
     'scripts/verify-employees-preservation.py', 'docs/work-items/hris-employees-ux-modernization.md',
+    'scripts/verify-employees-position.py', 'docs/work-items/hris-employees-complete-ux.md',
 }
 changes = set(subprocess.check_output(['git', 'diff', '--name-only', BASELINE], cwd=ROOT, text=True).splitlines())
 untracked = set(subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], cwd=ROOT, text=True).splitlines())

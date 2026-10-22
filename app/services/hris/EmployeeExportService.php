@@ -20,7 +20,7 @@ class EmployeeExportService
     public const DEFAULT_MAX_ROWS = 1000;
     public const HARD_MAX_ROWS = 5000;
     private const MAX_TEXT_BYTES = 2000000;
-    public const SORT_FIELDS = ['employee_no', 'name', 'branch_name', 'date_hired', 'employment_status', 'created_at'];
+    public const SORT_FIELDS = ['employee_no', 'name', 'branch_name', 'employment_type', 'date_hired', 'employment_status', 'created_at'];
 
     public static function authorizedContext(array $session): array
     {

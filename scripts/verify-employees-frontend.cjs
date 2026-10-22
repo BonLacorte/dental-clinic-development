@@ -35,19 +35,23 @@ const context = vm.createContext({$, console, document: {activeElement: {}, cont
     window: {matchMedia: () => ({matches: false, addEventListener() {}})}, MonteroHris: {statusClass: () => 'hris-status--neutral'}});
 vm.runInContext(script(view), context);
 const evaluate = code => vm.runInContext(code, context);
-const fixture = {id: 71, employee_no: '000071', firstname: 'Ana María', middlename: '', lastname: '例 <img src=x onerror=alert(1)>', branch_name: 'Fictional clinic & team', date_hired: '2026-10-01', employment_status: 'Probationary', status: 'INTERNAL-DO-NOT-DISPLAY'};
+const fixture = {id: 71, employee_no: '000071', firstname: 'Ana María', middlename: '', lastname: '例 <img src=x onerror=alert(1)>', position: 'Dentist', employment_type: 'Regular', branch_name: 'Fictional clinic & team', date_hired: '2026-10-01', employment_status: 'Probationary', status: 'INTERNAL-DO-NOT-DISPLAY'};
 context.fixture = fixture;
 const record = evaluate('employeePresentation(fixture)');
 context.record = record;
 const row = evaluate('employeeTableRow(record)'), card = evaluate('employeeCard(record)');
 for (const markup of [row, card]) {
     assert(markup.includes('000071') && markup.includes('Ana María') && markup.includes('例'));
-    assert(markup.includes('Fictional clinic &amp; team') && markup.includes('2026-10-01') && markup.includes('Probationary'));
+    assert(markup.includes('Fictional clinic &amp; team') && markup.includes('Dentist') && markup.includes('Regular') && markup.includes('Probationary'));
     assert(!markup.includes('<img') && !markup.includes('INTERNAL-DO-NOT-DISPLAY'));
-    assert.equal((markup.match(/data-id="71"/g) || []).length, 4);
+    assert.equal((markup.match(/data-id="71"/g) || []).length, 5);
     assert.equal((markup.match(/\sid="/g) || []).length, 0);
     for (const action of ['View', 'Edit', 'Compensation', 'Delete']) assert(markup.includes(`>${action}</span>`));
 }
+assert(card.includes('2026-10-01'), 'Previously approved card hire date preserved');
+assert(!row.includes('2026-10-01'), 'Hire date remains in supplementary sorting/cards, not new directory columns');
+assert.equal(evaluate('employeePresentation({...fixture, position:null}).position'), 'Not assigned');
+assert.equal(evaluate('employeePresentation({id:1}).position'), 'Position unavailable', 'Missing API property never masquerades as unassigned');
 evaluate('employeeActions.view = employeeActions.edit = employeeActions.delete = false');
 const restricted = evaluate('employeePresentation(fixture).actions');
 assert(!restricted.includes('viewEmployeeBtn') && !restricted.includes('editEmployeeBtn') && !restricted.includes('deleteEmployeeBtn'));
@@ -76,7 +80,7 @@ assert.equal(requests.length, 3);
 assert.equal(requests[2].config.data.search, '');
 requests[2].reject();
 assert.equal(evaluate('loadedList.search'), 'fictional query', 'Failed request retains previous successful context');
-for (const field of ['employee_no', 'name', 'branch_name', 'date_hired', 'employment_status', 'created_at']) {
+for (const field of ['employee_no', 'name', 'branch_name', 'employment_type', 'date_hired', 'employment_status', 'created_at']) {
     for (const dir of ['ASC', 'DESC']) {
         values.set('#employeeMobileSortBy|val', field); values.set('#employeeMobileSortDir|val', dir);
         const count = requests.length;
