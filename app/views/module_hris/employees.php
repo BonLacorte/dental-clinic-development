@@ -177,6 +177,7 @@ $employeeActions = [
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
             <div class="modal-content">
                 <form id="compensationForm" class="employee-form">
+                    <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
                     <div class="modal-header"><h2 class="modal-title fs-5" id="compensationModalLabel" tabindex="-1">Employee Compensation</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Employee Compensation"></button></div>
                     <div class="modal-body">
                         <p id="compensationEmployeeName" class="fw-semibold"></p>
@@ -442,8 +443,13 @@ $employeeActions = [
         $dialog.find('.employee-mutation-feedback').prop('hidden', false).find('[role="alert"]').text(text);
     }
 
-    // Presentation guard only: explicit success is required before clearing a dialog.
-    // Endpoint validation/response/access correctness and A15 remain separately gated.
+    function employeeFailureMessage(res) {
+        const message = typeof res.message === 'string' ? res.message : typeof res.error === 'string' ? res.error : 'The request was not completed.';
+        const errors = res.errors && typeof res.errors === 'object' ? Object.values(res.errors).filter(value => typeof value === 'string') : [];
+        return [message, ...errors, 'Your entries are kept.'].join(' ');
+    }
+
+    // Only an explicit, non-contradictory success may clear a submitted dialog.
     function employeeMutation($dialog, url, data, onSuccess) {
         const state = employeeDialogs[$dialog.attr('id')];
         if (state.pending) return;
@@ -452,8 +458,8 @@ $employeeActions = [
         $dialog.find('[type="submit"], #confirmDeleteEmployeeBtn').prop('disabled', true);
         $('#compensationSpinner', $dialog).removeClass('d-none');
         $.ajax({url, type: 'POST', data, dataType: 'json'}).done(function (res) {
-            if (!res || res.success !== true) {
-                mutationFeedback($dialog, res?.success === false || res?.error ? (res.message || res.error || 'The request was not completed. Your entries are kept.') : 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
+            if (!res || res.success !== true || res.error || res.type === 'error') {
+                mutationFeedback($dialog, res?.success === false || res?.error || res?.type === 'error' ? employeeFailureMessage(res) : 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
                 return;
             }
             state.pending = false;
@@ -461,8 +467,9 @@ $employeeActions = [
             showToast(res.message || 'Request completed.', 'success');
             bootstrap.Modal.getInstance($dialog[0]).hide();
             onSuccess();
-        }).fail(function () {
-            mutationFeedback($dialog, 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
+        }).fail(function (xhr) {
+            const res = xhr.responseJSON;
+            mutationFeedback($dialog, res?.success === false ? employeeFailureMessage(res) : 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
         }).always(function () {
             state.pending = false;
             dialogReadStatus($dialog);
@@ -474,7 +481,7 @@ $employeeActions = [
     function submitEmployee(form) {
         const $form = $(form), $dialog = $form.closest('.modal'), state = employeeDialogs[$dialog.attr('id')];
         if (!state.ready || $form.find('[type="submit"]').prop('disabled')) return;
-        // Keep the original payload, including read-only employee_no (C-EMP-01).
+        // Legacy readonly employee_no is accepted and ignored by the server.
         const fields = ['employee_no', 'firstname', 'middlename', 'lastname', 'email', 'contact_no', 'branch_id', 'position_id', 'org_unit_id', 'employment_type_id', 'date_hired', 'csrf_token'];
         const edit = $dialog.is('#editEmployeeModal');
         if (edit) fields.push('employment_status_id', 'date_resigned');

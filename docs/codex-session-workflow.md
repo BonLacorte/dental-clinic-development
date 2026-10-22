@@ -17,12 +17,42 @@ For explicitly frontend-design tasks, follow the stricter frontend-only section 
 
 A handoff is a **summary**, not a guarantee of continuity. A new session must verify it against the current checked-out source, branch, and Git history. Models may still differ in how they reason. The goal is repeatable inputs and verifiable outcomes, not identical chat memory.
 
+## Autonomous grouped milestones
+
+An explicit grouped milestone authorization activates
+[montero-dental-development](../.agents/skills/montero-dental-development/SKILL.md).
+Read the skill from disk if discovery has not refreshed. PLAN → SPEC → BUILD → VERIFY →
+REVIEW runs continuously: internal subtasks, routine coding/testing/debugging, regression
+repairs, documentation and authorized local checkpoint commits do not need repeated approval.
+One feature branch and one consolidated milestone handoff replace per-subtask approval loops.
+For C-EMP, keep C-EMP-01/02/03 sections in `docs/work-items/c-emp.md`; historical UI-01
+specifications stay unchanged.
+
+The conservative START/PAUSE examples below apply when broader authority has **not** already
+been granted. Do not reset or narrow existing user authorization merely by rereading a handoff
+or prompt. For an authorized milestone use this START prompt instead:
+
+> Complete the approved <milestone> on <branch>. Read AGENTS.md, the repository-local
+> montero-dental-development skill, architecture, setup and the consolidated handoff.
+> Verify source/history/status, state the plan and execute through final review continuously.
+> Use safe fictional fixtures; report PASS/FAIL/BLOCKED/NOT RUN. Make routine local checkpoints
+> and, if authorized, one final push/draft PR. Continue safe work around policy blockers.
+> No merge, production access/synchronization or deployment.
+
+Review the combined diff, sensitive-data scan and final checks before one authorized final
+push/draft PR. If publication is unavailable, preserve local commits and supply a Git bundle
+or exact supported transfer steps. Never weaken access settings to publish. Recreate runtime,
+database and credentials independently on each device; fetch/switch the published branch,
+read the skill/handoff and cross-check actual code before continuing. Never force divergent
+history. New security/compensation policy or incompatible contracts require a decision;
+continue independent safe work. Existing production/security restrictions remain unchanged.
+
 ## A. Start a new multi-session task (first device)
 
 1. Before switching branches, check `git status --short`. Resolve existing work deliberately; do not discard or blindly stash other work.
 2. Update the baseline and create a **descriptive feature branch**; example below. If `main` may contain unpublished production differences, see the production synchronization caution at the end.
 3. Copy `docs/work-items/TEMPLATE.md` to a distinct task file (example: `docs/work-items/employee-filter.md`); fill in goal, acceptance criteria, baseline, and known risks.
-4. Open Codex in **This computer** mode, scoped to the local checkout. Give it the START prompt below. Review its plan before allowing substantive edits.
+4. Open Codex in **This computer** mode, scoped to the local checkout. Give it the START prompt below. Review its plan before allowing substantive edits unless the grouped milestone is already authorized.
 
 ```powershell
 # Only when your working tree is clean and your main branch has no local-only changes:
@@ -95,7 +125,7 @@ Read `docs/work-items/employee-filter.md` and paste the START prompt with the ma
 1. Confirm acceptance criteria are met or clearly identify what is incomplete.
 2. Run relevant checks against the isolated local development environment; record results.
 3. Change the task handoff to `READY_FOR_REVIEW` and provide reviewed file list, risk notes, and reproducible checks.
-4. Commit and push the feature branch; open a pull request into `main` only after reviewing the changes. Merge only when the task is approved and ready.
+4. Commit and push the feature branch; open a pull request into `main` only after reviewing the changes and confirming existing publication authority. For approved autonomous milestones, publish once and use a draft PR. Merge only when the task is approved and ready.
 5. Mark the task `DONE` after merging (this may be a later documentation update). A merged development branch is **not** a deployment.
 
 ## F. Production is an independent source of changes

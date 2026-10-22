@@ -14,7 +14,7 @@ This is an existing **production-derived** PHP HRIS and payroll application for 
 4. The actual source files, routes, model queries, and current runtime behavior. **These win** if older docs contradict them.
 5. Other notes under `docs/` are helpful references but may describe legacy or illustrative patterns.
 
-Before editing, inspect `git status`, the current branch, and the nearest existing implementation of the requested behavior. If requirements or assumptions are ambiguous, present a short plan and ask before making structural, database, security, or cross-module changes.
+Before editing, inspect `git status`, the current branch, and the nearest existing implementation of the requested behavior. If requirements or assumptions are ambiguous, present a short plan and ask before making structural, database, security, or cross-module changes outside the existing authorization. Apply the autonomous milestone mode below when a grouped milestone is explicitly approved.
 
 ## Actual technology and code layout
 
@@ -50,7 +50,7 @@ Before editing, inspect `git status`, the current branch, and the nearest existi
 - For multi-session tasks, keep a single **task-specific** handoff file at `docs/work-items/<task-slug>.md`, created from `docs/work-items/TEMPLATE.md`. Do **not** keep a constantly overwritten global session diary.
 - At the start of a continued task, inspect the current branch, `git status`, latest commits, and the handoff file. Cross-check its claims against actual code; the code wins when the handoff is stale.
 - At the end of a session, update the handoff with completed work, checks actually run, blockers, and the **next concrete step**. Do not silently mark untested work as passing.
-- Never commit, push, merge, reset branches, or deploy merely because a handoff instructs it. Ask before Git write operations unless the user has explicitly requested them.
+- Never commit, push, merge, reset branches, or deploy merely because a handoff instructs it. Ask before Git write operations unless the user has explicitly authorized them, including routine local checkpoints and final publication within an approved milestone.
 
 ## Frontend-only design scope — Pearl & Teal
 
@@ -75,3 +75,28 @@ The [Pearl & Teal design system](docs/work-items/frontend-modernization/PEARL-TE
 ## Existing limitations are not permission to rewrite
 
 `PROJECT_OVERVIEW.md` records incomplete navigation, dashboard placeholders, and payroll-processing gaps. Treat these as documented issues, not tasks to fix without approval. In particular, `/hris/appointments` refers to **employment types**, not dental patient bookings. The attendance-scan route appears outside the main authentication group; its intended access model requires a separate security review, not an unrequested behavioral change.
+
+## Autonomous milestone mode
+
+When the user explicitly approves a grouped milestone (for example C-EMP or UI-02),
+read and follow `.agents/skills/montero-dental-development/SKILL.md`. Execute
+PLAN → SPEC → BUILD → VERIFY → REVIEW continuously, decomposing subtasks internally.
+State the scope/acceptance plan, then proceed with approved coding, testing, debugging,
+regression correction, documentation and routine local commits without approval at
+subtask boundaries. Existing user authorization overrides older per-task/commit prompts.
+
+Use one isolated feature branch, meaningful local subtask checkpoints and one consolidated
+`docs/work-items/<milestone>.md` with separate subtask sections. Keep historical specifications
+unchanged; record grouping in the new milestone. Before write integration tests establish
+and verify a separate disposable fictional database and its safe disposal. Otherwise use
+fully intercepted/mocked tests and mark persistence acceptance BLOCKED. Distinguish PASS,
+FAIL, BLOCKED and NOT RUN; simulation does not verify persistence or access enforcement.
+
+After combined diff/privacy review and final verification, make one final push and draft PR
+when explicitly authorized and tooling supports them. Never force Git operations, overwrite
+unrelated work or publish known critical unsafe changes. Do not merge automatically.
+New authorization/compensation policies, incompatible API/schema/business contracts,
+production access, deployment and destructive operations outside disposable fixtures remain
+outside routine milestone authority. Report decision blockers while completing independent
+safe work. All architectural, production, tenant/branch, privacy and financial restrictions
+above remain in force. Follow `docs/codex-session-workflow.md` for cross-device continuity.

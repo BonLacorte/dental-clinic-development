@@ -2,6 +2,51 @@
 
 class EmployeeModel extends Model
 {
+    private ?array $allowedBranches = null;
+
+    public function setAllowedBranches(?array $branches): void
+    {
+        $this->allowedBranches = $branches === null ? null : array_values(array_unique(array_filter(
+            array_map('intval', $branches), static fn ($id) => $id > 0
+        )));
+    }
+
+    private function branchSql(string $column = 'e.branch_id'): string
+    {
+        if ($this->allowedBranches === null) return '';
+        $keys = array_keys($this->branchValues());
+        return $keys ? ' AND ' . $column . ' IN (:' . implode(', :', $keys) . ')' : ' AND 1 = 0';
+    }
+
+    private function branchValues(): array
+    {
+        $values = [];
+        foreach ($this->allowedBranches ?? [] as $index => $id) $values['employee_branch_' . $index] = $id;
+        return $values;
+    }
+
+    public function employeeReferencesAllowed(int $tenant_id, array $data): bool
+    {
+        if ($this->allowedBranches !== null && !in_array($data['branch_id'], $this->allowedBranches, true)) return false;
+        // Table names/conditions are fixed here; every external value is bound.
+        $references = [
+            'branch_id' => ['tenant_branches', 'AND deleted_at IS NULL'],
+            'position_id' => ['hris_positions', ''],
+            'org_unit_id' => ['hris_org_units', ''],
+            'employment_type_id' => ['hris_employment_types', 'AND is_active = 1 AND deleted_at IS NULL'],
+            'employment_status_id' => ['hris_employment_statuses', 'AND is_active = 1 AND deleted_at IS NULL']
+        ];
+        foreach ($references as $field => [$table, $condition]) {
+            if (($data[$field] ?? null) === null) continue;
+            $tenant = in_array($field, ['employment_type_id', 'employment_status_id'], true)
+                ? '(tenant_id = :tenant_id OR tenant_id IS NULL)' : 'tenant_id = :tenant_id';
+            $stmt = $this->db->prepare("SELECT id FROM $table WHERE id = :id AND $tenant $condition LIMIT 1");
+            $stmt->execute(['id' => $data[$field], 'tenant_id' => $tenant_id]);
+            if (!$stmt->fetchColumn()) return false;
+        }
+        return true;
+    }
+
     public function __construct()
     {
         parent::__construct('default');
@@ -29,11 +74,12 @@ class EmployeeModel extends Model
                 e.date_hired, e.date_resigned,
                 e.status, e.created_at
             FROM hris_employees e
-            LEFT JOIN tenant_branches b ON b.id = e.branch_id
-            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
-            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
+            LEFT JOIN tenant_branches b ON b.id = e.branch_id AND b.tenant_id = e.tenant_id
+            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id AND (et.tenant_id = e.tenant_id OR et.tenant_id IS NULL)
+            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id AND (es.tenant_id = e.tenant_id OR es.tenant_id IS NULL)
             WHERE e.tenant_id = :tenant_id
                 AND e.deleted_at IS NULL
+                {$this->branchSql()}
                 {$whereSearch}
             ORDER BY {$orderBy} {$direction}, e.created_at DESC
             LIMIT :limit OFFSET :offset
@@ -54,11 +100,12 @@ class EmployeeModel extends Model
         $stmt = $this->db->prepare("
             SELECT COUNT(*) AS total
             FROM hris_employees e
-            LEFT JOIN tenant_branches b ON b.id = e.branch_id
-            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
-            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
+            LEFT JOIN tenant_branches b ON b.id = e.branch_id AND b.tenant_id = e.tenant_id
+            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id AND (et.tenant_id = e.tenant_id OR et.tenant_id IS NULL)
+            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id AND (es.tenant_id = e.tenant_id OR es.tenant_id IS NULL)
             WHERE e.tenant_id = :tenant_id
                 AND e.deleted_at IS NULL
+                {$this->branchSql()}
                 {$whereSearch}
         ");
 
@@ -74,17 +121,19 @@ class EmployeeModel extends Model
             SELECT e.*, b.name AS branch_name, et.name AS employment_type, es.name AS employment_status,
                 p.name AS position, ou.name AS org_unit
             FROM hris_employees e
-            LEFT JOIN tenant_branches b ON b.id = e.branch_id
-            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
-            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
-            LEFT JOIN hris_positions p ON p.id = e.position_id
-            LEFT JOIN hris_org_units ou ON ou.id = e.org_unit_id
+            LEFT JOIN tenant_branches b ON b.id = e.branch_id AND b.tenant_id = e.tenant_id
+            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id AND (et.tenant_id = e.tenant_id OR et.tenant_id IS NULL)
+            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id AND (es.tenant_id = e.tenant_id OR es.tenant_id IS NULL)
+            LEFT JOIN hris_positions p ON p.id = e.position_id AND p.tenant_id = e.tenant_id
+            LEFT JOIN hris_org_units ou ON ou.id = e.org_unit_id AND ou.tenant_id = e.tenant_id
             WHERE e.id = :id
                 AND e.tenant_id = :tenant_id
+                AND e.deleted_at IS NULL
+                {$this->branchSql()}
             LIMIT 1
         ");
 
-        $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id]);
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id] + $this->branchValues());
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -120,7 +169,7 @@ class EmployeeModel extends Model
                  :date_hired, :date_resigned, :status, NOW())
         ");
 
-        $stmt->execute([
+        $success = $stmt->execute([
             'tenant_id' => $tenant_id,
             'employee_no' => $data['employee_no'],
 
@@ -144,7 +193,7 @@ class EmployeeModel extends Model
             'status' => $data['status'] ?? 'ACTIVE'
         ]);
 
-        return (int) $this->db->lastInsertId();
+        return $success ? (int) $this->db->lastInsertId() : 0;
     }
 
     public function updateEmployee(int $id, int $tenant_id, array $data): bool
@@ -160,9 +209,11 @@ class EmployeeModel extends Model
                 updated_at = NOW()
             WHERE id = :id
                 AND tenant_id = :tenant_id
+                AND deleted_at IS NULL
+                {$this->branchSql('branch_id')}
         ");
 
-        return $stmt->execute([
+        $success = $stmt->execute([
             'firstname' => $data['firstname'],
             'middlename' => $data['middlename'] ?? null,
             'lastname' => $data['lastname'],
@@ -184,13 +235,16 @@ class EmployeeModel extends Model
 
             'id' => $id,
             'tenant_id' => $tenant_id
-        ]);
+        ] + $this->branchValues());
+        // An unchanged accessible row is a valid edit; a missing row is not.
+        return $success && $this->getEmployeeById($id, $tenant_id) !== false;
     }
 
     public function deleteEmployee(int $id, int $tenant_id): bool
     {
-        $stmt = $this->db->prepare("UPDATE hris_employees SET status = 'INACTIVE', deleted_at = NOW() WHERE id = :id AND tenant_id = :tenant_id");
-        return $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id]);
+        $stmt = $this->db->prepare("UPDATE hris_employees SET status = 'INACTIVE', deleted_at = NOW() WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL {$this->branchSql('branch_id')}");
+        $success = $stmt->execute(['id' => $id, 'tenant_id' => $tenant_id] + $this->branchValues());
+        return $success && $stmt->rowCount() > 0;
     }
 
     public function getEmploymentTypes(int $tenant_id): array
@@ -209,7 +263,7 @@ class EmployeeModel extends Model
 
     public function getDefaultEmploymentStatusId(int $tenant_id): int
     {
-        $stmt = $this->db->prepare("SELECT id FROM hris_employment_statuses WHERE code = 'ACTIVE' AND (tenant_id = :tenant_id OR tenant_id IS NULL) LIMIT 1 ");
+        $stmt = $this->db->prepare("SELECT id FROM hris_employment_statuses WHERE code = 'ACTIVE' AND (tenant_id = :tenant_id OR tenant_id IS NULL) AND is_active = 1 AND deleted_at IS NULL LIMIT 1 ");
         $stmt->execute(['tenant_id' => $tenant_id]);
         return (int) $stmt->fetchColumn();
     }
@@ -250,6 +304,7 @@ class EmployeeModel extends Model
     private function bindEmployeeListValues(PDOStatement $stmt, int $tenant_id, string $search): void
     {
         $stmt->bindValue(':tenant_id', $tenant_id, PDO::PARAM_INT);
+        foreach ($this->branchValues() as $key => $id) $stmt->bindValue(':' . $key, $id, PDO::PARAM_INT);
 
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
@@ -259,11 +314,13 @@ class EmployeeModel extends Model
     public function getEmployeeCompensation(int $id, int $tenant_id)
     {
         $stmt = $this->db->prepare("
-            SELECT * from payroll_employee_compensations WHERE
-            tenant_id = :tenant_id and employee_id = :employee_id
+            SELECT c.* FROM payroll_employee_compensations c
+            INNER JOIN hris_employees e ON e.id = c.employee_id AND e.tenant_id = c.tenant_id
+            WHERE c.tenant_id = :tenant_id AND c.employee_id = :employee_id
+                AND e.deleted_at IS NULL {$this->branchSql()}
         ");
 
-        $stmt->execute(['tenant_id' => $tenant_id, 'employee_id' => $id,]);
+        $stmt->execute(['tenant_id' => $tenant_id, 'employee_id' => $id] + $this->branchValues());
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -282,8 +339,7 @@ class EmployeeModel extends Model
                 effective_to,
                 created_at  
             )
-            VALUES
-            (
+            SELECT
                 :tenant_id,
                 :employee_id,
                 :salary_type,
@@ -292,13 +348,14 @@ class EmployeeModel extends Model
                 :effective_from,
                 :effective_to,
                 NOW()
-            
-            )
+            FROM hris_employees e
+            WHERE e.id = :target_employee_id AND e.tenant_id = :employee_tenant_id
+                AND e.deleted_at IS NULL {$this->branchSql()}
             ";
 
         $stmt = $this->db->prepare($sql);
 
-        $stmt->execute([
+        $success = $stmt->execute([
             'tenant_id' => $tenant_id,
             'employee_id' => $data['employee_id'],
             'salary_type' => $data['salary_type'],
@@ -306,57 +363,36 @@ class EmployeeModel extends Model
             'salary_rate' => $data['salary_rate'],
             'effective_from' => $data['effective_from'],
             'effective_to' => $data['effective_to'],
-        ]);
+            'target_employee_id' => $data['employee_id'],
+            'employee_tenant_id' => $tenant_id
+        ] + $this->branchValues());
 
-        return (int) $this->db->lastInsertId();
+        return $success && $stmt->rowCount() === 1 ? (int) $this->db->lastInsertId() : 0;
     }
 
     public function updateEmployeeCompensation(int $id, int $tenant_id, array $data): bool
     {
-        $stmt = $this->db->prepare("
-            UPDATE payroll_employee_compensations
-            SET 
-  
-                employee_id = :employee_id,
-                salary_type = :salary_type,
-                payroll_frequency = :payroll_frequency,
-                salary_rate = :salary_rate,
-                effective_from = :effective_from,
-                effective_to = :effective_to,
-                updated_at = NOW()
-            WHERE id = :id
-                AND tenant_id = :tenant_id
-        ");
-
-        $stmt->execute([
-            'tenant_id' => $tenant_id,
-            'employee_id' => $data['employee_id'],
-            'salary_type' => $data['salary_type'],
-            'payroll_frequency' => $data['payroll_frequency'],
-            'salary_rate' => $data['salary_rate'],
-            'effective_from' => $data['effective_from'],
-            'effective_to' => $data['effective_to'],
-            'id' => $id
-
+        // IDs must describe the same existing employee/rate. Never reparent a rate.
+        $where = "id = :id AND tenant_id = :tenant_id AND employee_id = :employee_id
+            AND EXISTS (SELECT 1 FROM hris_employees e
+                WHERE e.id = payroll_employee_compensations.employee_id
+                    AND e.tenant_id = payroll_employee_compensations.tenant_id
+                    AND e.deleted_at IS NULL {$this->branchSql()})";
+        $params = ['id' => $id, 'tenant_id' => $tenant_id, 'employee_id' => $data['employee_id']] + $this->branchValues();
+        $stmt = $this->db->prepare("UPDATE payroll_employee_compensations
+            SET salary_type = :salary_type, payroll_frequency = :payroll_frequency,
+                salary_rate = :salary_rate, effective_from = :effective_from,
+                effective_to = :effective_to, updated_at = NOW()
+            WHERE $where");
+        $success = $stmt->execute($params + [
+            'salary_type' => $data['salary_type'], 'payroll_frequency' => $data['payroll_frequency'],
+            'salary_rate' => $data['salary_rate'], 'effective_from' => $data['effective_from'],
+            'effective_to' => $data['effective_to']
         ]);
-
-        if ($stmt->rowCount() > 0) {
-            return true;
-        }
-
-        $check = $this->db->prepare("
-                SELECT id
-                FROM payroll_employee_compensations
-                WHERE id = :id
-                AND tenant_id = :tenant_id
-                LIMIT 1
-            ");
-
-        $check->execute([
-            'id' => $id,
-            'tenant_id' => $tenant_id
-        ]);
-
+        if (!$success) return false;
+        if ($stmt->rowCount() > 0) return true;
+        $check = $this->db->prepare("SELECT id FROM payroll_employee_compensations WHERE $where LIMIT 1");
+        $check->execute($params);
         return (bool) $check->fetchColumn();
     }
 }

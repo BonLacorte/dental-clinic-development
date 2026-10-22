@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../models/hris/EmployeeModel.php';
 require_once __DIR__ . '/../../models/hris/BranchModel.php';
 require_once __DIR__ . '/../../models/hris/ShiftModel.php';
+require_once __DIR__ . '/../../services/hris/EmployeeInput.php';
 
 class EmployeeController extends Controller
 {
@@ -14,6 +15,10 @@ class EmployeeController extends Controller
     public function __construct()
     {
         $this->employeeModel = new EmployeeModel();
+        // Mirror BranchMiddleware's established session whitelist and tenant-wide fallbacks.
+        $user = $_SESSION['user'];
+        $branches = !empty($user['is_super_admin']) || empty($user['branches']) ? null : $user['branches'];
+        $this->employeeModel->setAllowedBranches($branches);
         $this->branchModel = new BranchModel();
         $this->shiftModel = new ShiftModel();
     }
@@ -47,7 +52,7 @@ class EmployeeController extends Controller
             $params['sort_dir']
         );
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data,
             'currentPage' => $params['page'],
@@ -62,14 +67,14 @@ class EmployeeController extends Controller
         $employee = $this->employeeModel->getEmployeeById($id, $tenant_id);
 
         if (!$employee) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Employee not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $employee
         ]);
@@ -83,14 +88,14 @@ class EmployeeController extends Controller
         $result = $this->shiftModel->getAllShifts($tenant_id, 500, 0);
 
         if (!$result) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Data not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $result
         ]);
@@ -101,19 +106,23 @@ class EmployeeController extends Controller
 
         $tenant_id = $_SESSION['user']['tenant_id'];
 
+        if (!$this->employeeModel->getEmployeeById($id, $tenant_id)) {
+            $this->inputFailure('Employee not found.');
+        }
+
         $result = $this->employeeModel->getEmployeeCompensation($id, $tenant_id);
 
 
 
         if (!$result) {
-            echo json_encode([
+            $this->json([
                 'success' => false,
                 'message' => 'Data not found.'
             ]);
             return;
         }
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $result
         ]);
@@ -127,37 +136,28 @@ class EmployeeController extends Controller
         try {
             $tenant_id = $_SESSION['user']['tenant_id'];
 
-            $rules = [
-                'employee_id' => ['type' => 'integer', 'required' => true],
-                'salary_type' => ['type' => 'string', 'required' => true],
-                'payroll_frequency' => ['type' => 'string', 'required' => true],
-                'salary_rate' => ['type' => 'numeric', 'required' => true],
-                'effective_from' => ['type' => 'date', 'required' => true],
-                'effective_to' => ['type' => 'date', 'required' => false]
-            ];
+            $data = $this->validatedInput(EmployeeInput::compensation($_POST));
 
-
-
-            $result = validate($_POST, $rules);
-
-            $data = $result['data'];
+            if (!$this->employeeModel->getEmployeeById($data['employee_id'], $tenant_id)) {
+                $this->inputFailure('Employee not found.');
+            }
 
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
             $newId = $this->employeeModel->createEmployeeCompensation($tenant_id, $data);
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Employee compensation created successfully.',
+            $this->json([
+                'success' => $newId > 0,
+                'message' => $newId > 0 ? 'Employee compensation created successfully.' : 'Employee compensation was not created.',
                 'id' => $newId
             ]);
 
         } catch (Throwable $e) {
             http_response_code(500);
 
-            echo json_encode([
+            $this->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'The request could not be completed. Check the record before trying again.'
             ]);
         }
     }
@@ -168,24 +168,17 @@ class EmployeeController extends Controller
         try {
             $tenant_id = $_SESSION['user']['tenant_id'];
 
-            $rules = [
-                'employee_id' => ['type' => 'integer', 'required' => true],
-                'salary_type' => ['type' => 'string', 'required' => true],
-                'payroll_frequency' => ['type' => 'string', 'required' => true],
-                'salary_rate' => ['type' => 'numeric', 'required' => true],
-                'effective_from' => ['type' => 'date', 'required' => true],
-                'effective_to' => ['type' => 'date', 'required' => false]
-            ];
+            $data = $this->validatedInput(EmployeeInput::compensation($_POST), $id);
 
-            $result = validate($_POST, $rules);
-
-            $data = $result['data'];
+            if (!$this->employeeModel->getEmployeeById($data['employee_id'], $tenant_id)) {
+                $this->inputFailure('Employee not found.');
+            }
 
             $data['effective_to'] = !empty($data['effective_to']) ? $data['effective_to'] : null;
 
             $success = $this->employeeModel->updateEmployeeCompensation($id, $tenant_id, $data);
 
-            echo json_encode([
+            $this->json([
                 'success' => $success,
                 'message' => $success
                     ? 'Employee compensation updated successfully.'
@@ -194,139 +187,82 @@ class EmployeeController extends Controller
         } catch (Throwable $e) {
             http_response_code(500);
 
-            echo json_encode([
+            $this->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'The request could not be completed. Check the record before trying again.'
             ]);
         }
     }
     public function create()
     {
-        $tenant_id = $_SESSION['user']['tenant_id'];
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $rules = [
-            'firstname' => ['type' => 'string', 'required' => true],
-            'middlename' => ['type' => 'string', 'required' => false],
-            'lastname' => ['type' => 'string', 'required' => true],
-            'email' => ['type' => 'email', 'required' => false],
-            'contact_no' => ['type' => 'string', 'required' => false, 'regex' => '/^[0-9+()\-\s]{7,20}$/'],
-            'branch_id' => ['type' => 'int', 'required' => true],
-            'position_id' => ['type' => 'int', 'required' => false],
-            'org_unit_id' => ['type' => 'int', 'required' => false],
-            'employment_type_id' => ['type' => 'int', 'required' => true],
-            'employment_status_id' => ['type' => 'int', 'required' => false],
-            'date_hired' => ['type' => 'date', 'required' => true],
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
+            $data = $this->validatedInput(EmployeeInput::employee($_POST));
 
-        $result = validate($_POST, $rules);
-        $data = $result['data'];
+            $data['employee_no'] = $this->buildEmployeeNo((int) $data['branch_id'], $tenant_id);
+            $data['status'] = 'ACTIVE';
 
+            if (empty($data['employment_status_id'])) {
+                $data['employment_status_id'] = $this->employeeModel->getDefaultEmploymentStatusId($tenant_id);
+            }
 
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
+            $this->validateEmployeeReferences($tenant_id, $data);
+
+            $newId = $this->employeeModel->createEmployee($tenant_id, $data);
+
+            $this->json([
+                'success' => $newId > 0,
+                'message' => $newId > 0 ? 'Employee created successfully.' : 'Employee was not created.',
+                'id' => $newId
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
         }
-
-        $data['employee_no'] = $this->buildEmployeeNo((int) $data['branch_id'], $tenant_id);
-        $data['status'] = 'ACTIVE';
-
-        if (empty($data['employment_status_id'])) {
-            $data['employment_status_id'] = $this->employeeModel->getDefaultEmploymentStatusId($tenant_id);
-        }
-
-        $newId = $this->employeeModel->createEmployee($tenant_id, $data);
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'Employee created successfully.',
-            'id' => $newId
-        ]);
     }
 
     public function updateEmployee(int $id)
     {
-        $tenant_id = $_SESSION['user']['tenant_id'];
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
 
-        $rules = [
-            'firstname' => ['type' => 'string', 'required' => true],
-            'middlename' => ['type' => 'string', 'required' => false],
-            'lastname' => ['type' => 'string', 'required' => true],
-            'email' => ['type' => 'email', 'required' => false],
-            'contact_no' => ['type' => 'string', 'required' => false, 'regex' => '/^[0-9+()\-\s]{7,20}$/'],
-            'branch_id' => ['type' => 'int', 'required' => true],
-            'position_id' => ['type' => 'int', 'required' => false],
-            'org_unit_id' => ['type' => 'int', 'required' => false],
-            'employment_type_id' => ['type' => 'int', 'required' => true],
-            'employment_status_id' => ['type' => 'int', 'required' => false],
-            'date_hired' => ['type' => 'date', 'required' => true],
-            'date_resigned' => ['type' => 'date', 'required' => false],
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
+            $data = $this->validatedInput(EmployeeInput::employee($_POST, true), $id);
 
-        $result = validate($_POST, $rules);
+            $this->validateEmployeeReferences($tenant_id, $data);
 
-        $data = $result['data'];
+            $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
 
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
+            $this->json([
+                'success' => $success,
+                'message' => $success
+                    ? 'Employee updated successfully.'
+                    : 'Failed to update employee.'
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
         }
-
-        if (
-            !empty($data['date_resigned']) && !empty($data['date_hired'])
-            && $data['date_resigned'] < $data['date_hired']
-        ) {
-            je([
-                'message' => 'Date resigned cannot be earlier than date hired.',
-                'type' => 'error'
-            ], 'json');
-            exit;
-        }
-
-        $success = $this->employeeModel->updateEmployee($id, $tenant_id, $data);
-
-        echo json_encode([
-            'success' => $success,
-            'message' => $success
-                ? 'Employee updated successfully.'
-                : 'Failed to update employee.'
-        ]);
     }
 
     public function deleteEmployee(int $id)
     {
+        try {
+            $tenant_id = $_SESSION['user']['tenant_id'];
+            $this->validatedInput(EmployeeInput::csrf($_POST));
 
-        $tenant_id = $_SESSION['user']['tenant_id'];
-        $rules = [
-            'csrf_token' => ['type' => 'string', 'required' => true]
-        ];
+            $success = $this->employeeModel->deleteEmployee($id, $tenant_id);
 
-        $result = validate($_POST, $rules);
-        $data = $result['data'];
-
-        if (!Csrf::validate($data['csrf_token'], 'keep')) {
-            je([
-                'message' => 'Invalid CSRF token',
-                'type' => 'error'
-            ], 'json');
-            exit;
+            $this->json([
+                'success' => $success,
+                'message' => $success
+                    ? 'Employee deleted successfully.'
+                    : 'Failed to delete employee.'
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            $this->json(['success' => false, 'message' => 'The request could not be completed. Check the record before trying again.']);
         }
-
-        $success = $this->employeeModel->deleteEmployee($id, $tenant_id);
-
-        echo json_encode([
-            'success' => $success,
-            'message' => $success
-                ? 'Employee deleted successfully.'
-                : 'Failed to delete employee.'
-        ]);
     }
 
     public function getEmploymentTypes()
@@ -335,7 +271,7 @@ class EmployeeController extends Controller
 
         $data = $this->employeeModel->getEmploymentTypes($tenant_id);
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data
         ]);
@@ -346,13 +282,48 @@ class EmployeeController extends Controller
         $tenant_id = $_SESSION['user']['tenant_id'];
         $data = $this->employeeModel->getEmploymentStatuses($tenant_id);
 
-        echo json_encode([
+        $this->json([
             'success' => true,
             'data' => $data
         ]);
     }
 
 
+
+    private function validateEmployeeReferences(int $tenant_id, array $data): void
+    {
+        if (!$this->employeeModel->employeeReferencesAllowed($tenant_id, $data)) {
+            $this->inputFailure('One or more selected employment values are unavailable for this tenant or branch.');
+        }
+    }
+
+    private function json(array $payload): void
+    {
+        header('Content-Type: application/json');
+        echo json_encode($payload);
+    }
+
+    private function validatedInput(array $result, ?int $pathId = null): array
+    {
+        if (!empty($result['errors'])) {
+            $this->inputFailure('Please correct the submitted fields.', $result['errors']);
+        }
+        $data = $result['data'];
+        if ($pathId !== null && ($pathId < 1 || (isset($data['id']) && $data['id'] !== $pathId))) {
+            $this->inputFailure('The record identifier does not match the request.');
+        }
+        if (!Csrf::validate($data['csrf_token'], 'keep')) {
+            $this->inputFailure('Invalid CSRF token');
+        }
+        unset($data['csrf_token'], $data['id']);
+        return $data;
+    }
+
+    private function inputFailure(string $message, array $errors = []): never
+    {
+        $this->json(['success' => false, 'message' => $message, 'type' => 'error', 'errors' => $errors]);
+        exit;
+    }
 
     private function listParams(array $input): array
     {
@@ -363,7 +334,11 @@ class EmployeeController extends Controller
             'sort_dir' => ['type' => 'string', 'required' => false, 'default' => 'DESC']
         ];
 
+        foreach (array_intersect_key($input, $rules) as $value) {
+            if (!is_string($value) && !is_int($value)) $this->inputFailure('Invalid employee list parameters.');
+        }
         $result = validate($input, $rules, false);
+        if ($result['errors']) $this->inputFailure('Invalid employee list parameters.', $result['errors']);
         $data = $result['data'];
         $page = max(1, (int) ($data['page'] ?: 1));
         $limit = 10;
