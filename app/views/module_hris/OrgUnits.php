@@ -4,16 +4,16 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Offices</h5>
+            <h1 class="h5 mb-0" id="officesHeading">Manage Offices</h1>
 
-            <div>
-                <button class="btn btn-outline-secondary btn-sm me-2" id="expandAllBtn">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">
                     <i class="bi bi-arrows-expand"></i> Expand All
                 </button>
-                <button class="btn btn-outline-secondary btn-sm me-2" id="collapseAllBtn">
+                <button class="btn btn-outline-secondary btn-sm" id="collapseAllBtn">
                     <i class="bi bi-arrows-collapse"></i> Collapse All
                 </button>
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
@@ -29,29 +29,29 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Office -->
-<div class="modal fade" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addOfficeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Organizational Unit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addOfficeModalTitle">Add Organizational Unit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Parent Unit</label>
+                            <label for="parentSelect" class="form-label">Parent Unit</label>
                             <select class="form-select" name="parent_id" id="parentSelect">
                                 <option value="">-- None (Top Level) --</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="type">
+                            <label for="addOfficeForm_type" class="form-label">Type</label>
+                            <select id="addOfficeForm_type" class="form-select" name="type">
                                 <option value="DEPARTMENT">DEPARTMENT</option>
                                 <option value="TEAM">TEAM</option>
                                 <option value="SECTION">SECTION</option>
@@ -60,13 +60,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         </div>
 
                         <div class="col-md-8">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="addOfficeForm_name" class="form-label">Name</label>
+                            <input id="addOfficeForm_name" type="text" class="form-control" name="name">
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Code</label>
-                            <input type="text" class="form-control" name="code">
+                            <label for="addOfficeForm_code" class="form-label">Code</label>
+                            <input id="addOfficeForm_code" type="text" class="form-control" name="code">
                         </div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Office -->
-<div class="modal fade" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editOfficeForm">
@@ -89,22 +89,22 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Organizational Unit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editOfficeModalTitle">Edit Organizational Unit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Parent Unit</label>
+                            <label for="editParentSelect" class="form-label">Parent Unit</label>
                             <select class="form-select" name="parent_id" id="editParentSelect">
                                 <option value="">-- None (Top Level) --</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="type">
+                            <label for="editOfficeForm_type" class="form-label">Type</label>
+                            <select id="editOfficeForm_type" class="form-select" name="type">
                                 <option value="DEPARTMENT">DEPARTMENT</option>
                                 <option value="TEAM">TEAM</option>
                                 <option value="SECTION">SECTION</option>
@@ -113,13 +113,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         </div>
 
                         <div class="col-md-8">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="editOfficeForm_name" class="form-label">Name</label>
+                            <input id="editOfficeForm_name" type="text" class="form-control" name="name">
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label">Code</label>
-                            <input type="text" class="form-control" name="code">
+                            <label for="editOfficeForm_code" class="form-label">Code</label>
+                            <input id="editOfficeForm_code" type="text" class="form-control" name="code">
                         </div>
                     </div>
                 </div>
@@ -136,26 +136,28 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <!-- View Office Employees -->
-<div class="modal fade" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="viewUnitEmployeesHeading">
                     Employees in <span id="viewUnitEmployeesTitle" class="fw-semibold">-</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="unitEmployeesTable">
+                <p class="hris-scroll-hint" id="unitEmployeesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+                <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="unitEmployeesTableScrollHelp">
+                    <table class="table table-hover align-middle mb-0 hris-data-table" id="unitEmployeesTable">
+                        <caption class="visually-hidden">Employees assigned directly to the selected organizational unit.</caption>
                         <thead class="table-light">
                             <tr>
-                                <th>Employee No</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Branch</th>
-                                <th>Status</th>
+                                <th scope="col">Employee No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">Branch</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -211,17 +213,21 @@ $(document).ready(function () {
         let $icon = $(this).find('i');
         let $children = $('#children-' + id);
 
-        $children.toggleClass('d-none');
-        $icon.toggleClass('bi-chevron-right bi-chevron-down');
+        let expanded = $children.hasClass('d-none');
+        $children.toggleClass('d-none', !expanded);
+        $(this).attr('aria-expanded', String(expanded));
+        $icon.toggleClass('bi-chevron-right', !expanded).toggleClass('bi-chevron-down', expanded);
     });
 
     $('#expandAllBtn').on('click', function () {
         $('.org-children').removeClass('d-none');
+        $('.org-toggle').attr('aria-expanded', 'true');
         $('.org-toggle i').removeClass('bi-chevron-right').addClass('bi-chevron-down');
     });
 
     $('#collapseAllBtn').on('click', function () {
         $('.org-children').addClass('d-none');
+        $('.org-toggle').attr('aria-expanded', 'false');
         $('.org-toggle i').removeClass('bi-chevron-down').addClass('bi-chevron-right');
     });
 });
@@ -382,33 +388,33 @@ function buildTreeHTML(byParent, parentKey, depth) {
             <div class="border-bottom">
                 <div class="d-flex align-items-center px-3 py-2 ${indentClass}">
                     ${hasChildren
-                        ? `<span class="org-toggle text-muted me-2" style="cursor:pointer;" data-id="${unit.id}">
-                                <i class="bi bi-chevron-right"></i>
-                           </span>`
-                        : `<span class="me-2 invisible"><i class="bi bi-chevron-right"></i></span>`
+                        ? `<button type="button" class="org-toggle btn btn-outline-secondary me-2" data-id="${unit.id}" aria-controls="children-${unit.id}" aria-expanded="false" aria-label="Toggle ${MonteroHris.escape(unit.name)}" title="Toggle ${MonteroHris.escape(unit.name)}">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                           </button>`
+                        : `<span class="org-toggle-placeholder me-2 invisible" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>`
                     }
 
                     <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
                         <span class="fw-semibold">${unit.name}</span>
-                        <span class="badge bg-secondary">${unit.type}</span>
+                        <span class="badge bg-secondary hris-unit-chip">${unit.type}</span>
                         <span class="small text-muted">${unit.code ?? '-'}</span>
                         <span class="small text-muted ms-auto">${unit.created_at}</span>
                     </div>
 
                     <div class="text-end">
-                        <button class="btn btn-link btn-sm text-info viewUnitEmployeesBtn" data-id="${unit.id}" data-name="${unit.name}">
-                            <i class="bi bi-eye"></i>
+                        <button class="btn btn-sm viewUnitEmployeesBtn hris-action" data-id="${unit.id}" data-name="${unit.name}" aria-label="View employees in this office" title="View employees in this office">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-primary editOfficeBtn" data-id="${unit.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editOfficeBtn hris-action" data-id="${unit.id}" aria-label="Edit office" title="Edit office">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteOfficeBtn" data-id="${unit.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteOfficeBtn hris-action hris-action--danger" data-id="${unit.id}" aria-label="Delete office" title="Delete office">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="d-none" id="children-${unit.id}">
+                <div class="org-children d-none" id="children-${unit.id}">
                     ${buildTreeHTML(byParent, unit.id, depth + 1)}
                 </div>
             </div>

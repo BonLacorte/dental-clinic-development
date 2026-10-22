@@ -2,13 +2,13 @@
 <?php include '../app/views/module_hris/partials/hris_nav.php'; // include on all hris pages 
 ?>
 <div class="row">
-    <div style="background-color: #F9F9F9;">
-        <br>
+    <div class="module-dashboard" style="background-color: #F9F9F9;">
+        <br class="module-dashboard-spacer">
 
         <!-- Module Contents here.. -->
         <h3>HRIS Dashboard</h3>
         <div class="row">
-            <div class="col col-6">
+            <div class="col col-6 module-placeholder">
                 <div class="card mb-4">
                     <div class="card-header">
                         Table/chart title

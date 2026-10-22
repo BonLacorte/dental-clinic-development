@@ -1,10 +1,10 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Shifts</h5>
+            <h1 class="h5 mb-0" id="shiftsHeading">Manage Shifts</h1>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addShiftModal">
                 <i class="bi bi-plus-lg"></i> Add Shift
@@ -14,7 +14,7 @@
         <div class="card-body border-bottom">
             <form id="shiftSearchForm" class="row g-2 align-items-end">
                 <div class="col-md-6 col-lg-4">
-                    <label class="form-label">Search</label>
+                    <label for="shiftSearchInput" class="form-label">Search</label>
                     <input type="text" class="form-control" id="shiftSearchInput" placeholder="Search shifts">
                 </div>
                 <div class="col-auto">
@@ -27,25 +27,28 @@
                         Clear
                     </button>
                 </div>
+                <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary sortable hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
             </form>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="shiftsTable">
+            <p class="hris-scroll-hint" id="shiftsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="shiftsHeading" aria-describedby="shiftsTableScrollHelp">
+                <table class="table table-hover align-middle mb-0 hris-data-table" id="shiftsTable">
+                    <caption class="visually-hidden">Shift times, required hours, breaks and overtime settings.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4"><button class="btn btn-link p-0 sortable" data-sort="name">Name</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="shift_type">Type</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="start_time">Start</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="end_time">End</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="flex_start_time">Flex Start</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="flex_end_time">Flex End</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="required_hours">Hours</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="break_minutes">Break</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="allow_overtime">OT</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th scope="col" class="ps-4"><button class="btn btn-link p-0 sortable" data-sort="name">Name</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="shift_type">Type</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="start_time">Start</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="end_time">End</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="flex_start_time">Flex Start</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="flex_end_time">Flex End</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="required_hours">Hours</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="break_minutes">Break</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="allow_overtime">OT</button></th>
+                            <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -54,65 +57,65 @@
         </div>
 
         <div class="card-footer bg-white py-3">
-            <nav aria-label="Page navigation">
+            <nav aria-label="Shift pages">
                 <ul class="pagination justify-content-end mb-0" id="shiftsPagination"></ul>
             </nav>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="addShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addShiftModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addShiftForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Shift</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addShiftModalTitle">Add Shift</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="addShiftForm_name" class="form-label">Name</label>
+                            <input id="addShiftForm_name" type="text" class="form-control" name="name">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Shift Type</label>
-                            <select class="form-select shiftTypeSelect" name="shift_type">
+                            <label for="addShiftForm_shift_type" class="form-label">Shift Type</label>
+                            <select id="addShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
                                 <option value="FIXED">FIXED</option>
                                 <option value="FLEX_WINDOW">FLEX_WINDOW</option>
                                 <option value="FLEX_HOURS">FLEX_HOURS</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Start Time</label>
-                            <input type="time" class="form-control" name="start_time">
+                            <label for="addShiftForm_start_time" class="form-label">Start Time</label>
+                            <input id="addShiftForm_start_time" type="time" class="form-control" name="start_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">End Time</label>
-                            <input type="time" class="form-control" name="end_time">
+                            <label for="addShiftForm_end_time" class="form-label">End Time</label>
+                            <input id="addShiftForm_end_time" type="time" class="form-control" name="end_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Flex Start</label>
-                            <input type="time" class="form-control" name="flex_start_time">
+                            <label for="addShiftForm_flex_start_time" class="form-label">Flex Start</label>
+                            <input id="addShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Flex End</label>
-                            <input type="time" class="form-control" name="flex_end_time">
+                            <label for="addShiftForm_flex_end_time" class="form-label">Flex End</label>
+                            <input id="addShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Required Hours</label>
-                            <input type="number" step="0.01" min="0" class="form-control" name="required_hours" value="8.00">
+                            <label for="addShiftForm_required_hours" class="form-label">Required Hours</label>
+                            <input id="addShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours" value="8.00">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Break Minutes</label>
-                            <input type="number" min="0" class="form-control" name="break_minutes" value="60">
+                            <label for="addShiftForm_break_minutes" class="form-label">Break Minutes</label>
+                            <input id="addShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes" value="60">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Allow Overtime</label>
-                            <select class="form-select" name="allow_overtime">
+                            <label for="addShiftForm_allow_overtime" class="form-label">Allow Overtime</label>
+                            <select id="addShiftForm_allow_overtime" class="form-select" name="allow_overtime">
                                 <option value="1">YES</option>
                                 <option value="0">NO</option>
                             </select>
@@ -129,7 +132,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="editShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editShiftModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editShiftForm">
@@ -137,51 +140,51 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Shift</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editShiftModalTitle">Edit Shift</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="editShiftForm_name" class="form-label">Name</label>
+                            <input id="editShiftForm_name" type="text" class="form-control" name="name">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Shift Type</label>
-                            <select class="form-select shiftTypeSelect" name="shift_type">
+                            <label for="editShiftForm_shift_type" class="form-label">Shift Type</label>
+                            <select id="editShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
                                 <option value="FIXED">FIXED</option>
                                 <option value="FLEX_WINDOW">FLEX_WINDOW</option>
                                 <option value="FLEX_HOURS">FLEX_HOURS</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Start Time</label>
-                            <input type="time" class="form-control" name="start_time">
+                            <label for="editShiftForm_start_time" class="form-label">Start Time</label>
+                            <input id="editShiftForm_start_time" type="time" class="form-control" name="start_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">End Time</label>
-                            <input type="time" class="form-control" name="end_time">
+                            <label for="editShiftForm_end_time" class="form-label">End Time</label>
+                            <input id="editShiftForm_end_time" type="time" class="form-control" name="end_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Flex Start</label>
-                            <input type="time" class="form-control" name="flex_start_time">
+                            <label for="editShiftForm_flex_start_time" class="form-label">Flex Start</label>
+                            <input id="editShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Flex End</label>
-                            <input type="time" class="form-control" name="flex_end_time">
+                            <label for="editShiftForm_flex_end_time" class="form-label">Flex End</label>
+                            <input id="editShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Required Hours</label>
-                            <input type="number" step="0.01" min="0" class="form-control" name="required_hours">
+                            <label for="editShiftForm_required_hours" class="form-label">Required Hours</label>
+                            <input id="editShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Break Minutes</label>
-                            <input type="number" min="0" class="form-control" name="break_minutes">
+                            <label for="editShiftForm_break_minutes" class="form-label">Break Minutes</label>
+                            <input id="editShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Allow Overtime</label>
-                            <select class="form-select" name="allow_overtime">
+                            <label for="editShiftForm_allow_overtime" class="form-label">Allow Overtime</label>
+                            <select id="editShiftForm_allow_overtime" class="form-select" name="allow_overtime">
                                 <option value="1">YES</option>
                                 <option value="0">NO</option>
                             </select>
@@ -198,12 +201,12 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteShiftModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Shift</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteShiftModalTitle">Delete Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this shift? This action cannot be undone.
@@ -348,13 +351,13 @@ function renderShiftRows(shifts) {
                     <td>${esc(s.required_hours)}</td>
                     <td>${esc(s.break_minutes)}</td>
                     <td>${s.allow_overtime == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(s.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(s.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editShiftBtn" data-id="${s.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editShiftBtn hris-action" data-id="${s.id}" aria-label="Edit shift" title="Edit shift">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteShiftBtn" data-id="${s.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteShiftBtn hris-action hris-action--danger" data-id="${s.id}" aria-label="Delete shift" title="Delete shift">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -431,7 +434,7 @@ function renderPagination(page, totalPages) {
     }
 
     for (let p = start; p <= end; p++) {
-        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link page-btn" data-page="${p}">${p}</a></li>`;
+        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link page-btn" data-page="${p}"${p === page ? ' aria-current="page"' : ''}>${p}</a></li>`;
     }
 
     if (page < totalPages) {
@@ -443,11 +446,23 @@ function renderPagination(page, totalPages) {
 
 function applySortIndicators() {
     $('.sortable').each(function () {
-        let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
-        if ($(this).data('sort') === currentSortBy) {
-            label += ' ' + currentSortDir;
-        }
-        $(this).text(label);
+        const $button = $(this);
+        const $header = $button.closest('th');
+        $header.removeAttr('aria-sort');
+        if (MonteroHris.createdSort(this, currentSortBy, currentSortDir)) return;
+        const label = $button.data('label') || $button.text().replace(/\s+(ASC|DESC)$/, '').trim();
+        const active = $button.data('sort') === currentSortBy;
+        const ascending = currentSortDir === 'ASC';
+        $button.data('label', label);
+        if (active) $header.attr('aria-sort', ascending ? 'ascending' : 'descending');
+        $button.empty().append(document.createTextNode(label));
+        $button.append($('<i>', {
+            class: 'bi hris-sort-mark ' + (active ? (ascending ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up'),
+            'aria-hidden': 'true'
+        }));
+        // Retain the original direction text for print; screen indicators are decorative.
+        if (active) $button.append($('<span>', {class: 'hris-sort-print', 'aria-hidden': 'true', text: ' ' + currentSortDir}));
+        $button.attr('aria-label', label + (active ? ': sorted ' + (ascending ? 'ascending' : 'descending') + '. ' : ': ') + 'Sort ' + (active && ascending ? 'descending' : 'ascending'));
     });
 }
 

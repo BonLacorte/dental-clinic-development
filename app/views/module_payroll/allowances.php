@@ -104,8 +104,8 @@ if (!function_exists('renderPayrollItemFields')) {
 $hasTypes = !empty($pageConfig['hasTypes']);
 ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page payroll-config-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Manage <?= e($pageConfig['title']); ?></h5>
             <div class="d-flex gap-2">

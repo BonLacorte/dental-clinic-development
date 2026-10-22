@@ -711,11 +711,12 @@
   }
 }
 
-/* Stage 2A: shared Pearl & Teal foundation. Screen-only so payroll/print
-   retains its accepted typography, dimensions, colors and page breaks.
-   Login/scanner remain page-owned; shell geometry above stays unchanged. */
+/* Pearl & Teal: shared foundation and Premium presentation. Screen-only so
+   payroll/print retains its accepted typography, dimensions, colors and page
+   breaks. Sidebar widths, breakpoints and behavior stay above. */
 @media screen {
-  .admin-shell {
+  .admin-shell,
+  .login-page {
     --montero-primary: #11685D;
     --montero-primary-hover: #0D544B;
     --montero-primary-active: #09473F;
@@ -727,6 +728,9 @@
     --montero-divider: #D9E4E1;
     --montero-control-border: #738C85;
     --montero-focus: #087F8C;
+    --montero-sidebar: #153F3B;
+    --montero-sidebar-text: #E6F3EF;
+    --montero-sidebar-muted: #B5CFCA;
     --montero-card-radius: 14px;
     --montero-control-radius: 8px;
     --montero-shadow: 0 2px 8px rgb(25 51 48 / 6%);
@@ -770,6 +774,12 @@
     --bs-navbar-brand-hover-color: var(--montero-primary);
     background-color: var(--montero-surface) !important;
     border-bottom: 1px solid var(--montero-divider);
+    min-height: 64px;
+    padding: 8px 16px;
+  }
+
+  .admin-shell .admin-navbar-inner {
+    gap: 4px 12px;
   }
 
   .admin-shell .admin-account.text-white {
@@ -777,7 +787,42 @@
   }
 
   .admin-shell .admin-navbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 600;
+    letter-spacing: -.025em;
+    line-height: 1.25;
+  }
+
+  .admin-shell .admin-brand-mark {
+    display: inline-flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--montero-primary);
+    color: var(--montero-surface);
+    font-size: 20px;
+  }
+
+  .admin-shell .admin-account-name {
+    font-size: .9375rem;
+    font-weight: 500;
+  }
+
+  .admin-shell .admin-logout {
+    padding-inline: 12px;
+    border-radius: var(--montero-control-radius);
+    text-decoration: none;
+    font-size: .9375rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .admin-logout:hover {
+    background: var(--bs-danger-bg-subtle);
   }
 
   .admin-shell #toggleSidebar {
@@ -801,31 +846,95 @@
   }
 
   .admin-shell #sidebar {
-    --bs-offcanvas-bg: var(--montero-surface);
-    --bs-offcanvas-color: var(--montero-text);
-    border-right: 1px solid var(--montero-divider);
+    --bs-offcanvas-bg: var(--montero-sidebar);
+    --bs-offcanvas-color: var(--montero-sidebar-text);
+    border-right: 1px solid var(--montero-sidebar);
+  }
+
+  .admin-shell #sidebar .offcanvas-body {
+    padding: 16px 12px 24px;
+  }
+
+  .admin-shell #sidebar .offcanvas-header {
+    border-bottom: 1px solid rgb(230 243 239 / 18%);
+  }
+
+  .admin-shell #sidebar .offcanvas-title {
+    color: var(--montero-sidebar-text);
   }
 
   .admin-shell #sidebar a,
   .admin-shell #sidebar .nav-parent,
   .admin-shell #sidebar .sidebar-module-label {
-    color: var(--montero-text);
+    color: var(--montero-sidebar-text);
   }
 
-  .admin-shell #sidebar a:hover,
-  .admin-shell #sidebar .nav-parent:hover,
-  .admin-shell #sidebar a.active {
-    background-color: var(--montero-primary-tint);
-    color: var(--montero-primary);
+  .admin-shell #sidebar a,
+  .admin-shell #sidebar .nav-parent {
+    min-height: 48px;
+    padding: 12px;
+    gap: 12px;
+    border-radius: var(--montero-control-radius);
+    margin-bottom: 4px;
+    line-height: 1.5;
+    transition: background-color .15s ease, color .15s ease;
   }
 
-  .admin-shell #sidebar a.active {
-    box-shadow: inset 4px 0 var(--montero-primary);
+  .admin-shell #sidebar :is(a, .nav-parent) > i:first-child {
+    width: 20px;
+    flex: 0 0 20px;
+    margin-right: 0 !important;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--montero-sidebar-muted);
+  }
+
+  .admin-shell #sidebar .nav-group {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgb(230 243 239 / 18%);
+  }
+
+  .admin-shell #sidebar .nav-child a {
+    padding-left: 44px;
+  }
+
+  .admin-shell #sidebar .nav-child .sidebar-module-link {
+    padding-left: 56px;
+    font-size: .9375rem;
+    color: var(--montero-sidebar-muted);
+  }
+
+  .admin-shell #sidebar .sidebar-module-label {
+    padding: 12px 12px 8px 44px;
+    font-size: .875rem;
     font-weight: 600;
   }
 
+  .admin-shell #sidebar .arrow {
+    font-size: .75rem;
+  }
+
+  .admin-shell #sidebar a:hover,
+  .admin-shell #sidebar .nav-parent:hover {
+    background-color: rgb(230 243 239 / 10%);
+    color: var(--montero-surface);
+  }
+
+  .admin-shell #sidebar a.active,
+  .admin-shell #sidebar .nav-child a.active {
+    background-color: var(--montero-primary-tint);
+    color: var(--montero-primary-active);
+    box-shadow: inset 3px 0 var(--montero-control-border);
+    font-weight: 600;
+  }
+
+  .admin-shell #sidebar a.active > i:first-child {
+    color: var(--montero-primary);
+  }
+
   .admin-shell #closeSidebar {
-    filter: none;
+    filter: invert(1) grayscale(100%) brightness(200%);
     opacity: 1;
   }
 
@@ -833,15 +942,63 @@
     color: var(--montero-muted);
     background-color: var(--montero-surface);
     border-top: 1px solid var(--montero-divider);
+    padding: 16px 24px;
+    font-size: .875rem;
+    text-align: left;
   }
 
   .admin-shell .module-navigation {
     --bs-nav-link-color: var(--montero-primary);
     --bs-nav-link-hover-color: var(--montero-primary-hover);
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--montero-divider);
   }
 
   .admin-shell .module-navigation .nav-underline {
     --bs-nav-underline-link-active-color: var(--montero-primary-active);
+    gap: 4px 12px;
+  }
+
+  .admin-shell .module-navigation .nav-link {
+    padding: 10px 12px;
+    border-radius: 8px 8px 0 0;
+    font-size: .9375rem;
+  }
+
+  .admin-shell .module-navigation .nav-link:is(:hover, .active) {
+    background: var(--montero-primary-tint);
+  }
+
+  .admin-shell #sidebar :focus-visible {
+    outline-color: var(--montero-primary-tint);
+    box-shadow: none;
+  }
+
+  .admin-shell #sidebar a.active:focus-visible {
+    outline-color: var(--montero-primary);
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .admin-navbar {
+      padding-inline: 12px;
+    }
+
+    .admin-shell .admin-navbar .navbar-brand {
+      font-size: 1.125rem;
+    }
+
+    .admin-shell .admin-account {
+      flex-basis: 100%;
+      gap: 4px;
+      border-top: 1px solid var(--montero-divider);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-shell #sidebar a,
+    .admin-shell #sidebar .nav-parent {
+      transition: none;
+    }
   }
 
   .admin-shell .nav-tabs {
@@ -849,6 +1006,35 @@
     --bs-nav-tabs-link-active-color: var(--montero-primary-active);
     --bs-nav-tabs-link-active-bg: var(--montero-surface);
     --bs-nav-tabs-link-active-border-color: var(--montero-divider) var(--montero-divider) var(--montero-surface);
+    gap: 4px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px solid var(--montero-divider);
+    border-radius: 10px;
+    background: var(--montero-canvas);
+  }
+
+  .admin-shell .nav-tabs .nav-link {
+    min-height: 44px;
+    padding: 10px 16px;
+    margin-bottom: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    color: var(--montero-muted);
+    font-weight: 500;
+    white-space: normal;
+  }
+
+  .admin-shell .nav-tabs .nav-link:hover {
+    color: var(--montero-primary-hover);
+  }
+
+  .admin-shell .nav-tabs .nav-link.active {
+    border-color: var(--montero-control-border);
+    background: var(--montero-surface);
+    color: var(--montero-primary-active);
+    font-weight: 600;
   }
 
   .admin-shell .dropdown-menu {
@@ -861,6 +1047,13 @@
     --bs-dropdown-link-active-color: var(--montero-surface);
     --bs-dropdown-link-active-bg: var(--montero-primary);
     box-shadow: var(--montero-shadow);
+    padding: 6px;
+    border-radius: 10px;
+  }
+
+  .admin-shell .dropdown-item {
+    padding: 10px 12px;
+    border-radius: 6px;
   }
 
   .admin-shell .btn {
@@ -868,6 +1061,26 @@
     --bs-btn-font-size: 1rem;
     min-height: 44px;
     min-width: 44px;
+    padding: 9px 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+  }
+
+  .admin-shell .btn > :is(.bi, .fas) {
+    vertical-align: -.05em;
+  }
+
+  .admin-shell .btn-secondary {
+    --bs-btn-color: var(--montero-text);
+    --bs-btn-bg: var(--montero-canvas);
+    --bs-btn-border-color: var(--montero-control-border);
+    --bs-btn-hover-color: var(--montero-text);
+    --bs-btn-hover-bg: var(--montero-divider);
+    --bs-btn-hover-border-color: var(--montero-muted);
+    --bs-btn-active-color: var(--montero-text);
+    --bs-btn-active-bg: var(--montero-divider);
+    --bs-btn-active-border-color: var(--montero-muted);
   }
 
   .admin-shell .btn-primary {
@@ -943,6 +1156,20 @@
     gap: 12px 16px;
   }
 
+  .admin-shell .card-header {
+    padding: 16px 24px;
+  }
+
+  .admin-shell .card-footer {
+    padding: 16px 24px;
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .card > :last-child {
+    border-bottom-left-radius: var(--montero-card-radius);
+    border-bottom-right-radius: var(--montero-card-radius);
+  }
+
   /* Existing generated office rows must also wrap around larger controls. */
   .admin-shell #orgUnitsTree .d-flex {
     flex-wrap: wrap;
@@ -954,7 +1181,7 @@
   }
 
   /* Existing payroll surfaces use body-bg locally; keep them white too. */
-  .admin-shell :is(.payroll-page-card, .payroll-summary-card, .payroll-total-box) {
+  .admin-shell :is(.payroll-page-card, .payroll-summary-card, .payroll-total-card, .payroll-total-box) {
     background-color: var(--montero-surface);
     border-color: var(--montero-divider);
     border-radius: var(--montero-card-radius);
@@ -962,6 +1189,217 @@
 
   .admin-shell #content > .row {
     row-gap: 16px;
+  }
+
+  /* Management composition: static opt-in classes, same fields and actions. */
+  .admin-shell .management-page {
+    padding-inline: 0;
+  }
+
+  .admin-shell .management-card > .card-header {
+    padding: 20px 24px !important;
+  }
+
+  .admin-shell .management-card > .card-header :is(h1, h4, h5) {
+    font-size: 1.375rem;
+    line-height: 1.35;
+    letter-spacing: -.025em;
+  }
+
+  .admin-shell .management-card > .card-header > .d-flex {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .management-card > .card-body:last-child .table-responsive {
+    border-radius: 0 0 var(--montero-card-radius) var(--montero-card-radius);
+  }
+
+  .admin-shell .management-card .card-body.border-bottom {
+    padding-block: 16px;
+    background: var(--montero-canvas);
+  }
+
+  .admin-shell .management-card :is(.card-footer, .employee-pagination) {
+    font-size: .9375rem;
+  }
+
+  .admin-shell .management-card .table {
+    min-width: 40rem;
+  }
+
+  .admin-shell .management-card :is(#leaveRequestsTable, #holidaysTable, #shiftsTable, #usersTable) {
+    min-width: 58rem;
+  }
+
+  .admin-shell .management-card #employeesTable {
+    min-width: 56rem;
+  }
+
+  .admin-shell .employee-page #employeesTable :where(th, td) {
+    padding: 10px 16px;
+  }
+
+  .admin-shell .employee-page .employee-list-feedback {
+    line-height: 1.5;
+  }
+
+  .admin-shell .attendance-page .table {
+    min-width: 64rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .attendance-page .card-header {
+    font-weight: 600;
+  }
+
+  .admin-shell :is(.dashboard-heading, .module-dashboard > h3) {
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+    line-height: 1.35;
+    letter-spacing: -.025em;
+  }
+
+  .admin-shell .dashboard-overview {
+    --bs-gutter-x: 16px;
+    --bs-gutter-y: 16px;
+  }
+
+  .admin-shell .dashboard-metric {
+    height: 100%;
+    padding: 24px !important;
+    border-top: 3px solid var(--montero-primary);
+  }
+
+  .admin-shell .dashboard-metric h5 {
+    margin-bottom: 16px;
+    color: var(--montero-muted);
+    font-size: .9375rem;
+  }
+
+  .admin-shell .dashboard-metric h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .module-dashboard {
+    padding: 24px .75rem 0;
+    background: transparent !important;
+  }
+
+  .admin-shell .module-dashboard-spacer {
+    display: none;
+  }
+
+  .admin-shell .module-placeholder {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+
+  /* Payroll keeps every business column, value, tab and print template. */
+  .admin-shell .payroll-runs-toolbar {
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  .admin-shell .payroll-runs-title {
+    flex: 1 1 21rem;
+  }
+
+  .admin-shell .payroll-runs-filters {
+    flex: 2 1 38rem;
+    align-items: center;
+  }
+
+  .admin-shell .payroll-runs-filters :is(.form-control, .form-select) {
+    flex: 1 1 10rem;
+    width: auto;
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  .admin-shell .payroll-runs-filters .btn {
+    flex: 0 0 auto;
+  }
+
+  .admin-shell #payrollRunsTable {
+    min-width: 82rem;
+  }
+
+  .admin-shell #payrollRunEmployeesTable {
+    min-width: 78rem;
+  }
+
+  .admin-shell :is(#payrollRunsTable, #payrollRunEmployeesTable) :is(th, td) {
+    white-space: nowrap;
+  }
+
+  .admin-shell #payrollRunsTable :is(th, td):first-child {
+    min-width: 12rem;
+    white-space: normal;
+  }
+
+  .admin-shell #payrollRunEmployeesTable :is(th, td):nth-child(2) {
+    min-width: 12rem;
+    white-space: normal;
+  }
+
+  .admin-shell .payroll-config-page :is(#recordsTable, #typesTable) {
+    min-width: 64rem;
+  }
+
+  .admin-shell .payroll-config-page .table :is(td.text-end, th:has([data-sort="amount"], [data-sort="salary_rate"], [data-sort="default_value"], [data-sort="installment_amount"], [data-sort="remaining_balance"])),
+  .admin-shell .payroll-config-page .table:has(th:nth-child(2) [data-sort="amount"]) tbody td:nth-child(2),
+  .admin-shell .payroll-config-page .table:has(th:nth-child(3) [data-sort="amount"]) tbody td:nth-child(3),
+  .admin-shell .payroll-config-page .table:has([data-sort="salary_rate"], [data-sort="default_value"], [data-sort="installment_amount"]) tbody td:nth-child(4),
+  .admin-shell .payroll-config-page .table:has([data-sort="remaining_balance"]) tbody td:nth-child(5) {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell :is(.payroll-summary-card, .payroll-total-card, .payroll-total-box) .label {
+    margin-bottom: 8px;
+    font-size: .875rem;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .admin-shell .payroll-summary-card .value {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell :is(.payroll-total-card, .payroll-total-box) {
+    border-top: 3px solid var(--montero-primary);
+  }
+
+  .admin-shell :is(.payroll-total-card, .payroll-total-box) .amount {
+    font-size: 1.375rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .payroll-section-title {
+    font-size: .9375rem;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .admin-shell .payroll-item-table {
+    min-width: 28rem;
+  }
+
+  .admin-shell #attendanceTab .table {
+    min-width: 40rem;
+  }
+
+  .admin-shell .import-page .form-control[type="file"] {
+    min-height: 48px;
   }
 
   .admin-shell .table:not(.table-primary, .table-secondary, .table-success, .table-danger, .table-warning, .table-info, .table-dark) {
@@ -983,13 +1421,75 @@
   }
 
   .admin-shell .table > :not(caption) > * > * {
-    padding: 12px 16px;
+    padding: 10px 16px;
+  }
+
+  .admin-shell .table > thead > tr > th {
+    color: inherit;
+    font-size: .875rem;
+    font-weight: 600;
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+
+  .admin-shell .table th > .btn-link {
+    font-size: inherit;
+    font-weight: 600;
+    text-align: inherit;
+    text-decoration: none;
+  }
+
+  .admin-shell .table th > .btn-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Existing generated actions keep their classes, order and event targets. */
+  .admin-shell .table td:has(> .btn),
+  .admin-shell .table td:has(> .d-inline-flex) {
+    white-space: nowrap;
+  }
+
+  .admin-shell .table td > .btn-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid var(--montero-divider);
+    background-color: var(--montero-canvas);
+    text-decoration: none;
+    vertical-align: middle;
+  }
+
+  .admin-shell .table td > .btn-link:hover {
+    border-color: var(--montero-control-border);
+    background-color: var(--montero-primary-tint);
+  }
+
+  .admin-shell .table td > .btn-link.text-danger:hover {
+    border-color: var(--bs-danger);
+    background-color: var(--bs-danger-bg-subtle);
+  }
+
+  .admin-shell :is(.table .text-end, input[type="number"], .amount, .payroll-total-card) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .table-responsive {
+    overscroll-behavior-x: contain;
+    scrollbar-color: var(--montero-control-border) var(--montero-canvas);
+  }
+
+  .admin-shell .table td[colspan] {
+    padding-block: 24px;
+    color: var(--montero-muted);
   }
 
   .admin-shell .badge {
     --bs-badge-font-size: .8125rem;
     --bs-badge-padding-x: .65em;
     --bs-badge-padding-y: .4em;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .admin-shell .pagination {
@@ -1028,6 +1528,22 @@
     border-radius: var(--montero-control-radius);
     color: var(--montero-text);
     background-color: var(--montero-surface);
+    line-height: 1.5;
+  }
+
+  .admin-shell .form-label {
+    margin-bottom: 8px;
+    font-size: .9375rem;
+  }
+
+  .admin-shell .form-text {
+    line-height: 1.5;
+  }
+
+  .admin-shell .input-group-text {
+    border-color: var(--montero-control-border);
+    background: var(--montero-canvas);
+    color: var(--montero-text);
   }
 
   /* Keep Bootstrap's valid/invalid border, icon and feedback treatments. */
@@ -1074,6 +1590,107 @@
     box-sizing: border-box;
   }
 
+  .admin-shell .modal-header,
+  .admin-shell .modal-footer {
+    padding: 16px 24px;
+    gap: 8px;
+  }
+
+  .admin-shell .modal-title {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .admin-shell .modal-body {
+    padding: 24px;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .modal-footer {
+    background: var(--montero-canvas);
+    border-radius: 0 0 var(--montero-card-radius) var(--montero-card-radius);
+  }
+
+  .admin-shell .alert {
+    padding: 16px;
+    border-radius: var(--montero-control-radius);
+    line-height: 1.5;
+  }
+
+  .admin-shell #page-loader {
+    background: rgb(25 51 48 / 45%);
+  }
+
+  .admin-shell #page-loader .loader-content {
+    padding: 24px;
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-card-radius);
+    background: var(--montero-surface);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell #page-loader .loader-text {
+    color: var(--montero-text);
+    font-size: 1rem;
+  }
+
+  .admin-shell #toast {
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: 1px solid currentColor;
+    box-shadow: var(--montero-shadow);
+  }
+
+  /* Standalone login retains CSP, its local stylesheet and script-free form. */
+  .login-page .login-card {
+    max-width: 420px;
+    padding: 32px;
+    border: 1px solid var(--montero-divider);
+    border-top: 4px solid var(--montero-primary);
+    border-radius: var(--montero-card-radius);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .login-page .login-image {
+    width: 128px;
+    margin-bottom: 24px;
+  }
+
+  .login-page .login-heading {
+    color: var(--montero-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -.025em;
+  }
+
+  .login-page .login-field label {
+    color: var(--montero-text);
+    font-size: .9375rem;
+  }
+
+  .login-page .login-field input {
+    color: var(--montero-text);
+    border-color: var(--montero-control-border);
+  }
+
+  .login-page #login-button {
+    background: var(--montero-primary);
+  }
+
+  .login-page #login-button:hover {
+    background: var(--montero-primary-hover);
+  }
+
+  .login-page #login-button:active {
+    background: var(--montero-primary-active);
+  }
+
+  .login-page :where(input, button):focus-visible {
+    outline-color: var(--montero-focus);
+    box-shadow: 0 0 0 2px var(--montero-surface);
+  }
+
   .admin-shell .admin-skip-link {
     color: var(--montero-primary);
     border: 1px solid var(--montero-control-border);
@@ -1098,5 +1715,310 @@
       --bs-card-spacer-x: 1rem;
       --bs-card-spacer-y: 1rem;
     }
+
+    .admin-shell .card-header,
+    .admin-shell .card-footer,
+    .admin-shell .modal-header,
+    .admin-shell .modal-body,
+    .admin-shell .modal-footer {
+      padding-inline: 16px;
+    }
+
+    .admin-shell .modal-footer > .btn {
+      flex: 1 1 auto;
+      white-space: normal;
+    }
+
+    .admin-shell .management-card > .card-header {
+      padding: 16px !important;
+    }
+
+    .admin-shell .management-card > .card-header :is(h1, h4, h5) {
+      font-size: 1.25rem;
+    }
+
+    .login-page .login-card {
+      padding: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-shell .btn {
+      transition: none;
+    }
+  }
+}
+
+/* HRIS refinement: opt-in presentation; pre-existing Payroll CSS is untouched. */
+@media print {
+  .admin-shell .hris-order-control {
+    display: none;
+  }
+}
+
+@media screen {
+  .admin-shell .hris-action {
+    --bs-btn-color: var(--montero-primary);
+    --bs-btn-bg: var(--montero-surface);
+    --bs-btn-border-color: var(--montero-control-border);
+    --bs-btn-hover-color: var(--montero-primary-hover);
+    --bs-btn-hover-bg: var(--montero-primary-tint);
+    --bs-btn-hover-border-color: var(--montero-primary);
+    --bs-btn-active-color: var(--montero-primary-active);
+    --bs-btn-active-bg: var(--montero-primary-tint);
+    --bs-btn-active-border-color: var(--montero-primary);
+    --bs-btn-disabled-color: var(--montero-muted);
+    --bs-btn-disabled-bg: var(--montero-canvas);
+    --bs-btn-disabled-border-color: var(--montero-control-border);
+    --bs-btn-disabled-opacity: 1;
+    display: inline-flex;
+    flex: 0 0 2.75rem;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-decoration: none;
+    vertical-align: middle;
+  }
+
+  .admin-shell :is(.hris-action--danger, .hris-action.btn-outline-danger) {
+    --bs-btn-color: #842029;
+    --bs-btn-border-color: #B02A37;
+    --bs-btn-hover-color: #842029;
+    --bs-btn-hover-bg: #F8D7DA;
+    --bs-btn-hover-border-color: #842029;
+    --bs-btn-active-color: #842029;
+    --bs-btn-active-bg: #F8D7DA;
+    --bs-btn-active-border-color: #842029;
+  }
+
+  .admin-shell .hris-action > .bi {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .admin-shell .hris-page td:has(.hris-action) {
+    white-space: nowrap;
+  }
+
+  .admin-shell .hris-action + .hris-action {
+    margin-left: 4px;
+  }
+
+  .admin-shell .employee-row-actions .hris-action,
+  .admin-shell #orgUnitsTree .hris-action {
+    margin-left: 0;
+  }
+
+  .admin-shell .hris-page #orgUnitsTree .text-end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .hris-page #orgUnitsTree .flex-grow-1 {
+    flex-basis: 12rem;
+  }
+
+  .admin-shell .hris-page :is(.org-toggle, .org-toggle-placeholder) {
+    display: inline-flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .admin-shell .hris-page .org-children {
+    margin-left: 12px;
+    border-left: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell :is(.hris-status, .hris-unit-chip) {
+    --hris-status-bg: #EDF2F1;
+    --hris-status-text: #435B56;
+    background-color: var(--hris-status-bg) !important;
+    color: var(--hris-status-text) !important;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .admin-shell .hris-status--positive {
+    --hris-status-bg: #E6F3EF;
+    --hris-status-text: #0D544B;
+  }
+
+  .admin-shell .hris-status--attention {
+    --hris-status-bg: #FFF3CD;
+    --hris-status-text: #664D03;
+  }
+
+  .admin-shell .hris-status--negative {
+    --hris-status-bg: #F8D7DA;
+    --hris-status-text: #842029;
+  }
+
+  .admin-shell .hris-unit-chip {
+    border-color: var(--montero-control-border);
+    font-weight: 500;
+  }
+
+  .admin-shell .hris-page .hris-created-at {
+    display: none;
+  }
+
+  .admin-shell .hris-created-sort {
+    min-height: 44px;
+    font-size: .9375rem;
+    white-space: normal;
+  }
+
+  .admin-shell .hris-page #leaveTypesTable {
+    min-width: 30rem;
+  }
+
+  .admin-shell .hris-page #holidaysTable {
+    min-width: 48rem;
+  }
+
+  .admin-shell .hris-page #shiftsTable {
+    min-width: 64rem;
+  }
+
+  .admin-shell .hris-navigation .dropdown-menu {
+    min-width: min(15rem, calc(100vw - 32px));
+  }
+
+  .admin-shell .hris-navigation .dropdown-item {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .hris-page .org-toggle-placeholder {
+      display: none;
+    }
+
+    .admin-shell .hris-navigation .dropdown-item {
+      white-space: normal;
+    }
+  }
+}
+
+
+/* HRIS Data Table UX: screen-only refinements within the approved component scope. */
+@media screen {
+  .admin-shell .hris-page .management-card > .card-header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .admin-shell .hris-page .management-card > .card-header > h1 {
+    flex: 1 1 12rem;
+    margin-bottom: 0;
+  }
+
+  .admin-shell .hris-table-region {
+    scroll-margin-block: calc(var(--admin-header-height) + 16px);
+  }
+
+  .admin-shell .hris-dialog #unitEmployeesTable {
+    min-width: 48rem;
+  }
+
+  .admin-shell .hris-dialog #unitEmployeesTable > :is(thead, tbody) > tr > :is(th, td):not([colspan]):first-child {
+    white-space: nowrap;
+  }
+
+  .admin-shell .hris-table-region:focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: -3px;
+  }
+
+  .admin-shell .hris-data-table > thead {
+    --bs-table-bg: var(--montero-primary-tint);
+    --bs-table-color: var(--montero-text);
+    --bs-table-border-color: var(--montero-divider);
+  }
+
+  .admin-shell .hris-data-table > tbody > tr > td:not([colspan]) {
+    line-height: 1.5;
+  }
+
+  .admin-shell :is(#employeesTable, #positionsTable, #appointmentsTable, #unitEmployeesTable) > tbody > tr > td:not([colspan]):nth-child(2),
+  .admin-shell :is(#branchesTable, #leaveRequestsTable, #leaveTypesTable, #shiftsTable) > tbody > tr > td:not([colspan]):first-child,
+  .admin-shell #holidaysTable > tbody > tr > td:not([colspan]):nth-child(2) {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell :is(#employeesTable, #unitEmployeesTable) > tbody > tr > td:not([colspan]):first-child,
+  .admin-shell .attendance-page .hris-data-table > tbody > tr > td:not([colspan]):first-child {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell #positionsTable > tbody > tr > td:not([colspan]):is(:first-child, :nth-child(3)) {
+    color: var(--montero-muted);
+  }
+
+  .admin-shell #holidaysTable > :is(thead, tbody) > tr > :is(th, td):not([colspan]):nth-child(4),
+  .admin-shell #shiftsTable > :is(thead, tbody) > tr > :is(th, td):not([colspan]):is(:nth-child(7), :nth-child(8)) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .hris-data-table th > :is(.sortable, .request-sort, .type-sort) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: inherit;
+    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .admin-shell .hris-sort-mark {
+    flex: 0 0 auto;
+    color: var(--montero-muted);
+    font-size: .875rem;
+  }
+
+  .admin-shell .hris-data-table th[aria-sort] .hris-sort-mark {
+    color: var(--montero-primary);
+  }
+
+  .admin-shell .hris-sort-print,
+  .admin-shell .hris-scroll-hint {
+    display: none;
+  }
+
+  .admin-shell .hris-dialog .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 991.98px) {
+    .admin-shell .hris-scroll-hint {
+      display: block;
+      margin: 0;
+      padding: 12px 16px;
+      color: var(--montero-muted);
+      font-size: .875rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+@media print {
+  .admin-shell .hris-sort-mark,
+  .admin-shell .hris-scroll-hint {
+    display: none;
   }
 }

@@ -1,10 +1,10 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Holidays</h5>
+            <h1 class="h5 mb-0" id="holidaysHeading">Manage Holidays</h1>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addHolidayModal">
                 <i class="bi bi-plus-lg"></i> Add Holiday
@@ -14,7 +14,7 @@
         <div class="card-body border-bottom">
             <form id="holidaySearchForm" class="row g-2 align-items-end">
                 <div class="col-md-6 col-lg-4">
-                    <label class="form-label">Search</label>
+                    <label for="holidaySearchInput" class="form-label">Search</label>
                     <input type="text" class="form-control" id="holidaySearchInput" placeholder="Search holidays">
                 </div>
                 <div class="col-auto">
@@ -27,21 +27,24 @@
                         Clear
                     </button>
                 </div>
+                <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary sortable hris-created-sort" data-sort="created_at" aria-pressed="false" aria-label="Date added. Sort oldest first" title="Sort by date added">Date added</button></div>
             </form>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="holidaysTable">
+            <p class="hris-scroll-hint" id="holidaysTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="holidaysHeading" aria-describedby="holidaysTableScrollHelp">
+                <table class="table table-hover align-middle mb-0 hris-data-table" id="holidaysTable">
+                    <caption class="visually-hidden">Holiday dates, types, pay multipliers and work settings.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4"><button class="btn btn-link p-0 sortable" data-sort="holiday_date">Holiday Date</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="name">Name</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="holiday_type">Type</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="pay_multiplier">Pay Multiplier</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="allow_work">Allow Work</button></th>
-                            <th><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th scope="col" class="ps-4"><button class="btn btn-link p-0 sortable" data-sort="holiday_date">Holiday Date</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="name">Name</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="holiday_type">Type</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="pay_multiplier">Pay Multiplier</button></th>
+                            <th scope="col"><button class="btn btn-link p-0 sortable" data-sort="allow_work">Allow Work</button></th>
+                            <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 sortable" data-sort="created_at">Created At</button></th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -50,49 +53,49 @@
         </div>
 
         <div class="card-footer bg-white py-3">
-            <nav aria-label="Page navigation">
+            <nav aria-label="Holiday pages">
                 <ul class="pagination justify-content-end mb-0" id="holidaysPagination"></ul>
             </nav>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="addHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addHolidayModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addHolidayForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Holiday</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addHolidayModalTitle">Add Holiday</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Holiday Date</label>
-                            <input type="date" class="form-control" name="holiday_date">
+                            <label for="addHolidayForm_holiday_date" class="form-label">Holiday Date</label>
+                            <input id="addHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="addHolidayForm_name" class="form-label">Name</label>
+                            <input id="addHolidayForm_name" type="text" class="form-control" name="name">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="holiday_type">
+                            <label for="addHolidayForm_holiday_type" class="form-label">Type</label>
+                            <select id="addHolidayForm_holiday_type" class="form-select" name="holiday_type">
                                 <option value="REGULAR">REGULAR</option>
                                 <option value="SPECIAL">SPECIAL</option>
                                 <option value="COMPANY">COMPANY</option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Pay Multiplier</label>
-                            <input type="number" step="0.01" min="0" class="form-control" name="pay_multiplier" value="1.00">
+                            <label for="addHolidayForm_pay_multiplier" class="form-label">Pay Multiplier</label>
+                            <input id="addHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier" value="1.00">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Allow Work</label>
-                            <select class="form-select" name="allow_work">
+                            <label for="addHolidayForm_allow_work" class="form-label">Allow Work</label>
+                            <select id="addHolidayForm_allow_work" class="form-select" name="allow_work">
                                 <option value="1">YES</option>
                                 <option value="0">NO</option>
                             </select>
@@ -109,7 +112,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="editHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editHolidayModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editHolidayForm">
@@ -117,35 +120,35 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Holiday</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editHolidayModalTitle">Edit Holiday</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Holiday Date</label>
-                            <input type="date" class="form-control" name="holiday_date">
+                            <label for="editHolidayForm_holiday_date" class="form-label">Holiday Date</label>
+                            <input id="editHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name">
+                            <label for="editHolidayForm_name" class="form-label">Name</label>
+                            <input id="editHolidayForm_name" type="text" class="form-control" name="name">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Type</label>
-                            <select class="form-select" name="holiday_type">
+                            <label for="editHolidayForm_holiday_type" class="form-label">Type</label>
+                            <select id="editHolidayForm_holiday_type" class="form-select" name="holiday_type">
                                 <option value="REGULAR">REGULAR</option>
                                 <option value="SPECIAL">SPECIAL</option>
                                 <option value="COMPANY">COMPANY</option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Pay Multiplier</label>
-                            <input type="number" step="0.01" min="0" class="form-control" name="pay_multiplier">
+                            <label for="editHolidayForm_pay_multiplier" class="form-label">Pay Multiplier</label>
+                            <input id="editHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Allow Work</label>
-                            <select class="form-select" name="allow_work">
+                            <label for="editHolidayForm_allow_work" class="form-label">Allow Work</label>
+                            <select id="editHolidayForm_allow_work" class="form-select" name="allow_work">
                                 <option value="1">YES</option>
                                 <option value="0">NO</option>
                             </select>
@@ -162,12 +165,12 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteHolidayModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Holiday</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteHolidayModalTitle">Delete Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this holiday? This action cannot be undone.
@@ -298,13 +301,13 @@ function renderHolidayRows(holidays) {
                     <td>${esc(h.holiday_type) || '-'}</td>
                     <td>${esc(h.pay_multiplier)}</td>
                     <td>${h.allow_work == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(h.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(h.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editHolidayBtn" data-id="${h.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editHolidayBtn hris-action" data-id="${h.id}" aria-label="Edit holiday" title="Edit holiday">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteHolidayBtn" data-id="${h.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteHolidayBtn hris-action hris-action--danger" data-id="${h.id}" aria-label="Delete holiday" title="Delete holiday">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -325,7 +328,7 @@ function renderPagination(page, totalPages) {
     }
 
     for (let p = start; p <= end; p++) {
-        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link page-btn" data-page="${p}">${p}</a></li>`;
+        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link page-btn" data-page="${p}"${p === page ? ' aria-current="page"' : ''}>${p}</a></li>`;
     }
 
     if (page < totalPages) {
@@ -337,11 +340,23 @@ function renderPagination(page, totalPages) {
 
 function applySortIndicators() {
     $('.sortable').each(function () {
-        let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
-        if ($(this).data('sort') === currentSortBy) {
-            label += ' ' + currentSortDir;
-        }
-        $(this).text(label);
+        const $button = $(this);
+        const $header = $button.closest('th');
+        $header.removeAttr('aria-sort');
+        if (MonteroHris.createdSort(this, currentSortBy, currentSortDir)) return;
+        const label = $button.data('label') || $button.text().replace(/\s+(ASC|DESC)$/, '').trim();
+        const active = $button.data('sort') === currentSortBy;
+        const ascending = currentSortDir === 'ASC';
+        $button.data('label', label);
+        if (active) $header.attr('aria-sort', ascending ? 'ascending' : 'descending');
+        $button.empty().append(document.createTextNode(label));
+        $button.append($('<i>', {
+            class: 'bi hris-sort-mark ' + (active ? (ascending ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up'),
+            'aria-hidden': 'true'
+        }));
+        // Retain the original direction text for print; screen indicators are decorative.
+        if (active) $button.append($('<span>', {class: 'hris-sort-print', 'aria-hidden': 'true', text: ' ' + currentSortDir}));
+        $button.attr('aria-label', label + (active ? ': sorted ' + (ascending ? 'ascending' : 'descending') + '. ' : ': ') + 'Sort ' + (active && ascending ? 'descending' : 'ascending'));
     });
 }
 

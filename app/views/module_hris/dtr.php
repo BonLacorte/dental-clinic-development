@@ -1,11 +1,11 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-3 management-page attendance-page hris-page">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="mb-1">Daily Time Record</h4>
+            <h1 class="h4 mb-1" id="dtrHeading">Daily Time Record</h1>
             <div class="text-muted">
                 Employee attendance and time records
             </div>
@@ -22,22 +22,22 @@
                 <div class="row g-3 align-items-end">
 
                     <div class="col-md-3">
-                        <label class="form-label">
+                        <label for="dtrFilter1_month" class="form-label">
                             Month
                         </label>
 
-                        <input type="month" name="month" class="form-control" value="<?= htmlspecialchars($month) ?>">
+                        <input id="dtrFilter1_month" type="month" name="month" class="form-control" value="<?= htmlspecialchars($month) ?>">
                     </div>
 
 
                     <?php if ($canViewAll): ?>
 
                         <div class="col-md-5">
-                            <label class="form-label">
+                            <label for="dtrFilter1_employee_id" class="form-label">
                                 Employee
                             </label>
 
-                            <select name="employee_id" class="form-select">
+                            <select id="dtrFilter1_employee_id" name="employee_id" class="form-select">
                                 <option value="">
                                     Select Employee
                                 </option>
@@ -165,21 +165,23 @@
             </div>
 
 
-            <div class="table-responsive">
+            <p class="hris-scroll-hint" id="dtrScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="dtrHeading" aria-describedby="dtrScrollHelp">
 
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 hris-data-table">
+                    <caption class="visually-hidden">Daily attendance for the selected employee and month.</caption>
 
                     <thead class="table-light">
                         <tr>
-                            <th>Date</th>
-                            <th>Day</th>
-                            <th>Time In</th>
-                            <th>Time Out</th>
-                            <th class="text-end">Late</th>
-                            <th class="text-end">Undertime</th>
-                            <th class="text-end">Overtime</th>
-                            <th class="text-end">Hours</th>
-                            <th>Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Day</th>
+                            <th scope="col">Time In</th>
+                            <th scope="col">Time Out</th>
+                            <th scope="col" class="text-end">Late</th>
+                            <th scope="col" class="text-end">Undertime</th>
+                            <th scope="col" class="text-end">Overtime</th>
+                            <th scope="col" class="text-end">Hours</th>
+                            <th scope="col">Status</th>
                         </tr>
                     </thead>
 
@@ -240,7 +242,7 @@
                                     <td>
                                         <?php if ($row['id']): ?>
 
-                                            <span class="badge bg-success">
+                                            <span class="badge bg-success hris-status" data-hris-kind="attendance">
                                                 <?= htmlspecialchars($row['status'] ?? 'PRESENT') ?>
                                             </span>
 

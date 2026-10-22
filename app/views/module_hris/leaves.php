@@ -1,10 +1,10 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Leaves</h5>
+            <h1 class="h5 mb-0" id="leavesHeading">Manage Leaves</h1>
 
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeaveTypeModal">
@@ -19,12 +19,12 @@
         <div class="card-body pb-0">
             <ul class="nav nav-tabs" id="leaveTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requestsPane" type="button" role="tab">
+                    <button class="nav-link active" id="requests-tab" aria-controls="requestsPane" aria-selected="true" data-bs-toggle="tab" data-bs-target="#requestsPane" type="button" role="tab">
                         Leave Requests
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="types-tab" data-bs-toggle="tab" data-bs-target="#typesPane" type="button" role="tab">
+                    <button class="nav-link" id="types-tab" aria-controls="typesPane" aria-selected="false" data-bs-toggle="tab" data-bs-target="#typesPane" type="button" role="tab">
                         Leave Types
                     </button>
                 </li>
@@ -32,11 +32,11 @@
         </div>
 
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="requestsPane" role="tabpanel">
+            <div class="tab-pane fade show active" id="requestsPane" role="tabpanel" aria-labelledby="requests-tab">
                 <div class="card-body border-bottom">
                     <form id="requestSearchForm" class="row g-2 align-items-end">
                         <div class="col-md-6 col-lg-4">
-                            <label class="form-label">Search</label>
+                            <label for="requestSearchInput" class="form-label">Search</label>
                             <input type="text" class="form-control" id="requestSearchInput" placeholder="Search leave requests">
                         </div>
                         <div class="col-auto">
@@ -47,23 +47,26 @@
                         <div class="col-auto">
                             <button class="btn btn-outline-secondary" type="button" id="clearRequestSearchBtn">Clear</button>
                         </div>
+                        <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary request-sort hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
                     </form>
                 </div>
 
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="leaveRequestsTable">
+                    <p class="hris-scroll-hint" id="leaveRequestsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+                    <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="requests-tab" aria-describedby="leaveRequestsTableScrollHelp">
+                        <table class="table table-hover align-middle mb-0 hris-data-table" id="leaveRequestsTable">
+                            <caption class="visually-hidden">Leave requests with their dates, status and approval details.</caption>
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4"><button class="btn btn-link p-0 request-sort" data-sort="employee_name">Employee</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="leave_type">Leave Type</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="date_from">Date From</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="date_to">Date To</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="status">Status</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="approved_by_name">Approved By</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="approved_at">Approved At</button></th>
-                                    <th><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th scope="col" class="ps-4"><button class="btn btn-link p-0 request-sort" data-sort="employee_name">Employee</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="leave_type">Leave Type</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="date_from">Date From</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="date_to">Date To</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="status">Status</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="approved_by_name">Approved By</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="approved_at">Approved At</button></th>
+                                    <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
+                                    <th scope="col" class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -78,11 +81,11 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="typesPane" role="tabpanel">
+            <div class="tab-pane fade" id="typesPane" role="tabpanel" aria-labelledby="types-tab">
                 <div class="card-body border-bottom">
                     <form id="typeSearchForm" class="row g-2 align-items-end">
                         <div class="col-md-6 col-lg-4">
-                            <label class="form-label">Search</label>
+                            <label for="typeSearchInput" class="form-label">Search</label>
                             <input type="text" class="form-control" id="typeSearchInput" placeholder="Search leave types">
                         </div>
                         <div class="col-auto">
@@ -93,18 +96,21 @@
                         <div class="col-auto">
                             <button class="btn btn-outline-secondary" type="button" id="clearTypeSearchBtn">Clear</button>
                         </div>
+                        <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary type-sort hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
                     </form>
                 </div>
 
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="leaveTypesTable">
+                    <p class="hris-scroll-hint" id="leaveTypesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+                    <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="types-tab" aria-describedby="leaveTypesTableScrollHelp">
+                        <table class="table table-hover align-middle mb-0 hris-data-table" id="leaveTypesTable">
+                            <caption class="visually-hidden">Leave types and their existing paid or unpaid setting.</caption>
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4"><button class="btn btn-link p-0 type-sort" data-sort="name">Name</button></th>
-                                    <th><button class="btn btn-link p-0 type-sort" data-sort="is_paid">Is Paid</button></th>
-                                    <th><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th scope="col" class="ps-4"><button class="btn btn-link p-0 type-sort" data-sort="name">Name</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 type-sort" data-sort="is_paid">Is Paid</button></th>
+                                    <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
+                                    <th scope="col" class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -122,38 +128,38 @@
     </div>
 </div>
 
-<div class="modal fade" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveRequestModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addLeaveRequestForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Leave Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addLeaveRequestModalTitle">Add Leave Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Employee</label>
-                            <select class="form-select employeeSelect" name="employee_id"></select>
+                            <label for="addLeaveRequestForm_employee_id" class="form-label">Employee</label>
+                            <select id="addLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Leave Type</label>
-                            <select class="form-select leaveTypeSelect" name="leave_type_id"></select>
+                            <label for="addLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
+                            <select id="addLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Date From</label>
-                            <input type="date" class="form-control" name="date_from">
+                            <label for="addLeaveRequestForm_date_from" class="form-label">Date From</label>
+                            <input id="addLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Date To</label>
-                            <input type="date" class="form-control" name="date_to">
+                            <label for="addLeaveRequestForm_date_to" class="form-label">Date To</label>
+                            <input id="addLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" name="status">
+                            <label for="addLeaveRequestForm_status" class="form-label">Status</label>
+                            <select id="addLeaveRequestForm_status" class="form-select" name="status">
                                 <option value="PENDING">PENDING</option>
                                 <option value="APPROVED">APPROVED</option>
                                 <option value="REJECTED">REJECTED</option>
@@ -161,8 +167,8 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Reason</label>
-                            <textarea class="form-control" name="reason" rows="3"></textarea>
+                            <label for="addLeaveRequestForm_reason" class="form-label">Reason</label>
+                            <textarea id="addLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
@@ -176,7 +182,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveRequestModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editLeaveRequestForm">
@@ -184,31 +190,31 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Leave Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editLeaveRequestModalTitle">Edit Leave Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Employee</label>
-                            <select class="form-select employeeSelect" name="employee_id"></select>
+                            <label for="editLeaveRequestForm_employee_id" class="form-label">Employee</label>
+                            <select id="editLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Leave Type</label>
-                            <select class="form-select leaveTypeSelect" name="leave_type_id"></select>
+                            <label for="editLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
+                            <select id="editLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Date From</label>
-                            <input type="date" class="form-control" name="date_from">
+                            <label for="editLeaveRequestForm_date_from" class="form-label">Date From</label>
+                            <input id="editLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Date To</label>
-                            <input type="date" class="form-control" name="date_to">
+                            <label for="editLeaveRequestForm_date_to" class="form-label">Date To</label>
+                            <input id="editLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" name="status">
+                            <label for="editLeaveRequestForm_status" class="form-label">Status</label>
+                            <select id="editLeaveRequestForm_status" class="form-select" name="status">
                                 <option value="PENDING">PENDING</option>
                                 <option value="APPROVED">APPROVED</option>
                                 <option value="REJECTED">REJECTED</option>
@@ -216,8 +222,8 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Reason</label>
-                            <textarea class="form-control" name="reason" rows="3"></textarea>
+                            <label for="editLeaveRequestForm_reason" class="form-label">Reason</label>
+                            <textarea id="editLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
@@ -231,25 +237,25 @@
     </div>
 </div>
 
-<div class="modal fade" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="addLeaveTypeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Leave Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addLeaveTypeModalTitle">Add Leave Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name">
+                        <label for="addLeaveTypeForm_name" class="form-label">Name</label>
+                        <input id="addLeaveTypeForm_name" type="text" class="form-control" name="name">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Is Paid</label>
-                        <select class="form-select" name="is_paid">
+                        <label for="addLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
+                        <select id="addLeaveTypeForm_is_paid" class="form-select" name="is_paid">
                             <option value="1">YES</option>
                             <option value="0">NO</option>
                         </select>
@@ -265,7 +271,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="editLeaveTypeForm">
@@ -273,18 +279,18 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Leave Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editLeaveTypeModalTitle">Edit Leave Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name">
+                        <label for="editLeaveTypeForm_name" class="form-label">Name</label>
+                        <input id="editLeaveTypeForm_name" type="text" class="form-control" name="name">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Is Paid</label>
-                        <select class="form-select" name="is_paid">
+                        <label for="editLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
+                        <select id="editLeaveTypeForm_is_paid" class="form-select" name="is_paid">
                             <option value="1">YES</option>
                             <option value="0">NO</option>
                         </select>
@@ -300,12 +306,12 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveRequestModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Leave Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteLeaveRequestModalTitle">Delete Leave Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this leave request? This action cannot be undone.
@@ -318,12 +324,12 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Leave Type</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteLeaveTypeModalTitle">Delete Leave Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this leave type? This action cannot be undone.
@@ -570,16 +576,16 @@ function renderRequestRows(requests) {
                     <td>${esc(req.leave_type) || '-'}</td>
                     <td>${esc(req.date_from)}</td>
                     <td>${esc(req.date_to)}</td>
-                    <td><span class="badge text-bg-secondary">${esc(req.status)}</span></td>
+                    <td><span class="badge text-bg-secondary hris-status ${MonteroHris.statusClass(req.status, 'leave')}">${esc(req.status)}</span></td>
                     <td>${esc(req.approved_by_name) || '-'}</td>
                     <td>${esc(req.approved_at) || '-'}</td>
-                    <td>${esc(req.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(req.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editLeaveRequestBtn" data-id="${req.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editLeaveRequestBtn hris-action" data-id="${req.id}" aria-label="Edit leave request" title="Edit leave request">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteLeaveRequestBtn" data-id="${req.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteLeaveRequestBtn hris-action hris-action--danger" data-id="${req.id}" aria-label="Delete leave request" title="Delete leave request">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -629,13 +635,13 @@ function renderTypeRows(types) {
                 <tr>
                     <td class="ps-4">${esc(type.name)}</td>
                     <td>${type.is_paid == 1 ? 'YES' : 'NO'}</td>
-                    <td>${esc(type.created_at) || '-'}</td>
+                    <td class="hris-created-at">${esc(type.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-link btn-sm text-primary editLeaveTypeBtn" data-id="${type.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editLeaveTypeBtn hris-action" data-id="${type.id}" aria-label="Edit leave type" title="Edit leave type">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-link btn-sm text-danger deleteLeaveTypeBtn" data-id="${type.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteLeaveTypeBtn hris-action hris-action--danger" data-id="${type.id}" aria-label="Delete leave type" title="Delete leave type">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -656,7 +662,7 @@ function renderPagination(selector, page, totalPages, buttonClass) {
     }
 
     for (let p = start; p <= end; p++) {
-        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link ${buttonClass}" data-page="${p}">${p}</a></li>`;
+        html += `<li class="page-item ${p === page ? 'active' : ''}"><a href="#" class="page-link ${buttonClass}" data-page="${p}"${p === page ? ' aria-current="page"' : ''}>${p}</a></li>`;
     }
 
     if (page < totalPages) {
@@ -668,11 +674,23 @@ function renderPagination(selector, page, totalPages, buttonClass) {
 
 function applySortIndicators(selector, sortBy, sortDir) {
     $(selector).each(function () {
-        let label = $(this).text().replace(' ASC', '').replace(' DESC', '');
-        if ($(this).data('sort') === sortBy) {
-            label += ' ' + sortDir;
-        }
-        $(this).text(label);
+        const $button = $(this);
+        const $header = $button.closest('th');
+        $header.removeAttr('aria-sort');
+        if (MonteroHris.createdSort(this, sortBy, sortDir)) return;
+        const label = $button.data('label') || $button.text().replace(/\s+(ASC|DESC)$/, '').trim();
+        const active = $button.data('sort') === sortBy;
+        const ascending = sortDir === 'ASC';
+        $button.data('label', label);
+        if (active) $header.attr('aria-sort', ascending ? 'ascending' : 'descending');
+        $button.empty().append(document.createTextNode(label));
+        $button.append($('<i>', {
+            class: 'bi hris-sort-mark ' + (active ? (ascending ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up'),
+            'aria-hidden': 'true'
+        }));
+        // Retain the original direction text for print; screen indicators are decorative.
+        if (active) $button.append($('<span>', {class: 'hris-sort-print', 'aria-hidden': 'true', text: ' ' + sortDir}));
+        $button.attr('aria-label', label + (active ? ': sorted ' + (ascending ? 'ascending' : 'descending') + '. ' : ': ') + 'Sort ' + (active && ascending ? 'descending' : 'ascending'));
     });
 }
 

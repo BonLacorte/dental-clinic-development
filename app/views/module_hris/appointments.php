@@ -3,26 +3,28 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Appointments</h5>
+            <h1 class="h5 mb-0" id="employmentTypesHeading">Employment Types</h1>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
-                <i class="bi bi-plus-lg"></i> Add Appointment
+                <i class="bi bi-plus-lg"></i> Add Employment Type
             </button>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="appointmentsTable">
+            <p class="hris-scroll-hint" id="appointmentsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="employmentTypesHeading" aria-describedby="appointmentsTableScrollHelp">
+                <table class="table table-hover align-middle mb-0 hris-data-table" id="appointmentsTable">
+                    <caption class="visually-hidden">Employment types, descriptions and activity status with existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th width="120" class="ps-4">Code</th>
-                            <th>Appointment Name</th>
-                            <th>Description</th>
-                            <th width="100">Status</th>
-                            <th width="140" class="text-end pe-4">Actions</th>
+                            <th scope="col" width="120" class="ps-4">Code</th>
+                            <th scope="col">Employment Type Name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col" width="100">Status</th>
+                            <th scope="col" width="140" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
 
@@ -40,7 +42,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Appointment -->
-<div class="modal fade" id="addAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAppointmentModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -49,15 +51,15 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Appointment</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addAppointmentModalTitle">Add Employment Type</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label">Code <span class="text-danger">*</span></label>
-                        <input
+                        <label for="addAppointmentForm_code" class="form-label">Code <span class="text-danger">*</span></label>
+                        <input id="addAppointmentForm_code"
                             type="text"
                             class="form-control"
                             name="code"
@@ -66,8 +68,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Appointment Name</label>
-                        <input
+                        <label for="addAppointmentForm_name" class="form-label">Employment Type Name</label>
+                        <input id="addAppointmentForm_name"
                             type="text"
                             class="form-control"
                             name="name"
@@ -75,8 +77,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea
+                        <label for="addAppointmentForm_description" class="form-label">Description</label>
+                        <textarea id="addAppointmentForm_description"
                             class="form-control"
                             name="description"
                             rows="2"
@@ -114,7 +116,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Appointment -->
-<div class="modal fade" id="editAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editAppointmentModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -124,15 +126,15 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Appointment</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editAppointmentModalTitle">Edit Employment Type</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label">Code <span class="text-danger">*</span></label>
-                        <input
+                        <label for="editAppointmentForm_code" class="form-label">Code <span class="text-danger">*</span></label>
+                        <input id="editAppointmentForm_code"
                             type="text"
                             class="form-control"
                             name="code"
@@ -140,16 +142,16 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Appointment Name</label>
-                        <input
+                        <label for="editAppointmentForm_name" class="form-label">Employment Type Name</label>
+                        <input id="editAppointmentForm_name"
                             type="text"
                             class="form-control"
                             name="name">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea
+                        <label for="editAppointmentForm_description" class="form-label">Description</label>
+                        <textarea id="editAppointmentForm_description"
                             class="form-control"
                             name="description"
                             rows="2"></textarea>
@@ -185,13 +187,13 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Delete Appointment Confirmation -->
-<div class="modal fade" id="deleteAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteAppointmentModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title">Delete Appointment</h5>
-                <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteAppointmentModalTitle">Delete Employment Type</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">
@@ -222,8 +224,24 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
 let appointmentIdToDelete = null;
 
+// Copy only: preserve unknown messages and every server response value unchanged.
+function employmentTypeMessage(message) {
+    const labels = new Map([
+        ['Appointment not found.', 'Employment type not found.'],
+        ['Appointment created successfully.', 'Employment type created successfully.'],
+        ['Appointment updated successfully.', 'Employment type updated successfully.'],
+        ['Failed to update appointment.', 'Failed to update employment type.'],
+        ['Appointment deleted successfully.', 'Employment type deleted successfully.'],
+        ['Failed to delete appointment.', 'Failed to delete employment type.'],
+        ['System default appointment types cannot be edited.', 'System default employment types cannot be edited.'],
+        ['System default appointment types cannot be deleted.', 'System default employment types cannot be deleted.']
+    ]);
+    return labels.has(message) ? labels.get(message) : message;
+}
+
 $(document).ready(function () {
 
+    document.title = document.title.replace('Appointments', 'Employment Types');
     getAllAppointments();
 
     $('#addAppointmentForm').on('submit', function (e) {
@@ -260,7 +278,7 @@ $(document).ready(function () {
 });
 
 function getAllAppointments() {
-    showLoader("Loading appointments...");
+    showLoader("Loading employment types...");
 
     $.ajax({
         url: '/hris/appointments/getallappointments',
@@ -277,7 +295,7 @@ function getAllAppointments() {
                 rows = `
                     <tr>
                         <td colspan="5" class="text-center">
-                            No appointments found
+                            No employment types found
                         </td>
                     </tr>
                 `;
@@ -287,18 +305,18 @@ function getAllAppointments() {
                 res.data.forEach((appointment) => {
 
                     let statusBadge = parseInt(appointment.is_active) === 1
-                        ? '<span class="badge bg-success">Active</span>'
-                        : '<span class="badge bg-secondary">Inactive</span>';
+                        ? '<span class="badge bg-success hris-status hris-status--positive">Active</span>'
+                        : '<span class="badge bg-secondary hris-status hris-status--neutral">Inactive</span>';
 
                     let actions = `
-                        <button class="btn btn-link btn-sm text-primary editAppointmentBtn"
-                            data-id="${appointment.id}">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm editAppointmentBtn hris-action"
+                            data-id="${appointment.id}" aria-label="Edit employment type" title="Edit employment type">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
 
-                        <button class="btn btn-link btn-sm text-danger deleteAppointmentBtn"
-                            data-id="${appointment.id}">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm deleteAppointmentBtn hris-action hris-action--danger"
+                            data-id="${appointment.id}" aria-label="Delete employment type" title="Delete employment type">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     `;
 
@@ -325,7 +343,7 @@ function getAllAppointments() {
         error: function (xhr) {
             hideLoader();
             console.log(xhr.responseText);
-            showToast('Unable to load appointments.', 'error');
+            showToast('Unable to load employment types.', 'error');
         }
 
     });
@@ -349,7 +367,7 @@ function addAppointment(form) {
         dataType: 'json',
 
         beforeSend: function () {
-            showLoader("Saving appointment...");
+            showLoader("Saving employment type...");
         },
 
         success: function (res) {
@@ -357,11 +375,11 @@ function addAppointment(form) {
             hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
                 return;
             }
 
-            showToast(res.message, 'success');
+            showToast(employmentTypeMessage(res.message), 'success');
 
             $('#addAppointmentForm')[0].reset();
 
@@ -385,7 +403,7 @@ function addAppointment(form) {
 }
 
 function getAppointment(id) {
-    showLoader("Loading appointment...");
+    showLoader("Loading employment type...");
 
     $.ajax({
         url: '/hris/appointments/getappointmentbyid/' + id,
@@ -397,7 +415,7 @@ function getAppointment(id) {
             hideLoader();
 
             if (!res.success) {
-                showToast(res.message, 'error');
+                showToast(employmentTypeMessage(res.message), 'error');
                 return;
             }
 
@@ -422,7 +440,7 @@ function getAppointment(id) {
 
             console.log(xhr.responseText);
 
-            showToast('Unable to load appointment.', 'error');
+            showToast('Unable to load employment type.', 'error');
 
         }
 
@@ -449,7 +467,7 @@ function updateAppointment(form) {
         dataType: 'json',
 
         beforeSend: function () {
-            showLoader("Updating appointment...");
+            showLoader("Updating employment type...");
         },
 
         success: function (res) {
@@ -457,11 +475,11 @@ function updateAppointment(form) {
             hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
                 return;
             }
 
-            showToast(res.message, 'success');
+            showToast(employmentTypeMessage(res.message), 'success');
 
             bootstrap.Modal.getInstance(
                 document.getElementById('editAppointmentModal')
@@ -496,7 +514,7 @@ function deleteAppointment(id) {
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deleteAppointmentModal')).hide();
-            showLoader("Deleting appointment...");
+            showLoader("Deleting employment type...");
         },
 
         success: function (res) {
@@ -504,11 +522,11 @@ function deleteAppointment(id) {
             hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
                 return;
             }
 
-            showToast(res.message, 'success');
+            showToast(employmentTypeMessage(res.message), 'success');
             appointmentIdToDelete = null;
             getAllAppointments();
 

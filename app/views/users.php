@@ -5,7 +5,7 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] 
 //$page = isset($result['page']) && $result['page'] > 0 ? (int)$result['page'] : 1;
 $offset = ($page - 1) * $limit;
 ?>
-<div class="card shadow-sm">
+<div class="card shadow-sm management-card">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">User Management</h5>
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">

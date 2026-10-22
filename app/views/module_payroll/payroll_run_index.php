@@ -3,18 +3,18 @@
 ?>
 
 
-<div class="py-4">
-    <div class="card shadow-sm">
+<div class="py-4 management-page payroll-runs-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3">
-            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
-                <div>
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 payroll-runs-toolbar">
+                <div class="payroll-runs-title">
                     <h5 class="mb-1">Payroll Runs</h5>
                     <small class="text-muted">
                         Create and manage semi-monthly payroll processing runs.
                     </small>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 payroll-runs-filters">
                     <select class="form-select form-select-sm" id="payrollRunStatusFilter" style="min-width: 160px;">
                         <option value="">All Statuses</option>
                         <option value="DRAFT">Draft</option>

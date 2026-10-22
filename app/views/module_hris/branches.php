@@ -1,10 +1,10 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 management-page hris-page">
+    <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Manage Branches</h5>
+            <h1 class="h5 mb-0" id="branchesHeading">Manage Branches</h1>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBranchModal">
                 <i class="bi bi-plus-lg"></i> Add Branch
@@ -12,14 +12,16 @@
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="branchesTable">
+            <p class="hris-scroll-hint" id="branchesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
+            <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="branchesHeading" aria-describedby="branchesTableScrollHelp">
+                <table class="table table-hover align-middle mb-0 hris-data-table" id="branchesTable">
+                    <caption class="visually-hidden">Branch names, codes and addresses with existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Name</th>
-                            <th>Code</th>
-                            <th>Address</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th scope="col" class="ps-4">Name</th>
+                            <th scope="col">Code</th>
+                            <th scope="col">Address</th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -28,7 +30,7 @@
         </div>
 
         <div class="card-footer bg-white py-3">
-            <nav aria-label="Page navigation">
+            <nav aria-label="Branch pages">
                 <ul class="pagination justify-content-end mb-0" id="branchesPagination"></ul>
             </nav>
         </div>
@@ -36,31 +38,31 @@
 </div>
 
 <!-- Add Branch -->
-<div class="modal fade" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="addBranchForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Branch</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addBranchModalTitle">Add Branch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Branch Name</label>
-                        <input type="text" class="form-control" name="name">
+                        <label for="addBranchForm_name" class="form-label">Branch Name</label>
+                        <input id="addBranchForm_name" type="text" class="form-control" name="name">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Branch Code</label>
-                        <input type="text" class="form-control" name="code">
+                        <label for="addBranchForm_code" class="form-label">Branch Code</label>
+                        <input id="addBranchForm_code" type="text" class="form-control" name="code">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea class="form-control" name="address" rows="3"></textarea>
+                        <label for="addBranchForm_address" class="form-label">Address</label>
+                        <textarea id="addBranchForm_address" class="form-control" name="address" rows="3"></textarea>
                     </div>
                 </div>
 
@@ -79,7 +81,7 @@
 </div>
 
 <!-- Edit Branch -->
-<div class="modal fade" id="editBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="editBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editBranchModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="editBranchForm">
@@ -87,24 +89,24 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Branch</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editBranchModalTitle">Edit Branch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Branch Name</label>
-                        <input type="text" class="form-control" name="name">
+                        <label for="editBranchForm_name" class="form-label">Branch Name</label>
+                        <input id="editBranchForm_name" type="text" class="form-control" name="name">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Branch Code</label>
-                        <input type="text" class="form-control" name="code">
+                        <label for="editBranchForm_code" class="form-label">Branch Code</label>
+                        <input id="editBranchForm_code" type="text" class="form-control" name="code">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea class="form-control" name="address" rows="3"></textarea>
+                        <label for="editBranchForm_address" class="form-label">Address</label>
+                        <textarea id="editBranchForm_address" class="form-control" name="address" rows="3"></textarea>
                     </div>
                 </div>
 
@@ -123,13 +125,13 @@
 </div>
 
 <!-- Delete confirmation modal (replaces window.confirm) -->
-<div class="modal fade" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div class="modal fade hris-dialog" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteBranchModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title">Delete Branch</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="deleteBranchModalTitle">Delete Branch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">
@@ -252,15 +254,15 @@ function getAllBranches(page) {
                             <td class="text-end pe-4">
 
                                 <button
-                                    class="btn btn-link btn-sm text-primary editBranchBtn"
-                                    data-id="${b.id}">
-                                    <i class="bi bi-pencil"></i>
+                                    class="btn btn-sm editBranchBtn hris-action"
+                                    data-id="${b.id}" aria-label="Edit branch" title="Edit branch">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                 </button>
 
                                 <button
-                                    class="btn btn-link btn-sm text-danger deleteBranchBtn"
-                                    data-id="${b.id}">
-                                    <i class="bi bi-trash"></i>
+                                    class="btn btn-sm deleteBranchBtn hris-action hris-action--danger"
+                                    data-id="${b.id}" aria-label="Delete branch" title="Delete branch">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
                                 </button>
                             </td>
                         </tr>
@@ -319,7 +321,7 @@ function renderPagination(page, totalPages) {
     for (let p = start; p <= end; p++) {
         html += `
             <li class="page-item ${p === page ? 'active' : ''}">
-                <a href="#" class="page-link page-btn" data-page="${p}">${p}</a>
+                <a href="#" class="page-link page-btn" data-page="${p}"${p === page ? ' aria-current="page"' : ''}>${p}</a>
             </li>
         `;
     }
