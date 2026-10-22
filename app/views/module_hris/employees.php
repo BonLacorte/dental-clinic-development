@@ -46,6 +46,27 @@ $employeeActions = [
                 <button type="button" class="btn btn-outline-danger" id="retryEmployeeList">Retry employee list</button>
             </div>
         </div>
+        <form id="employeeMobileSortForm" class="employee-mobile-sort" aria-label="Sort employees">
+            <div>
+                <label class="form-label" for="employeeMobileSortBy">Sort employees by</label>
+                <select class="form-select" id="employeeMobileSortBy">
+                    <option value="created_at">Date added (default)</option>
+                    <option value="employee_no">Employee No</option>
+                    <option value="name">Name</option>
+                    <option value="branch_name">Branch</option>
+                    <option value="date_hired">Date Hired</option>
+                    <option value="employment_status">Employment Status</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="employeeMobileSortDir">Direction</label>
+                <select class="form-select" id="employeeMobileSortDir">
+                    <option value="ASC">Ascending</option>
+                    <option value="DESC" selected>Descending</option>
+                </select>
+            </div>
+            <button class="btn btn-outline-primary" type="submit">Apply order</button>
+        </form>
         <div class="table-responsive employee-table-region" tabindex="0" role="region" aria-label="Employee records" aria-describedby="employeeScrollHelp" aria-busy="true">
             <table class="table table-hover align-middle mb-0 hris-data-table" id="employeesTable">
                 <caption class="visually-hidden">Employee records. Sort using the column buttons; Actions apply to the named employee.</caption>
@@ -58,6 +79,7 @@ $employeeActions = [
                 <tbody></tbody>
             </table>
         </div>
+        <ul class="employee-cards" id="employeeCards" aria-label="Employee records" aria-busy="true"></ul>
         <div class="card-footer bg-white employee-pagination">
             <p id="employeePageSummary" class="mb-0">Waiting for employee records.</p>
             <nav aria-label="Employee pages"><ul class="pagination mb-0" id="employeesPagination"></ul></nav>
@@ -234,7 +256,41 @@ $employeeActions = [
 
     function listDescription(context) {
         const labels = {employee_no: 'Employee No', name: 'Name', branch_name: 'Branch', date_hired: 'Date Hired', employment_status: 'Status'};
-        return context.sortBy === 'created_at' ? 'Sorted by newest added.' : `Sorted by ${labels[context.sortBy]}, ${context.sortDir === 'ASC' ? 'ascending' : 'descending'}.`;
+        return context.sortBy === 'created_at' ? `Sorted by ${context.sortDir === 'ASC' ? 'oldest' : 'newest'} added.` : `Sorted by ${labels[context.sortBy]}, ${context.sortDir === 'ASC' ? 'ascending' : 'descending'}.`;
+    }
+
+    // Both representations use these same escaped values and permission decisions.
+    function employeePresentation(emp) {
+        const name = employeeName(emp);
+        const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-employee-action="${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i><span class="employee-action-label">${label}</span></button>` : '';
+        // Legacy compensation visibility is unchanged; policy review stays separate.
+        const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
+            + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil-square', 'primary')
+            + action(true, 'editCompensationBtn', 'Compensation', 'cash-stack', 'primary')
+            + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
+        return {
+            name: esc(name), number: esc(emp.employee_no) || '—', branch: esc(emp.branch_name) || '—',
+            dateHired: esc(emp.date_hired) || '—', actions,
+            status: `<span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span>`
+        };
+    }
+
+    function employeeTableRow(record) {
+        return `<tr><td>${record.number}</td><td>${record.name}</td><td>${record.branch}</td><td>${record.dateHired}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions">${record.actions}</div></td></tr>`;
+    }
+
+    function employeeCard(record) {
+        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.name}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions" role="group" aria-label="Actions for ${record.name}">${record.actions}</div></article></li>`;
+    }
+
+    function focusEmployeeAction(trigger, employeeId) {
+        if (trigger && document.contains(trigger) && $(trigger).is(':visible')) {
+            trigger.focus();
+            return;
+        }
+        const replacement = employeeId && $('#employeesTable button, #employeeCards button').filter(':visible').toArray().find(button =>
+            button.dataset.id === String(employeeId) && button.dataset.employeeAction === trigger?.dataset.employeeAction);
+        (replacement || document.getElementById('employeesHeading')).focus();
     }
 
     function getAllEmployees(page) {
@@ -242,8 +298,8 @@ $employeeActions = [
         if (listRequest) listRequest.abort();
         requestedPage = page;
         const context = {page, search: currentSearch, sortBy: currentSortBy, sortDir: currentSortDir};
-        $('.employee-table-region').attr('aria-busy', 'true');
-        if ($('#employeeListError').has(document.activeElement).length) $('.employee-table-region').trigger('focus');
+        $('.employee-table-region, #employeeCards').attr('aria-busy', 'true');
+        if ($('#employeeListError').has(document.activeElement).length) $('#employeesHeading').trigger('focus');
         $('#employeeListError').prop('hidden', true);
         $('#employeeListStatus').text(loadedList ? 'Refreshing employees. Previously loaded rows remain below.' : 'Loading employees…');
         listRequest = $.ajax({
@@ -257,21 +313,16 @@ $employeeActions = [
             }
             currentPage = res.currentPage;
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
-            const rows = res.data.map(emp => {
-                const name = employeeName(emp);
-                const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i></button>` : '';
-                // Existing compensation access/visibility is deliberately unchanged.
-                const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
-                    + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil-square', 'primary')
-                    + action(true, 'editCompensationBtn', 'Compensation', 'cash-stack', 'primary')
-                    + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
-                return `<tr><td>${esc(emp.employee_no) || '—'}</td><td>${esc(name)}</td><td>${esc(emp.branch_name) || '—'}</td><td>${esc(emp.date_hired) || '—'}</td><td><span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span></td><td class="text-end"><div class="employee-row-actions">${actions || 'No available actions'}</div></td></tr>`;
-            }).join('');
-            $('#employeesTable tbody').html(rows || `<tr><td colspan="6" class="text-center py-4">${context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.'}</td></tr>`);
+            const records = res.data.map(employeePresentation);
+            const emptyText = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
+            $('#employeesTable tbody').html(records.map(employeeTableRow).join('') || `<tr><td colspan="6" class="text-center py-4">${emptyText}</td></tr>`);
+            $('#employeeCards').html(records.map(employeeCard).join('') || `<li class="employee-card-empty">${emptyText}</li>`);
             const count = `${res.data.length} employee${res.data.length === 1 ? '' : 's'} loaded on this page`;
             $('#employeeListStatus').text(`${count}${context.search ? ` for “${context.search}”` : ''}.`);
             $('#employeePageSummary').text(`Page ${currentPage} of ${res.totalPages}`);
             $('#employeeSortSummary').text(listDescription(context));
+            $('#employeeMobileSortBy').val(context.sortBy);
+            $('#employeeMobileSortDir').val(context.sortDir);
             $('.employee-sort').each(function () {
                 const active = $(this).data('sort') === context.sortBy;
                 $(this).closest('th').removeAttr('aria-sort');
@@ -285,7 +336,7 @@ $employeeActions = [
         }).always(function () {
             if (sequence === listSequence) {
                 listRequest = null;
-                $('.employee-table-region').attr('aria-busy', 'false');
+                $('.employee-table-region, #employeeCards').attr('aria-busy', 'false');
             }
         });
     }
@@ -494,10 +545,24 @@ $employeeActions = [
         $('#clearEmployeeSearchBtn').on('click', function () { $('#employeeSearchInput').val(''); currentSearch = ''; getAllEmployees(1); });
         $('#retryEmployeeList').on('click', function () { getAllEmployees(requestedPage); });
         $('.employee-sort').on('click', function () { const key = $(this).data('sort'); currentSortDir = currentSortBy === key && currentSortDir === 'ASC' ? 'DESC' : 'ASC'; currentSortBy = key; getAllEmployees(1); });
+        $('#employeeMobileSortForm').on('submit', function (event) {
+            event.preventDefault();
+            currentSortBy = $('#employeeMobileSortBy').val();
+            currentSortDir = $('#employeeMobileSortDir').val();
+            getAllEmployees(1);
+        });
         $('#employeesPagination').on('click', '.page-btn', function () { getAllEmployees($(this).data('page')); });
-        $('#employeesTable').on('click', '.viewEmployeeBtn, .editEmployeeBtn, .deleteEmployeeBtn, .editCompensationBtn', function () {
+        $('.employee-page').on('click', '.viewEmployeeBtn, .editEmployeeBtn, .deleteEmployeeBtn, .editCompensationBtn', function () {
             const id = $(this).hasClass('viewEmployeeBtn') ? '#viewEmployeeModal' : $(this).hasClass('editEmployeeBtn') ? '#editEmployeeModal' : $(this).hasClass('deleteEmployeeBtn') ? '#deleteEmployeeModal' : '#compensationModal';
             openEmployeeDialog(id, this);
+        });
+        const mobileCards = window.matchMedia('(max-width: 767.98px)');
+        mobileCards.addEventListener('change', function () {
+            const active = document.activeElement;
+            if ($(active).is('[data-employee-action]')) focusEmployeeAction(active, active.dataset.id);
+            else if ($(active).closest('.employee-table-region, .employee-mobile-sort').length && !$(active).is(':visible')) {
+                (mobileCards.matches ? document.getElementById('employeeMobileSortBy') : document.querySelector('.employee-sort')).focus();
+            }
         });
 
         $('.employee-dialog').on('keydown', function (event) {
@@ -547,12 +612,7 @@ $employeeActions = [
             if (state.xhr) state.xhr.abort();
             Object.values(state.lookups).forEach(entry => { ++entry.sequence; if (entry.xhr) entry.xhr.abort(); });
             if ($dialog.is('#deleteEmployeeModal')) pendingDeleteId = null;
-            const trigger = state.trigger;
-            if (trigger && document.contains(trigger)) trigger.focus();
-            else {
-                const replacement = state.employeeId && $('#employeesTable button').toArray().find(button => button.dataset.id === String(state.employeeId) && trigger && button.className === trigger.className);
-                (replacement || document.getElementById('employeesHeading')).focus();
-            }
+            focusEmployeeAction(state.trigger, state.employeeId);
         });
         $('.employee-stay').on('click', function () {
             const $dialog = $(this).closest('.modal'), state = employeeDialogs[$dialog.attr('id')];

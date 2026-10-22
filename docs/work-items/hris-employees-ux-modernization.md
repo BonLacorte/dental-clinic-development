@@ -18,10 +18,13 @@ MTD-01–07/10–13 apply to desktop presentation and mobile information/action 
 
 - PR #11 merged with GitHub expected-head guard and merge-commit strategy. Merge parents match prior main and reviewed PR head. Original `work` checkout preserved; separate worktree created.
 - A implemented: Employees heading/actions, labeled explicit-search grouping/help, visible existing applied-result/order feedback, scoped Premium table typography/spacing and pagination refinements. Add predicate/trigger and all existing JavaScript preserved.
-- B and C pending; continue sequentially without another approval gate.
+- A committed as `d32d51f`; whitespace and exact JavaScript preservation checks PASS.
+- B implemented: below-768px labeled cards and mobile field/direction sort controls; both render from a shared escaped representation of the same 10-row response. One delegated row-action handler and existing dialogs; responsive focus restoration chooses the visible matching action. Tablet retains local-scroll table; print hides cards/mobile controls and retains the table. No extra request on breakpoint changes.
+- C pending; continue without another approval gate.
+- B verification: JavaScript syntax and `node scripts/verify-employees-frontend.cjs` PASS with an externally captured baseline argument on this restricted executor. Tests use SIMULATED DOM/AJAX: safe escaping/Unicode/IDs, table/card/action parity, legacy permissions, applied state, Search/Clear, five fields plus date-added in both directions, pagination, stale-response protection, one request per interaction and exact protected mutation/dialog function comparisons. This is not visual browser evidence.
 
 ## Verification and limits
 
 Runtime prerequisites were previously blocked on this Debian cloud machine. Do not report historical source/browser claims as fresh passes. No application/DB writes or seed/startup scripts have run. PHP/real browser verification will be attempted only with available supported tools; independently executable checks continue.
 
-Next: verify A diff/protected script, commit A, then implement B using one list response and shared dialogs; inspect authoritative session branch data before C.
+Next: verify B JavaScript/data/action parity and protected mutation code, commit B, then implement C with authoritative server-session branch assignments.
