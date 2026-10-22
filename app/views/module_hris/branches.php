@@ -214,7 +214,7 @@ $(document).ready(function () {
 ========================= */
 function getAllBranches(page) {
     $('#branchesTable').attr('aria-busy', 'true');
-    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state" role="status">Loading branches…</td></tr>');
+    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state"><div role="status">Loading branches…</div></td></tr>');
     $('#branchesPagination').empty();
 
     $.ajax({
@@ -237,46 +237,7 @@ function getAllBranches(page) {
             currentPage = res.currentPage;
             let totalPages = res.totalPages;
 
-            let rows = '';
-            let branches = res.data || [];
-
-            if (branches.length === 0) {
-
-                rows = `
-                    <tr>
-                        <td colspan="3" class="org-state">
-                            No branches found. Add a branch to get started.
-                        </td>
-                    </tr>
-                `;
-
-            } else {
-
-                branches.forEach((b) => {
-                    rows += `
-                        <tr>
-                            <th scope="row" class="ps-4"><span class="org-record-name">${esc(b.name)}</span><span class="org-record-meta">${esc(b.code)}</span></th>
-                            <td>${esc(b.address) || '-'}</td>
-                            <td class="text-end pe-4"><div class="org-row-actions">
-
-                                <button
-                                    class="btn btn-sm editBranchBtn hris-action"
-                                    type="button" data-id="${esc(b.id)}" aria-label="Edit branch ${esc(b.name)} (${esc(b.code)})" title="Edit branch ${esc(b.name)}">
-                                    <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
-                                </button>
-
-                                <button
-                                    class="btn btn-sm deleteBranchBtn hris-action hris-action--danger"
-                                    type="button" data-id="${esc(b.id)}" data-name="${esc(b.name)} (${esc(b.code)})" aria-label="Delete branch ${esc(b.name)} (${esc(b.code)})" title="Delete branch ${esc(b.name)}">
-                                    <i class="bi bi-trash" aria-hidden="true"></i> Delete
-                                </button>
-                            </div></td>
-                        </tr>
-                    `;
-                });
-            }
-
-            $('#branchesTable tbody').html(rows);
+            $('#branchesTable tbody').html(renderBranchRows(res.data));
             renderPagination(currentPage, totalPages);
         },
 
@@ -291,9 +252,50 @@ function getAllBranches(page) {
 /* =========================
    PAGINATION UI
 ========================= */
+function renderBranchRows(branches) {
+    let rows = '';
+
+    if (branches.length === 0) {
+
+        rows = `
+            <tr>
+                <td colspan="3" class="org-state">
+                    No branches found. Add a branch to get started.
+                </td>
+            </tr>
+        `;
+
+    } else {
+
+        branches.forEach((b) => {
+            rows += `
+                <tr>
+                    <th scope="row" class="ps-4"><span class="org-record-name">${esc(b.name)}</span><span class="org-record-meta">${esc(b.code)}</span></th>
+                    <td>${esc(b.address) || '-'}</td>
+                    <td class="text-end pe-4"><div class="org-row-actions">
+
+                        <button
+                            class="btn btn-sm editBranchBtn hris-action"
+                            type="button" data-id="${esc(b.id)}" aria-label="Edit branch ${esc(b.name)} (${esc(b.code)})" title="Edit branch ${esc(b.name)}">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
+                        </button>
+
+                        <button
+                            class="btn btn-sm deleteBranchBtn hris-action hris-action--danger"
+                            type="button" data-id="${esc(b.id)}" data-name="${esc(b.name)} (${esc(b.code)})" aria-label="Delete branch ${esc(b.name)} (${esc(b.code)})" title="Delete branch ${esc(b.name)}">
+                            <i class="bi bi-trash" aria-hidden="true"></i> Delete
+                        </button>
+                    </div></td>
+                </tr>
+            `;
+        });
+    }
+
+    return rows;
+}
 function branchReadError() {
     $('#branchesTable').removeAttr('aria-busy');
-    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state" role="status">Unable to load branches. <button class="btn btn-outline-secondary" type="button" id="retryBranches">Try Again</button></td></tr>');
+    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state"><div role="status">Unable to load branches. <button class="btn btn-outline-secondary" type="button" id="retryBranches">Try Again</button></div></td></tr>');
 }
 $(document).on('click', '#retryBranches', function () { getAllBranches(currentPage); });
 
@@ -390,17 +392,17 @@ function addBranch(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving branch...");
+            orgFeedback("Saving branch...", 'info', $form);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (res.error || res.success === false || res.type === 'error') {
                 orgFeedback(res.error || res.message || 'Unable to save this branch.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
             $('#addBranchForm')[0].reset();
             bootstrap.Modal.getInstance(document.getElementById('addBranchModal')).hide();
@@ -409,7 +411,6 @@ function addBranch(form) {
         },
 
         error: function (xhr) {
-            hideLoader();
             orgFeedback('Unable to save this branch. Your entries have been kept; try again.', 'error', $form);
 
         }
@@ -452,7 +453,6 @@ function getBranch(id) {
 
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
             showToast('Unable to load branch.', 'error');
 
         }
@@ -485,24 +485,23 @@ function updateBranch(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating branch...");
+            orgFeedback("Updating branch...", 'info', $form);
         },
 
         success: function (res) {
 
-            hideLoader();
             if (res.error || res.success === false || res.type === 'error') {
                 orgFeedback(res.error || res.message || 'Unable to save this branch.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
             bootstrap.Modal.getInstance(document.getElementById('editBranchModal')).hide();
             getAllBranches(currentPage);
         },
 
         error: function (xhr) {
-            hideLoader();
             orgFeedback('Unable to save this branch. Your entries have been kept; try again.', 'error', $form);
         }
 
@@ -530,11 +529,10 @@ function deleteBranch(id) {
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deleteBranchModal')).hide();
-            showLoader("Deleting branch...");
+            orgFeedback("Deleting branch...", 'info', null);
         },
 
         success: function (res) {
-            hideLoader();
             pendingDeleteId = null;
 
             if (res.error || res.success === false || res.type === 'error') {
@@ -547,7 +545,6 @@ function deleteBranch(id) {
         },
 
         error: function (xhr) {
-            hideLoader();
             pendingDeleteId = null;
             orgFeedback('Unable to delete this branch. Try again.', 'error');
 
@@ -561,7 +558,9 @@ function orgFeedback(message, type = 'info', form = null) {
     const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
     $target.removeClass('d-none org-feedback--error org-feedback--success')
         .toggleClass('org-feedback--error', type === 'error')
-        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
 }
 function orgBegin($scope) {
     if ($scope.data('orgPending')) return false;
@@ -578,12 +577,20 @@ function initOrganizationUX() {
     $(document).on('click', '.organization-page button, .organization-page a', function () {
         returnFocus = this;
     });
-    $('.organization-dialog').on('shown.bs.modal', function () {
+    $('.organization-dialog').on('show.bs.modal', function () {
         $(this).find('.org-form-feedback').addClass('d-none').empty();
-        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
         // Destructive dialogs initially focus Cancel, never the destructive action.
         const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
         (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
     }).on('hidden.bs.modal', function () {
         if (returnFocus?.isConnected) returnFocus.focus();
         else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');

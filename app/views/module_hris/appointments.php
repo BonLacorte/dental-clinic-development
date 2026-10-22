@@ -303,7 +303,7 @@ function esc(str) {
 }
 function getAllAppointments() {
     $('#appointmentsTable').attr('aria-busy', 'true');
-    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state" role="status">Loading employment types…</td></tr>');
+    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state"><div role="status">Loading employment types…</div></td></tr>');
     $('#employmentTypeSearch, #employmentTypeStatus, #clearEmploymentTypeFilters').prop('disabled', true);
     $.ajax({
         url: '/hris/appointments/getallappointments',
@@ -321,7 +321,7 @@ function getAllAppointments() {
 }
 function employmentTypeReadError() {
     $('#appointmentsTable').removeAttr('aria-busy');
-    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state" role="status">Unable to load employment types. <button class="btn btn-outline-secondary" type="button" id="retryEmploymentTypes">Try Again</button></td></tr>');
+    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state"><div role="status">Unable to load employment types. <button class="btn btn-outline-secondary" type="button" id="retryEmploymentTypes">Try Again</button></div></td></tr>');
     $('#employmentTypeResults').text('Employment types could not be loaded.');
 }
 $(document).on('click', '#retryEmploymentTypes', getAllAppointments);
@@ -374,18 +374,17 @@ function addAppointment(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving employment type...");
+            orgFeedback("Saving employment type...", 'info', $form);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(employmentTypeMessage(res.message) || 'Please check the employment type details and try again.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(employmentTypeMessage(res.message), 'success');
 
             $('#addAppointmentForm')[0].reset();
@@ -397,10 +396,6 @@ function addAppointment(form) {
         },
 
         error: function (xhr) {
-
-            hideLoader();
-
-            console.log(xhr.responseText);
 
             orgFeedback('Unable to save this employment type. Your entries have been kept; try again.', 'error', $form);
 
@@ -426,6 +421,10 @@ function getAppointment(id) {
                 return;
             }
 
+            if (parseInt(res.data?.is_global) !== 0) {
+                orgFeedback('System Default employment types are protected and cannot be edited here.', 'error');
+                return;
+            }
             let appointment = res.data;
             let $form = $('#editAppointmentForm');
 
@@ -444,8 +443,6 @@ function getAppointment(id) {
         error: function (xhr) {
 
             hideLoader();
-
-            console.log(xhr.responseText);
 
             showToast('Unable to load employment type.', 'error');
 
@@ -476,18 +473,17 @@ function updateAppointment(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating employment type...");
+            orgFeedback("Updating employment type...", 'info', $form);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(employmentTypeMessage(res.message) || 'Please check the employment type details and try again.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(employmentTypeMessage(res.message), 'success');
 
             bootstrap.Modal.getInstance(
@@ -499,10 +495,6 @@ function updateAppointment(form) {
         },
 
         error: function (xhr) {
-
-            hideLoader();
-
-            console.log(xhr.responseText);
 
             orgFeedback('Unable to save this employment type. Your entries have been kept; try again.', 'error', $form);
 
@@ -526,12 +518,10 @@ function deleteAppointment(id) {
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deleteAppointmentModal')).hide();
-            showLoader("Deleting employment type...");
+            orgFeedback("Deleting employment type...", 'info', null);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(employmentTypeMessage(res.message) || 'Unable to delete this employment type.', 'error');
@@ -545,8 +535,6 @@ function deleteAppointment(id) {
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
             orgFeedback('Unable to delete this employment type. Try again.', 'error');
         }
     });
@@ -557,7 +545,9 @@ function orgFeedback(message, type = 'info', form = null) {
     const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
     $target.removeClass('d-none org-feedback--error org-feedback--success')
         .toggleClass('org-feedback--error', type === 'error')
-        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
 }
 function orgBegin($scope) {
     if ($scope.data('orgPending')) return false;
@@ -574,12 +564,20 @@ function initOrganizationUX() {
     $(document).on('click', '.organization-page button, .organization-page a', function () {
         returnFocus = this;
     });
-    $('.organization-dialog').on('shown.bs.modal', function () {
+    $('.organization-dialog').on('show.bs.modal', function () {
         $(this).find('.org-form-feedback').addClass('d-none').empty();
-        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
         // Destructive dialogs initially focus Cancel, never the destructive action.
         const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
         (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
     }).on('hidden.bs.modal', function () {
         if (returnFocus?.isConnected) returnFocus.focus();
         else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');

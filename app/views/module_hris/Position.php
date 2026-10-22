@@ -219,7 +219,7 @@ function esc(str) {
 }
 function getAllPositions() {
     $('#positionsTable').attr('aria-busy', 'true');
-    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state" role="status">Loading positions…</td></tr>');
+    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state"><div role="status">Loading positions…</div></td></tr>');
     $('#positionSearch, #clearPositionSearch').prop('disabled', true);
     $.ajax({
         url: '/hris/positions/getallpositions',
@@ -237,7 +237,7 @@ function getAllPositions() {
 }
 function positionReadError() {
     $('#positionsTable').removeAttr('aria-busy');
-    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state" role="status">Unable to load positions. <button class="btn btn-outline-secondary" type="button" id="retryPositions">Try Again</button></td></tr>');
+    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state"><div role="status">Unable to load positions. <button class="btn btn-outline-secondary" type="button" id="retryPositions">Try Again</button></div></td></tr>');
     $('#positionResults').text('Positions could not be loaded.');
 }
 $(document).on('click', '#retryPositions', getAllPositions);
@@ -270,18 +270,17 @@ function addPosition(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving position...");
+            orgFeedback("Saving position...", 'info', $form);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Please check the position name and try again.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
 
             $('#addPositionForm')[0].reset();
@@ -293,10 +292,6 @@ function addPosition(form) {
         },
 
         error: function (xhr) {
-
-            hideLoader();
-
-            console.log(xhr.responseText);
 
             orgFeedback('Unable to save this position. Your entry has been kept; try again.', 'error', $form);
 
@@ -338,8 +333,6 @@ function getPosition(id) {
 
             hideLoader();
 
-            console.log(xhr.responseText);
-
             showToast('Unable to load position.', 'error');
 
         }
@@ -366,18 +359,17 @@ function updatePosition(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating position...");
+            orgFeedback("Updating position...", 'info', $form);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Please check the position name and try again.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
 
             bootstrap.Modal.getInstance(
@@ -389,10 +381,6 @@ function updatePosition(form) {
         },
 
         error: function (xhr) {
-
-            hideLoader();
-
-            console.log(xhr.responseText);
 
             orgFeedback('Unable to save this position. Your entry has been kept; try again.', 'error', $form);
 
@@ -416,12 +404,10 @@ function deletePosition(id) {
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deletePositionModal')).hide();
-            showLoader("Deleting position...");
+            orgFeedback("Deleting position...", 'info', null);
         },
 
         success: function (res) {
-
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Unable to delete this position.', 'error');
@@ -435,8 +421,6 @@ function deletePosition(id) {
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
             orgFeedback('Unable to delete this position. Try again.', 'error');
         }
     });
@@ -447,7 +431,9 @@ function orgFeedback(message, type = 'info', form = null) {
     const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
     $target.removeClass('d-none org-feedback--error org-feedback--success')
         .toggleClass('org-feedback--error', type === 'error')
-        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
 }
 function orgBegin($scope) {
     if ($scope.data('orgPending')) return false;
@@ -464,12 +450,20 @@ function initOrganizationUX() {
     $(document).on('click', '.organization-page button, .organization-page a', function () {
         returnFocus = this;
     });
-    $('.organization-dialog').on('shown.bs.modal', function () {
+    $('.organization-dialog').on('show.bs.modal', function () {
         $(this).find('.org-form-feedback').addClass('d-none').empty();
-        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
         // Destructive dialogs initially focus Cancel, never the destructive action.
         const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
         (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
     }).on('hidden.bs.modal', function () {
         if (returnFocus?.isConnected) returnFocus.focus();
         else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');

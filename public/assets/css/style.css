@@ -2094,3 +2094,17 @@
     .admin-shell .organization-dialog .modal-dialog { margin: 8px; }
   }
 }
+
+@media screen {
+  /* Keep the form inside Bootstrap's scrollable dialog; the footer stays reachable. */
+  .admin-shell .organization-dialog .modal-content > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+  }
+  .admin-shell .organization-dialog .org-form-feedback:focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: 3px;
+  }
+}

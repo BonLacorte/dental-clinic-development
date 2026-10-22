@@ -152,7 +152,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <!-- View Office Employees -->
-<div class="modal fade hris-dialog organization-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
+<div class="modal fade hris-dialog organization-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="directAssignmentHelp">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -164,7 +164,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
             <div class="modal-body">
                     <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
-                <p class="form-text">Employees assigned directly to this unit are listed below. Descendant units are not included.</p>
+                <p class="form-text" id="directAssignmentHelp">Employees assigned directly to this unit are listed below. Descendant units are not included.</p>
                 <p class="hris-scroll-hint" id="unitEmployeesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
                 <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="unitEmployeesTableScrollHelp">
                     <table class="table table-hover align-middle mb-0 hris-data-table" id="unitEmployeesTable">
@@ -191,16 +191,17 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <script>
-let currentPage = 1;
 let orgUnitsFlat = [];
 let expandedOffices = new Set();
 let searchExpandedOffices = new Set();
 let officeSearchQuery = '';
 let officeIdToDelete = null;
 let employeeRead = null;
+let parentRead = null;
 
 $(document).ready(function () {
     initOrganizationUX();
+    document.title = document.title.replace('Organizational Units', 'Offices');
     getAllOrgUnits();
 
     $('#addOfficeForm').on('submit', function (e) {
@@ -274,7 +275,7 @@ function esc(str) {
 function viewUnitEmployees(id, name) {
     if (employeeRead) employeeRead.abort();
     $('#viewUnitEmployeesTitle').text(name || '-');
-    $('#unitEmployeesTable tbody').html('<tr><td colspan="5" class="org-state" role="status">Loading assigned employees…</td></tr>');
+    $('#unitEmployeesTable tbody').html('<tr><td colspan="5" class="org-state"><div role="status">Loading assigned employees…</div></td></tr>');
     $('#unitEmployeesTable').attr('aria-busy', 'true');
     bootstrap.Modal.getOrCreateInstance(document.getElementById('viewUnitEmployeesModal')).show();
 
@@ -285,48 +286,54 @@ function viewUnitEmployees(id, name) {
 
         success: function (res) {
             $('#unitEmployeesTable').removeAttr('aria-busy');
-            if (!res.success) {
-                $('#unitEmployeesTable tbody').html('<tr><td colspan="5" class="org-state">Unable to load assigned employees. Close and try again.</td></tr>');
+            if (!res.success || !Array.isArray(res.data)) {
+                orgFeedback('Unable to load assigned employees. Close and try again.', 'error', '#viewUnitEmployeesModal');
+                $('#unitEmployeesTable tbody').empty();
                 return;
             }
 
             $('#viewUnitEmployeesTitle').text(res.unit?.name || name || '-');
 
-            let employees = res.data || [];
-            let rows = '';
-
-            if (employees.length === 0) {
-                rows = `
-                    <tr>
-                        <td colspan="5" class="text-center py-3">No employees assigned to this unit.</td>
-                    </tr>
-                `;
-            } else {
-                employees.forEach(emp => {
-                    let fullName = `${emp.firstname ?? ''} ${emp.middlename ?? ''} ${emp.lastname ?? ''}`
-                        .replace(/\s+/g, ' ')
-                        .trim();
-
-                    rows += `
-                        <tr>
-                            <td>${esc(emp.employee_no) || '-'}</td>
-                            <td>${esc(fullName) || '-'}</td>
-                            <td>${esc(emp.position) || '-'}</td>
-                            <td>${esc(emp.branch_name) || '-'}</td>
-                            <td>${esc(emp.employment_status) || '-'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            $('#unitEmployeesTable tbody').html(rows);
+            $('#unitEmployeesTable tbody').html(renderUnitEmployeeRows(res.data));
+            orgFeedback(res.data.length + ' employees assigned directly to this unit.', 'info', '#viewUnitEmployeesModal');
         },
         error: function (xhr, status) {
             if (status === 'abort') return;
             $('#unitEmployeesTable').removeAttr('aria-busy');
-            $('#unitEmployeesTable tbody').html('<tr><td colspan="5" class="org-state">Unable to load assigned employees. Close and try again.</td></tr>');
+            orgFeedback('Unable to load assigned employees. Close and try again.', 'error', '#viewUnitEmployeesModal');
+            $('#unitEmployeesTable tbody').empty();
         }
     });
+}
+
+function renderUnitEmployeeRows(employees) {
+    let rows = '';
+
+    if (employees.length === 0) {
+        rows = `
+            <tr>
+                <td colspan="5" class="text-center py-3">No employees assigned to this unit.</td>
+            </tr>
+        `;
+    } else {
+        employees.forEach(emp => {
+            let fullName = `${emp.firstname ?? ''} ${emp.middlename ?? ''} ${emp.lastname ?? ''}`
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            rows += `
+                <tr>
+                    <td>${esc(emp.employee_no) || '-'}</td>
+                    <td>${esc(fullName) || '-'}</td>
+                    <td>${esc(emp.position) || '-'}</td>
+                    <td>${esc(emp.branch_name) || '-'}</td>
+                    <td>${esc(emp.employment_status) || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    return rows;
 }
 
 function buildParentOptions(units, selected = '') {
@@ -344,8 +351,9 @@ function buildParentOptions(units, selected = '') {
 }
 
 function loadParentOptions(selector, selected = '') {
+    if (parentRead) parentRead.abort();
     $(selector).prop('disabled', true).html('<option value="">Loading parent units…</option>');
-    $.ajax({
+    parentRead = $.ajax({
         url: '/hris/offices/getallunits',
         type: 'GET',
         dataType: 'json',
@@ -355,11 +363,15 @@ function loadParentOptions(selector, selected = '') {
                 orgFeedback('Unable to load parent units. Close and try again.', 'error', '#addOfficeForm');
                 return;
             }
+            if (selected && !res.data.some(unit => String(unit.id) === String(selected))) {
+                orgFeedback('The selected parent unit is no longer available. Close and choose another parent.', 'error', '#addOfficeForm');
+                return;
+            }
             $(selector).prop('disabled', false).html(buildParentOptions(res.data, selected));
         },
 
-        error: function (xhr) {
-            console.log(xhr.responseText);
+        error: function (xhr, status) {
+            if (status === 'abort') return;
             orgFeedback('Unable to load parent units. Close and try again.', 'error', '#addOfficeForm');
         }
     });
@@ -451,11 +463,11 @@ function buildOfficeNode(unit, byParent, visible, visited) {
     const hasChildren = (byParent.get(id) || []).some(child => visible.has(String(child.id)) && !visited.has(String(child.id)));
     const expanded = (officeSearchQuery ? searchExpandedOffices : expandedOffices).has(id);
     const typeLabels = {DEPARTMENT: 'Department', TEAM: 'Team', SECTION: 'Section', UNIT: 'Unit'};
-    const type = typeLabels[unit.type] || unit.type;
+    const type = Object.hasOwn(typeLabels, unit.type) ? typeLabels[unit.type] : unit.type;
     return `<div class="org-node">
         <div class="org-node-row">
             ${hasChildren ? `<button type="button" class="org-toggle btn btn-outline-secondary" data-id="${esc(id)}" aria-controls="children-${esc(id)}" aria-expanded="${expanded}" aria-label="Expand or collapse ${esc(unit.name)}"><i class="bi ${expanded ? 'bi-chevron-down' : 'bi-chevron-right'}" aria-hidden="true"></i></button>` : '<span class="org-toggle-placeholder invisible" aria-hidden="true"></span>'}
-            <div class="org-node-identity"><span class="org-record-name">${officeHighlight(unit.name)}</span><span class="hris-unit-chip badge">${officeHighlight(type)}</span> <span class="org-record-meta">Code: ${officeHighlight(unit.code ?? '-')}</span></div>
+            <div class="org-node-identity"><span class="org-record-name">${officeHighlight(unit.name)}</span><span class="hris-unit-chip badge">${officeHighlight(type)}</span> <span class="org-record-meta">Code: ${officeHighlight(unit.code ?? '-')}</span><span class="org-record-meta">Created: ${esc(unit.created_at ?? '-')}</span></div>
             <div class="org-node-actions">
                 <button type="button" class="btn viewUnitEmployeesBtn hris-action org-employees" data-id="${esc(id)}" data-name="${esc(unit.name)}" aria-label="View employees assigned directly to ${esc(unit.name)}"><i class="bi bi-people" aria-hidden="true"></i> View Assigned Employees</button>
                 <div class="dropdown"><button type="button" class="btn hris-action" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" aria-label="Actions for ${esc(unit.name)}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
@@ -473,7 +485,7 @@ function buildOfficeNode(unit, byParent, visible, visited) {
 
 function addOffice(form) {
     let $form = $(form);
-    if (fnParentUnavailable($form) || !orgBegin($form)) return;
+    if (officeParentUnavailable($form) || !orgBegin($form)) return;
 
     let formData = {
         parent_id: $form.find('[name="parent_id"]').val(),
@@ -491,17 +503,17 @@ function addOffice(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving office...");
+            orgFeedback("Saving office...", 'info', $form);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Something went wrong.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
             $('#addOfficeForm')[0].reset();
             bootstrap.Modal.getInstance(document.getElementById('addOfficeModal')).hide();
@@ -509,8 +521,6 @@ function addOffice(form) {
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
             orgFeedback('Unable to save this unit. Your entries have been kept; try again.', 'error', $form);
         }
     });
@@ -547,7 +557,6 @@ function getOffice(id) {
 
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
             showToast('Unable to load office.', 'error');
         }
     });
@@ -555,7 +564,7 @@ function getOffice(id) {
 
 function updateOffice(form) {
     let $form = $(form);
-    if (fnParentUnavailable($form) || !orgBegin($form)) return;
+    if (officeParentUnavailable($form) || !orgBegin($form)) return;
     let id = $form.find('[name="id"]').val();
 
     let formData = {
@@ -574,25 +583,23 @@ function updateOffice(form) {
         complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating office...");
+            orgFeedback("Updating office...", 'info', $form);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Something went wrong.', 'error', $form);
                 return;
             }
 
+            orgEnd($form);
             orgFeedback(res.message, 'success');
             bootstrap.Modal.getInstance(document.getElementById('editOfficeModal')).hide();
             getAllOrgUnits();
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
             orgFeedback('Unable to save this unit. Your entries have been kept; try again.', 'error', $form);
         }
     });
@@ -613,11 +620,10 @@ function deleteOffice(id) {
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deleteOfficeModal')).hide();
-            showLoader("Deleting office...");
+            orgFeedback("Deleting office...", 'info', null);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
                 orgFeedback(res.message || 'Unable to delete this unit.', 'error');
@@ -630,13 +636,11 @@ function deleteOffice(id) {
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
             orgFeedback('Unable to delete this unit. Try again.', 'error');
         }
     });
 }
-function fnParentUnavailable($form) {
+function officeParentUnavailable($form) {
     if ($form.is('#addOfficeForm') && $('#parentSelect').prop('disabled')) {
         orgFeedback('Parent units are unavailable. Close and reopen the form to retry.', 'error', $form);
         return true;
@@ -649,7 +653,9 @@ function orgFeedback(message, type = 'info', form = null) {
     const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
     $target.removeClass('d-none org-feedback--error org-feedback--success')
         .toggleClass('org-feedback--error', type === 'error')
-        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
 }
 function orgBegin($scope) {
     if ($scope.data('orgPending')) return false;
@@ -666,12 +672,20 @@ function initOrganizationUX() {
     $(document).on('click', '.organization-page button, .organization-page a', function () {
         returnFocus = this;
     });
-    $('.organization-dialog').on('shown.bs.modal', function () {
+    $('.organization-dialog').on('show.bs.modal', function () {
         $(this).find('.org-form-feedback').addClass('d-none').empty();
-        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
         // Destructive dialogs initially focus Cancel, never the destructive action.
         const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
         (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
     }).on('hidden.bs.modal', function () {
         if (returnFocus?.isConnected) returnFocus.focus();
         else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
