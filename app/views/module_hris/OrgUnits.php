@@ -670,7 +670,8 @@ function orgEnd($scope) {
 function initOrganizationUX() {
     let returnFocus = null;
     $(document).on('click', '.organization-page button, .organization-page a', function () {
-        returnFocus = this;
+        // Menu items become hidden on dismissal; return to their visible trigger.
+        returnFocus = this.closest('.dropdown')?.querySelector('[data-bs-toggle="dropdown"]') || this;
     });
     $('.organization-dialog').on('show.bs.modal', function () {
         $(this).find('.org-form-feedback').addClass('d-none').empty();
