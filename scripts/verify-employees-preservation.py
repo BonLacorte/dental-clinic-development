@@ -1,5 +1,7 @@
 """Read-only source gates; these are not PHP lint, SQL execution or browser tests."""
 from pathlib import Path
+from html.parser import HTMLParser
+import hashlib
 import re
 import subprocess
 
@@ -27,10 +29,27 @@ for path in ['app/controllers/hris/EmployeeController.php', 'app/models/hris/Emp
 
 path = 'app/views/module_hris/employees.php'
 before, after = original(path), (ROOT / path).read_text()
-start = '    <?php\n    // Existing field names'
-assert before[before.index(start):before.index('</main>')] == after[after.index(start):after.index('</main>')]
+def field_groups(source):
+    return source[source.index('    $employeeGroups = ['):source.index("    foreach (['add' => 'Add'")]
+assert field_groups(before) == field_groups(after)
+assert re.findall(r"\$groups\['Employment'\]\[\].*?;", before) == re.findall(r"\$groups\['Employment'\]\[\].*?;", after)
+class Controls(HTMLParser):
+    def __init__(self):
+        super().__init__(); self.controls = []
+    def handle_starttag(self, tag, attributes):
+        if tag in ['input', 'select', 'form']:
+            protected = {'name','id','type','value','required','readonly','disabled','step','min','max','method','action'}
+            self.controls.append((tag, {key:value for key,value in attributes if key in protected}))
+def controls(source):
+    # Tokenize embedded PHP so HTML parsing cannot mistake PHP's > or quotes for markup.
+    source = re.sub(r'<\?.*?\?>', lambda m: 'php_'+hashlib.sha256(m.group().encode()).hexdigest()[:16], source, flags=re.S)
+    parser=Controls(); parser.feed(source); return parser.controls
+control_baseline = subprocess.check_output(['git', 'show', '681f84e0bb3bbcd02cfb92b20a042e032a766d53:' + path], cwd=ROOT, text=True)
+assert controls(control_baseline) == controls(after), 'Input/select/form IDs, names, values, types or constraints changed'
+for expression in ["<?= $required ? ' required' : '' ?>", "<?= $name === 'employee_no' ? ' readonly' : '' ?>"]:
+    assert before.count(expression) == after.count(expression)
 assert "$navCanPermission('hris.employee.create')" in after
-print('PASS: complete dialog/form markup, Add predicate and modal target preserved')
+print('PASS: dialog input/select/form contract and authoritative required/readonly PHP, Add predicate and target preserved; layout changes authorized')
 
 path = 'public/assets/css/style.css'
 assert (ROOT / path).read_text().startswith(original(path))

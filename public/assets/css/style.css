@@ -2483,3 +2483,70 @@
     display: block;
   }
 }
+
+@media screen {
+  .admin-shell .employee-page .employee-dialog .modal-header > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .admin-shell .employee-page .employee-dialog-identity {
+    margin-top: 8px;
+    color: var(--montero-muted);
+    font-size: .9375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page .employee-field-group {
+    padding: 16px 0;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .employee-page .employee-field-group > legend {
+    float: none;
+    width: auto;
+    margin: 0 0 12px;
+    padding-right: 12px;
+    color: var(--montero-text);
+  }
+
+  .admin-shell .employee-page .employee-detail-summary {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .employee-page .employee-summary-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin: 16px 0 0;
+  }
+
+  .admin-shell .employee-page .employee-summary-meta > div {
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
+
+  .admin-shell .employee-page .employee-detail-section {
+    padding-top: 24px;
+  }
+
+  .admin-shell .employee-page :is(.employee-detail-section, .employee-summary-meta) dt {
+    color: var(--montero-muted);
+    font-weight: 400;
+    font-size: .875rem;
+  }
+
+  .admin-shell .employee-page :is(.employee-detail-section, .employee-summary-meta) dd {
+    margin: 4px 0 0;
+    color: var(--montero-text);
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page .employee-read-value {
+    user-select: text;
+    overflow-wrap: anywhere;
+  }
+}

@@ -133,7 +133,7 @@ $employeeActions = [
                     <?php if ($mode === 'edit'): ?><input type="hidden" name="id"><?php endif; ?>
                     <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
                     <div class="modal-header">
-                        <h2 class="modal-title fs-5" id="<?= $mode ?>EmployeeTitle" tabindex="-1"><?= $verb ?> Employee</h2>
+                        <div><h2 class="modal-title fs-5" id="<?= $mode ?>EmployeeTitle" tabindex="-1"><?= $verb ?> Employee</h2><p id="<?= $mode ?>EmployeeIdentity" class="employee-dialog-identity mb-0"><?= $mode === 'add' ? 'Create an employee record.' : '' ?></p></div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close <?= $verb ?> Employee"></button>
                     </div>
                     <div class="modal-body">
@@ -141,7 +141,7 @@ $employeeActions = [
                         <div class="employee-mutation-feedback alert alert-warning" hidden><p role="alert" class="mb-0"></p></div>
                         <div class="employee-discard alert alert-warning" role="group" aria-labelledby="<?= $mode ?>DiscardTitle" hidden>
                             <h3 class="h6" id="<?= $mode ?>DiscardTitle">Discard your changes?</h3>
-                            <p>Your unsaved entries will be lost.</p>
+                            <p>Unsaved edits will be lost.</p>
                             <div class="d-flex flex-wrap gap-2">
                                 <button type="button" class="btn btn-primary employee-stay">Stay editing</button>
                                 <button type="button" class="btn btn-outline-danger employee-discard-confirm">Discard changes</button>
@@ -157,14 +157,17 @@ $employeeActions = [
                                     <?php foreach ($fields as $field):
                                         [$name, $label, $type, $required] = $field;
                                         $id = $type === 'select' ? $field[$mode === 'add' ? 4 : 5] : $mode . '_' . $name;
+                                        $errorId = $mode . '_' . $name . '_error';
                                     ?>
-                                    <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label" for="<?= e($id) ?>"><?= e($label) ?><?php if ($required): ?> <span aria-hidden="true">*</span><?php endif; ?></label>
                                         <?php if ($type === 'select'): ?>
-                                        <select class="form-select" name="<?= e($name) ?>" id="<?= e($id) ?>"<?= $required ? ' required' : '' ?>><option value="">Select <?= e($label) ?></option></select>
+                                        <select class="form-select" name="<?= e($name) ?>" id="<?= e($id) ?>" aria-describedby="<?= e($errorId) ?>"<?= $required ? ' required' : '' ?>><option value="">Select <?= e($label) ?></option></select>
                                         <?php else: ?>
-                                        <input type="<?= e($type) ?>" class="form-control" name="<?= e($name) ?>" id="<?= e($id) ?>"<?= $required ? ' required' : '' ?><?= $name === 'employee_no' ? ' readonly' : '' ?><?= $name === 'employee_no' && $mode === 'add' ? ' placeholder="Auto-generated on save"' : '' ?>>
+                                        <input type="<?= e($type) ?>" class="form-control" name="<?= e($name) ?>" id="<?= e($id) ?>" aria-describedby="<?= e($errorId) ?>"<?= $required ? ' required' : '' ?><?= $name === 'employee_no' ? ' readonly' : '' ?><?= $name === 'employee_no' && $mode === 'add' ? ' placeholder="Auto-generated on save"' : '' ?>>
                                         <?php endif; ?>
+                                        <p class="invalid-feedback" id="<?= e($errorId) ?>"></p>
+                                        <?php if ($name === 'employee_no'): ?><p class="form-text mb-0">System-assigned employee number.</p><?php endif; ?>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -174,7 +177,7 @@ $employeeActions = [
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                        <button class="btn btn-primary" type="submit"><?= $mode === 'add' ? 'Save' : 'Update' ?> employee</button>
+                        <button class="btn btn-primary" type="submit"><span class="employee-submit-label" data-idle-label="<?= $mode === 'add' ? 'Save employee' : 'Save changes' ?>"><?= $mode === 'add' ? 'Save employee' : 'Save changes' ?></span></button>
                     </div>
                 </form>
             </div>
@@ -188,11 +191,28 @@ $employeeActions = [
                 <div class="modal-header"><h2 class="modal-title fs-5" id="viewEmployeeTitle" tabindex="-1">Employee Details</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Employee Details"></button></div>
                 <div class="modal-body">
                     <div class="employee-read-feedback" hidden><p role="status" class="mb-2"></p><button type="button" class="btn btn-outline-danger employee-retry" hidden>Retry employee details</button></div>
-                    <dl class="row g-3 employee-details mb-0">
-                        <?php foreach (['employeeNo' => 'Employee No', 'fullName' => 'Full Name', 'branch' => 'Branch', 'position' => 'Position', 'orgUnit' => 'Organization Unit', 'email' => 'Email', 'contactNo' => 'Contact No', 'dateHired' => 'Date Hired', 'employmentType' => 'Employment Type', 'employmentStatus' => 'Employment Status', 'status' => 'Status'] as $key => $label): ?>
-                        <div class="col-12 col-md-6"><dt class="text-body-secondary fw-normal"><?= e($label) ?></dt><dd class="fw-semibold mb-0" id="view_<?= e($key) ?>">—</dd></div>
-                        <?php endforeach; ?>
-                    </dl>
+                    <section class="employee-detail-summary" aria-label="Employee identity">
+                        <h3 class="h5 employee-read-value" id="view_fullName">—</h3>
+                        <dl class="employee-summary-meta">
+                            <div><dt>Employee Number</dt><dd id="view_employeeNo" class="employee-read-value">—</dd></div>
+                            <div><dt>Position</dt><dd id="view_position" class="employee-read-value">—</dd></div>
+                            <div><dt>Employment Status</dt><dd><span id="view_employmentStatus" class="badge hris-status employee-read-value">—</span></dd></div>
+                        </dl>
+                    </section>
+                    <?php foreach ([
+                        'Employment information' => ['branch' => 'Branch', 'orgUnit' => 'Organization Unit', 'employmentType' => 'Employment Type', 'dateHired' => 'Date Hired', 'dateResigned' => 'Date Resigned'],
+                        'Contact information' => ['email' => 'Email', 'contactNo' => 'Contact Number'],
+                        'Record information' => ['status' => 'Record Status'],
+                    ] as $section => $fields): ?>
+                    <section class="employee-detail-section" aria-label="<?= e($section) ?>">
+                        <h3 class="h6"><?= e($section) ?></h3>
+                        <dl class="row g-3 employee-details mb-0">
+                            <?php foreach ($fields as $key => $label): ?>
+                            <div class="col-12 col-md-6"><dt><?= e($label) ?></dt><dd class="employee-read-value" id="view_<?= e($key) ?>">—</dd></div>
+                            <?php endforeach; ?>
+                        </dl>
+                    </section>
+                    <?php endforeach; ?>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
             </div>
@@ -598,7 +618,7 @@ $employeeActions = [
             // Legacy compensation explicitly uses this response for an absent rate.
             const noCompensation = compensation && res?.success === false && res.message === 'Data not found.';
             if (!noCompensation && (!res || res.success !== true || !res.data || typeof res.data !== 'object')) {
-                state.detailError = 'Unable to load employee details. Your entries are kept. Retry when ready.';
+                state.detailError = res?.message === 'Employee not found.' ? 'This employee is unavailable. Close this dialog and refresh the directory.' : 'Unable to load this record. Retry when ready. Any entered values are kept.';
                 return;
             }
             const emp = res.data;
@@ -610,10 +630,12 @@ $employeeActions = [
                     $(this).val(value);
                 });
                 state.baseline = dialogValues($dialog);
+                $('#editEmployeeIdentity').text(`${employeeName(emp)} · ${emp.employee_no || 'Employee number unavailable'}`);
                 Object.keys(state.lookups).forEach(name => { if (state.lookups[name].ready) populateChoices($dialog, name); });
             } else if ($dialog.is('#viewEmployeeModal')) {
-                const fields = {employeeNo: emp.employee_no, fullName: employeeName(emp), branch: emp.branch_name, position: emp.position, orgUnit: emp.org_unit, email: emp.email, contactNo: emp.contact_no, dateHired: emp.date_hired, employmentType: emp.employment_type, employmentStatus: emp.employment_status, status: emp.status};
+                const fields = {employeeNo: emp.employee_no, fullName: employeeName(emp), branch: emp.branch_name, position: emp.position, orgUnit: emp.org_unit, email: emp.email, contactNo: emp.contact_no, dateHired: emp.date_hired, dateResigned: emp.date_resigned, employmentType: emp.employment_type, employmentStatus: emp.employment_status, status: emp.status};
                 Object.entries(fields).forEach(([name, value]) => $(`#view_${name}`).text(value ?? '—'));
+                $('#view_employmentStatus').attr('class', 'badge hris-status employee-read-value ' + MonteroHris.statusClass(emp.employment_status, 'employment'));
             } else if (compensation) {
                 $('#compensation_employee_id').val(state.employeeId);
                 if (emp) {
@@ -626,9 +648,24 @@ $employeeActions = [
             dialogReadStatus($dialog);
             if ($dialog.hasClass('show') && document.activeElement === $dialog.find('.modal-title')[0]) focusDialog($dialog);
         }).fail(function (xhr, status) {
-            if (employeeDialogs[$dialog.attr('id')] === state && state.sequence === sequence && status !== 'abort') state.detailError = 'Unable to load employee details. Your entries are kept. Retry when ready.';
+            if (employeeDialogs[$dialog.attr('id')] === state && state.sequence === sequence && status !== 'abort') state.detailError = employeeReadError(xhr);
         }).always(function () {
             if (employeeDialogs[$dialog.attr('id')] === state && state.sequence === sequence) { state.xhr = null; dialogReadStatus($dialog); }
+        });
+    }
+
+    function employeeReadError(xhr) {
+        if (xhr?.status === 401 || xhr?.status === 403) return 'This record is unavailable for your current access. Close the dialog and check your session or contact an administrator.';
+        if (xhr?.status === 404) return 'This record is unavailable. Close the dialog and refresh the directory.';
+        return 'Unable to load this record. Your entered values are kept. Retry when ready.';
+    }
+
+    function employeeFieldFeedback($dialog, errors = {}) {
+        $dialog.find('input[name], select[name]').each(function () {
+            const message = errors[this.name];
+            const text = typeof message === 'string' ? message : Array.isArray(message) ? message.filter(item => typeof item === 'string').join(' ') : '';
+            $(this).toggleClass('is-invalid', !!text).attr('aria-invalid', text ? 'true' : 'false');
+            $(this).siblings('.invalid-feedback').text(text);
         });
     }
 
@@ -753,7 +790,14 @@ $employeeActions = [
             const state = employeeDialogs[this.id] = {trigger, employeeId: trigger?.dataset.id, baseline: {}, ready: $dialog.is('#addEmployeeModal, #deleteEmployeeModal'), lookups: {}, pending: false, discard: false};
             state.returnTrigger = $dialog.data('employee-return-trigger') || trigger;
             $dialog.find('.employee-discard, .employee-mutation-feedback').prop('hidden', true);
-            $dialog.find('.employee-details dd').text('—');
+            employeeFieldFeedback($dialog);
+            $dialog.find('.employee-details dd, .employee-read-value').text('—');
+            if ($dialog.is('#viewEmployeeModal')) {
+                $('#view_fullName').text(trigger?.dataset.name || 'Loading employee…');
+                $('#view_employeeNo').text(trigger?.dataset.number || '—');
+                $('#view_employmentStatus').attr('class', 'badge hris-status employee-read-value');
+            }
+            if ($dialog.is('#editEmployeeModal')) $('#editEmployeeIdentity').text(`${trigger?.dataset.name || 'Loading employee…'}${trigger?.dataset.number ? ` · ${trigger.dataset.number}` : ''}`);
             if ($dialog.is('#compensationModal')) { $('#compensation_id, #compensation_employee_id').val(''); $('#compensationModalLabel').text('Employee Compensation'); $('#compensationEmployeeName').text(trigger?.dataset.name || ''); }
             if ($dialog.is('#deleteEmployeeModal')) { pendingDeleteId = state.employeeId; $('#deleteEmployeeName').text(trigger?.dataset.name || 'this employee'); }
             if ($dialog.is('#addEmployeeModal, #editEmployeeModal')) {
@@ -798,6 +842,11 @@ $employeeActions = [
             Object.keys(state.lookups).forEach(name => { if (!state.lookups[name].xhr) loadDialogLookup($dialog, name); });
         });
         $('.employee-dialog select').on('change', function () { dialogReadStatus($(this).closest('.modal')); });
+        $('#addEmployeeForm, #editEmployeeForm').find('input, select').on('invalid', function () {
+            $(this).addClass('is-invalid').attr('aria-invalid', 'true').siblings('.invalid-feedback').text(this.validationMessage);
+        }).on('input change', function () {
+            $(this).removeClass('is-invalid').attr('aria-invalid', 'false').siblings('.invalid-feedback').text('');
+        });
         $('#addEmployeeForm, #editEmployeeForm').on('submit', function (event) { event.preventDefault(); submitEmployee(this); });
         $('#confirmDeleteEmployeeBtn').on('click', function () {
             if (pendingDeleteId) employeeMutation($('#deleteEmployeeModal'), '/hris/employees/deleteemployee/' + pendingDeleteId, {csrf_token: $('#addEmployeeForm [name="csrf_token"]').val()}, function () { getAllEmployees(currentPage); });

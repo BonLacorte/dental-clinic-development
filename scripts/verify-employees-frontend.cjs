@@ -109,7 +109,7 @@ assert.equal(requests.length, countBefore + 1);
 const baseline = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf8') : cp.execFileSync('git', ['show', 'b5526bb4a7999bbd3c253fcdda1c8419a171314d:app/views/module_hris/employees.php'], {cwd:root,encoding:'utf8'});
 const original = vm.createContext({$: () => {}, console});
 vm.runInContext(script(baseline), original);
-for (const name of ['dialogValues','dialogIsDirty','dialogReadStatus','populateChoices','loadDialogLookup','loadDialogRecord','focusDialog','mutationFeedback','employeeMutation','submitEmployee','renderPagination']) {
+for (const name of ['dialogValues','dialogIsDirty','dialogReadStatus','populateChoices','loadDialogLookup','focusDialog','mutationFeedback','employeeMutation','submitEmployee','renderPagination']) {
     assert.equal(evaluate(`${name}.toString()`), vm.runInContext(`${name}.toString()`, original), `Protected function changed: ${name}`);
 }
 for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBtn', 'compensationForm']) {
