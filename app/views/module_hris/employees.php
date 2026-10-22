@@ -13,28 +13,33 @@ $employeeActions = [
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white employee-header">
             <div>
-                <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Manage Employees</h1>
+                <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Employees</h1>
                 <p class="mb-0 text-body-secondary">Employee records and employment details</p>
             </div>
-            <?php if ($navCanPermission('hris.employee.create')): ?>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-                <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Employee
-            </button>
-            <?php endif; ?>
+            <div class="employee-header-actions">
+                <?php if ($navCanPermission('hris.employee.create')): ?>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Employee
+                </button>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="card-body border-bottom">
             <form id="employeeSearchForm" class="employee-toolbar" role="search" aria-label="Employees">
                 <div class="employee-search-field">
                     <label class="form-label" for="employeeSearchInput">Search employees</label>
-                    <input type="search" class="form-control" id="employeeSearchInput" placeholder="Name, employee no or branch">
+                    <input type="search" class="form-control" id="employeeSearchInput" placeholder="Name, employee no or branch" aria-describedby="employeeSearchHelp">
                 </div>
-                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
-                <button class="btn btn-outline-secondary" type="button" id="clearEmployeeSearchBtn">Clear</button>
+                <div class="employee-search-actions">
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+                    <button class="btn btn-outline-secondary" type="button" id="clearEmployeeSearchBtn">Clear</button>
+                </div>
             </form>
+            <p class="employee-search-help mb-0" id="employeeSearchHelp">Search by name, employee number or branch. Select Search to apply.</p>
         </div>
         <div class="employee-list-feedback">
-        <p id="employeeListStatus" role="status" class="visually-hidden">Loading employees…</p>
-        <p id="employeeSortSummary" class="visually-hidden">Sorted by newest added.</p>
+        <p id="employeeListStatus" role="status" class="employee-result-context mb-0">Loading employees…</p>
+        <p id="employeeSortSummary" class="employee-order-summary mb-0">Sorted by newest added.</p>
         <p id="employeeScrollHelp" class="visually-hidden">Scroll the table horizontally to reach every column and action. Keyboard: focus the table region and use the arrow keys.</p>
             <div id="employeeListError" class="alert alert-danger m-3" hidden>
                 <p role="alert" class="mb-2"></p>

@@ -2022,3 +2022,132 @@
     display: none;
   }
 }
+
+/* Employees Increment A: scoped screen presentation; existing print stays intact. */
+@media screen {
+  .admin-shell .employee-page .employee-header {
+    align-items: center;
+    gap: 16px 24px;
+  }
+
+  .admin-shell .employee-page .employee-header > .employee-header-actions {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .admin-shell .employee-page #employeesHeading {
+    color: var(--montero-text);
+    font-weight: 650;
+    letter-spacing: -.025em;
+  }
+
+  .admin-shell .employee-page .employee-toolbar {
+    gap: 12px;
+  }
+
+  .admin-shell .employee-page .employee-search-field {
+    min-width: 0;
+    max-width: 36rem;
+  }
+
+  .admin-shell .employee-page .employee-search-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .employee-page .employee-search-help {
+    margin-top: 8px;
+    color: var(--montero-muted);
+    font-size: .875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page .employee-list-feedback {
+    padding: 16px;
+    border-bottom: 1px solid var(--montero-divider);
+    color: var(--montero-muted);
+    font-size: .875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page .employee-result-context {
+    color: var(--montero-text);
+    font-weight: 500;
+  }
+
+  .admin-shell .employee-page .employee-order-summary {
+    margin-top: 4px;
+  }
+
+  .admin-shell .employee-page #employeeListError {
+    margin: 12px 0 0 !important;
+  }
+
+  .admin-shell .employee-page #employeesTable > thead > tr > th {
+    padding: 8px 16px;
+    font-size: .875rem;
+    vertical-align: middle;
+  }
+
+  .admin-shell .employee-page #employeesTable > tbody > tr > td {
+    padding: 8px 16px;
+    height: 60px;
+    font-size: .9375rem;
+  }
+
+  .admin-shell .employee-page #employeesTable > tbody > tr > td:first-child {
+    font-size: .875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .employee-page #employeesTable > tbody > tr > td:nth-child(2):not([colspan]) {
+    min-width: 12rem;
+    font-weight: 600;
+    color: var(--montero-text);
+  }
+
+  .admin-shell .employee-page .employee-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    font-size: inherit;
+    text-decoration: none;
+    color: var(--montero-text);
+  }
+
+  .admin-shell .employee-page th[aria-sort] .employee-sort {
+    color: var(--montero-primary);
+  }
+
+  .admin-shell .employee-page .employee-pagination {
+    gap: 12px 24px;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .employee-page .employee-pagination > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .employee-page .employee-header > .employee-header-actions {
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
+    .admin-shell .employee-page .employee-search-actions {
+      width: 100%;
+    }
+
+    .admin-shell .employee-page .employee-search-actions > .btn {
+      flex: 1 1 0;
+    }
+  }
+}
