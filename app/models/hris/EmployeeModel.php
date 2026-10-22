@@ -26,12 +26,14 @@ class EmployeeModel extends Model
                 e.branch_id, b.name AS branch_name,
                 e.employment_type_id, et.name AS employment_type,
                 e.employment_status_id, es.name AS employment_status,
+                p.name AS position,
                 e.date_hired, e.date_resigned,
                 e.status, e.created_at
             FROM hris_employees e
             LEFT JOIN tenant_branches b ON b.id = e.branch_id
             LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
             LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
+            LEFT JOIN hris_positions p ON p.id = e.position_id AND p.tenant_id = e.tenant_id
             WHERE e.tenant_id = :tenant_id
                 AND e.deleted_at IS NULL
                 {$whereSearch}
@@ -66,6 +68,58 @@ class EmployeeModel extends Model
         $stmt->execute();
 
         return (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+    /** Dedicated export query; the paginated list and mutation scopes are unchanged. */
+    public function getEmployeesForExport(int $tenantId, int $userId, array $branchIds, string $search, string $sortBy, string $sortDir, int $maxRows): array
+    {
+        if ($tenantId < 1 || $userId < 1 || !$branchIds || count($branchIds) > 200 || $maxRows < 1 || $maxRows > 5000) {
+            throw new InvalidArgumentException('Invalid bounded export scope.');
+        }
+        foreach ($branchIds as $branchId) {
+            if (!is_int($branchId) || $branchId < 1) {
+                throw new InvalidArgumentException('Invalid export branch scope.');
+            }
+        }
+        $allowedSorts = ['employee_no', 'name', 'branch_name', 'employment_type', 'date_hired', 'employment_status', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts, true) || !in_array($sortDir, ['ASC', 'DESC'], true)) {
+            throw new InvalidArgumentException('Invalid export order.');
+        }
+        $orderBy = $this->sortColumn($sortBy);
+        $whereSearch = $this->employeeSearchSql($search);
+        $branchParameters = implode(', ', array_map(static fn ($key) => ':export_branch_' . $key, array_keys(array_values($branchIds))));
+        $stmt = $this->db->prepare("
+            SELECT e.employee_no,
+                CONCAT_WS(' ', e.firstname, e.middlename, e.lastname) AS employee_name,
+                b.name AS branch_name, e.date_hired, es.name AS employment_status
+            FROM hris_employees e
+            INNER JOIN tenant_branches b ON b.id = e.branch_id AND b.tenant_id = e.tenant_id AND b.deleted_at IS NULL
+            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id AND (et.tenant_id = e.tenant_id OR et.tenant_id IS NULL)
+            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id AND (es.tenant_id = e.tenant_id OR es.tenant_id IS NULL)
+            WHERE e.tenant_id = :tenant_id AND e.deleted_at IS NULL
+                AND e.branch_id IN ({$branchParameters})
+                AND EXISTS (
+                    SELECT 1 FROM user_branches ub
+                    INNER JOIN users u ON u.id = ub.user_id AND u.tenant_id = e.tenant_id AND u.deleted_at IS NULL
+                    WHERE ub.user_id = :export_user_id AND ub.branch_id = e.branch_id AND ub.deleted_at IS NULL
+                )
+                {$whereSearch}
+            ORDER BY {$orderBy} {$sortDir}, e.created_at DESC, e.id ASC
+            LIMIT :export_limit
+        ");
+        $this->bindEmployeeListValues($stmt, $tenantId, $search);
+        $stmt->bindValue(':export_user_id', $userId, PDO::PARAM_INT);
+        foreach (array_values($branchIds) as $index => $branchId) {
+            $stmt->bindValue(':export_branch_' . $index, $branchId, PDO::PARAM_INT);
+        }
+        // One sentinel row detects overflow. Never silently return a truncated workbook.
+        $stmt->bindValue(':export_limit', $maxRows + 1, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($rows) > $maxRows) {
+            throw new EmployeeExportException('Too many employees to export. Narrow your search and try again.');
+        }
+        return $rows;
     }
 
     public function getEmployeeById(int $id, int $tenant_id): array|false

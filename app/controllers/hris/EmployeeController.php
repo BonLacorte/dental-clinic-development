@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../models/hris/EmployeeModel.php';
 require_once __DIR__ . '/../../models/hris/BranchModel.php';
 require_once __DIR__ . '/../../models/hris/ShiftModel.php';
+require_once __DIR__ . '/../../services/hris/EmployeeExportService.php';
 
 class EmployeeController extends Controller
 {
@@ -25,7 +26,8 @@ class EmployeeController extends Controller
         $data = [
             'title' => 'Employees',
             'name' => $_SESSION['user']['name'],
-            'csrf_token' => $csrf_token
+            'csrf_token' => $csrf_token,
+            'can_export' => EmployeeExportService::canExport($_SESSION)
         ];
 
         $this->view('module_hris/employees', $data);
@@ -54,6 +56,69 @@ class EmployeeController extends Controller
             'totalPages' => $totalPages
         ]);
         exit;
+    }
+
+    public function exportEmployees(): void
+    {
+        $path = null;
+        $stream = null;
+        try {
+            // Defence in depth after Auth/Tenant/Module and both Permission middleware checks.
+            $context = EmployeeExportService::authorizedContext($_SESSION);
+            $token = $_POST['csrf_token'] ?? null;
+            if (!is_string($token) || !Csrf::validate($token, 'keep')) {
+                throw new EmployeeExportException('Your session token is invalid. Refresh the page and try again.', 403);
+            }
+            $params = EmployeeExportService::parameters($_POST);
+            $limit = EmployeeExportService::rowLimit();
+            $rows = $this->employeeModel->getEmployeesForExport(
+                $context['tenant_id'], $context['user_id'], $context['branch_ids'],
+                $params['search'], $params['sort_by'], $params['sort_dir'], $limit
+            );
+            $path = EmployeeExportService::createFile($rows, $limit);
+            // Shutdown cleanup also covers a client disconnect during the binary response.
+            register_shutdown_function(static function () use ($path, &$stream): void {
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                EmployeeExportService::cleanup($path);
+            });
+            $stream = @fopen($path, 'rb');
+            $size = @filesize($path);
+            if ($stream === false || $size === false || $size === 0) {
+                throw new RuntimeException('Export file is unavailable.');
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . EmployeeExportService::filename() . '"');
+            header('Content-Length: ' . $size);
+            header('Cache-Control: private, no-store, max-age=0');
+            header('Pragma: no-cache');
+            header('X-Content-Type-Options: nosniff');
+            fpassthru($stream);
+        } catch (EmployeeExportException $error) {
+            $this->exportError($error->httpStatus, $error->getMessage());
+        } catch (Throwable $error) {
+            // Do not leak SQL, private data, file paths or configuration in a response/log.
+            error_log('Employee export failed (' . get_class($error) . ').');
+            $this->exportError(500, 'Unable to prepare the employee export. Please try again later.');
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            EmployeeExportService::cleanup($path);
+        }
+    }
+
+    private function exportError(int $status, string $message): void
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+        echo json_encode(['success' => false, 'message' => $message]);
     }
 
     public function getEmployeeById(int $id)

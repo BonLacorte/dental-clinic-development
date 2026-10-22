@@ -34,6 +34,10 @@ $app->group(['AuthMiddleware', 'TenantMiddleware', 'ModuleMiddleware:module=HRIS
 
     //ss employees
     $app->get('/hris/employees/getallemployees', 'hris/EmployeeController@getAllEmployees', ['PermissionMiddleware:permission=hris.view']);
+    $app->post('/hris/employees/export', 'hris/EmployeeController@exportEmployees', [
+        'PermissionMiddleware:permission=hris.employee.view',
+        'PermissionMiddleware:permission=hris.view'
+    ]);
     $app->post('/hris/employees/create', 'hris/EmployeeController@create', ['PermissionMiddleware:permission=hris.employee.create']);
     $app->get('/hris/employees/getemployee/{id}', 'hris/EmployeeController@getemployeeById', ['PermissionMiddleware:permission=hris.employee.view']);
     $app->post('/hris/employees/deleteemployee/{id}', 'hris/EmployeeController@deleteEmployee', ['PermissionMiddleware:permission=hris.employee.delete']);
