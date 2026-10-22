@@ -11,11 +11,12 @@ const values = new Map(), events = new Map(), requests = [];
 const ready = [];
 function $(selector) {
     if (typeof selector === 'function') { ready.push(selector); return; }
+    if (selector?.__testChain) return selector.__testChain;
     const key = typeof selector === 'string' ? selector : 'element';
     const chain = {length: 0, on(event, ...args) { events.set(`${key}|${event}`, args.at(-1)); return chain; },
         has() { return chain; }, each() { return chain; }, find() { return chain; }, closest() { return chain; },
         filter() { return chain; }, toArray() { return []; }, is() { return typeof selector === 'object' && selector?.visible !== false; }, trigger() { return chain; },
-        removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, data() { return undefined; }};
+        removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, toggleClass() { return chain; }, siblings() { return chain; }, data() { return undefined; }};
     for (const method of ['text', 'html', 'val', 'prop', 'attr']) chain[method] = function (...args) {
         const property = method === 'prop' || method === 'attr' ? args[0] : method;
         const id = `${key}|${property}`;
@@ -28,7 +29,7 @@ $.ajax = config => {
     const callbacks = {};
     const req = {config, abort() { callbacks.fail?.({}, 'abort'); callbacks.always?.(); },
         done(fn) { callbacks.done = fn; return req; }, fail(fn) { callbacks.fail = fn; return req; }, always(fn) { callbacks.always = fn; return req; },
-        succeed(data) { callbacks.done?.(data); callbacks.always?.(); }, reject() { callbacks.fail?.({}, 'error'); callbacks.always?.(); }};
+        succeed(data) { callbacks.done?.(data); callbacks.always?.(); }, reject(xhr = {}) { callbacks.fail?.(xhr, 'error'); callbacks.always?.(); }};
     requests.push(req); return req;
 };
 const context = vm.createContext({$, console, document: {activeElement: {}, contains: () => false, getElementById: () => ({focus() {}})},
@@ -109,16 +110,76 @@ assert.equal(requests.length, countBefore + 1);
 const baseline = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf8') : cp.execFileSync('git', ['show', 'b5526bb4a7999bbd3c253fcdda1c8419a171314d:app/views/module_hris/employees.php'], {cwd:root,encoding:'utf8'});
 const original = vm.createContext({$: () => {}, console});
 vm.runInContext(script(baseline), original);
-for (const name of ['dialogValues','dialogIsDirty','dialogReadStatus','populateChoices','loadDialogLookup','focusDialog','mutationFeedback','employeeMutation','submitEmployee','renderPagination']) {
+for (const name of ['dialogValues','dialogIsDirty','populateChoices','loadDialogLookup','focusDialog','mutationFeedback','submitEmployee','renderPagination']) {
     assert.equal(evaluate(`${name}.toString()`), vm.runInContext(`${name}.toString()`, original), `Protected function changed: ${name}`);
 }
-for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBtn', 'compensationForm']) {
+for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBtn']) {
     const start = `        $('#${id}').on(`;
     const chunk = source => source.slice(source.indexOf(start), source.indexOf('\n        });', source.indexOf(start)) + 12);
     assert.equal(chunk(view), chunk(baseline), `Mutation event changed: ${id}`);
 }
 assert.equal((view.match(/\.on\('click\.employeeActions'/g) || []).length, 1);
 console.log('PASS: simulated frontend rendering/XSS/action parity, legacy permissions, shared applied state, explicit Search/Clear, all mobile sorts/directions, pagination, stale-response protection, one list request per interaction and protected mutation/dialog functions.');
+
+// Compensation contracts and shared mutation states. No application or database requests.
+{
+    const classify = (response, employeeId = 71) => {context.response=response;context.employeeId=employeeId;return evaluate('compensationReadState(response,employeeId)');};
+    assert.equal(classify({success:true,data:{id:9,employee_id:71}}),'record');
+    assert.equal(classify({success:true,data:{id:9,employee_id:'71'}}),'record');
+    assert.equal(classify({success:false,message:'Data not found.'}),'unverified-absence','Ambiguous absence never authorizes creation');
+    for(const response of [null,{success:true,data:[]},{success:true,data:{id:9,employee_id:72}},{success:true,data:{id:0,employee_id:71}},{success:false,message:'Access denied'}]) assert.equal(classify(response),'unverified');
+    assert.equal(classify({success:true,data:{id:9}},undefined),'unverified');
+    for(const type of ['DAILY','HOURLY','MONTHLY']) {context.rateType=type;assert(evaluate('salaryRateCopy(rateType).label').includes(type[0]+type.slice(1).toLowerCase()));}
+    for(const type of ['',null,'WEEKLY','constructor','__proto__']) {context.rateType=type;assert.equal(evaluate('salaryRateCopy(rateType).label'),'Salary rate (₱)');assert(!evaluate('salaryRateCopy(rateType).help').includes('undefined'));}
+    values.set('#salary_rate|val','123.45');values.set('#payroll_frequency|val','MONTHLY');values.set('#salary_type|val','DAILY');
+    evaluate('updateSalaryRateCopy()');assert.equal(values.get('#salaryRateLabel|text'),'Daily rate (₱)');
+    assert.equal(values.get('#salary_rate|val'),'123.45');assert.equal(values.get('#payroll_frequency|val'),'MONTHLY');
+    for(const [response,expected] of [[{success:true},'success'],[{success:false},'failure'],[{error:'Denied'},'failure'],[{},'uncertain'],[null,'uncertain']]) {context.response=response;assert.equal(evaluate('mutationOutcome(response)'),expected);}
+
+    const ui = new Map();
+    function part(key) {
+        const chain={length:0,find:s=>part(`${key}>${s}`),has:()=>({length:0}),each:()=>chain,is:()=>false,hasClass:()=>false,toggleClass:()=>chain,addClass:()=>chain,removeClass:()=>chain};
+        for(const method of ['prop','attr','text']) chain[method]=(...args)=>{const id=`${key}|${method}|${args.length===2?args[0]:''}`;if(args.length===(method==='text'?0:1))return ui.get(id);ui.set(id,args.at(-1));return chain;};
+        return chain;
+    }
+    const dialog=part('dialog');dialog[0]={};dialog.attr=name=>name==='id'?'testModal':undefined;
+    context.testDialog=dialog;
+    let hidden=0,refreshed=0,toasts=0;
+    context.bootstrap={Modal:{getInstance:()=>({hide(){hidden++;}})}};
+    context.showToast=()=>toasts++;context.afterSuccess=()=>refreshed++;
+    const reset=()=>{ui.clear();evaluate('employeeDialogs.testModal={ready:true,lookups:{},pending:false,uncertain:false,discard:false}');};
+    const submit=()=>evaluate('employeeMutation(testDialog,"/fictional-test-only",{csrf_token:"fixture"},afterSuccess)');
+    reset();let before=requests.length;submit();submit();
+    assert.equal(requests.length,before+1,'Pending request cannot submit twice');
+    assert.equal(evaluate('employeeDialogs.testModal.pending'),true);
+    assert.equal(ui.get('dialog>[type="submit"], #confirmDeleteEmployeeBtn|prop|disabled'),true);
+    assert.equal(ui.get('dialog>.employee-fields|prop|disabled'),true);
+    requests.at(-1).succeed({success:false,message:'Validation rejected',errors:{firstname:'Required'}});
+    assert.equal(hidden,0);assert.equal(refreshed,0);assert.equal(evaluate('employeeDialogs.testModal.uncertain'),false);
+    assert.equal(ui.get('dialog>.employee-mutation-feedback>[role="alert"]|text|'),'Validation rejected');
+    assert.equal(ui.get('dialog>[type="submit"], #confirmDeleteEmployeeBtn|prop|disabled'),false);
+    for(const failure of [{status:0},{status:500}]) {
+        reset();submit();requests.at(-1).reject(failure);before=requests.length;submit();
+        assert.equal(requests.length,before,'Uncertain network/server result cannot be resubmitted');
+        assert.equal(evaluate('employeeDialogs.testModal.uncertain'),true);
+        assert.equal(ui.get('dialog>.employee-read-feedback|prop|hidden'),true,'No empty read-error panel for an uncertain mutation');
+        assert(ui.get('dialog>.employee-mutation-feedback>[role="alert"]|text|').includes('could not be confirmed'));
+    }
+    reset();submit();requests.at(-1).succeed({message:'No explicit outcome'});before=requests.length;submit();assert.equal(requests.length,before);
+    reset();submit();requests.at(-1).reject({status:422,responseJSON:{message:'Review the entered values'}});
+    assert.equal(evaluate('employeeDialogs.testModal.uncertain'),false);assert.equal(hidden,0);
+    reset();submit();requests.at(-1).succeed({success:true,message:'Saved fixture'});
+    assert.equal(hidden,1);assert.equal(refreshed,1);assert.equal(toasts,1);assert.equal(evaluate('employeeDialogs.testModal.allowHide'),true);
+    reset();evaluate('employeeDialogs.testModal.ready=false');before=requests.length;submit();assert.equal(requests.length,before,'Unloaded dialog cannot mutate');
+    reset();evaluate('employeeDialogs.testModal.employeeId=71');evaluate('loadDialogRecord(testDialog)');
+    requests.at(-1).succeed({success:true,data:{id:72,firstname:'Wrong employee'}});
+    assert.equal(evaluate('employeeDialogs.testModal.ready'),false);assert(evaluate('employeeDialogs.testModal.detailError').includes('does not match'));
+    const compensationSubmit=view.slice(view.indexOf("$('#compensationForm').on('submit'"));
+    assert(!compensationSubmit.includes('/hris/employees/createcompensation'));
+    assert(compensationSubmit.includes("'/hris/employees/updatecompensation/' + id") && compensationSubmit.includes('$(this).serialize()'));
+    assert(compensationSubmit.includes('if (!id)') && compensationSubmit.includes('rate <= 0') && compensationSubmit.includes('to < from'));
+    console.log('PASS: simulated compensation identity/absence guards, safe salary-unit labels without value changes, pending/duplicate guards, explicit success, known rejection, uncertain-response latch, mismatched detail rejection and blocked ambiguous creation.');
+}
 
 // Programmatic Bootstrap/portal/keyboard protocol, without layout or a browser.
 {

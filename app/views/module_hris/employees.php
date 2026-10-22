@@ -159,7 +159,7 @@ $employeeActions = [
                                         $id = $type === 'select' ? $field[$mode === 'add' ? 4 : 5] : $mode . '_' . $name;
                                         $errorId = $mode . '_' . $name . '_error';
                                     ?>
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-6 employee-control">
                                         <label class="form-label" for="<?= e($id) ?>"><?= e($label) ?><?php if ($required): ?> <span aria-hidden="true">*</span><?php endif; ?></label>
                                         <?php if ($type === 'select'): ?>
                                         <select class="form-select" name="<?= e($name) ?>" id="<?= e($id) ?>" aria-describedby="<?= e($errorId) ?>"<?= $required ? ' required' : '' ?>><option value="">Select <?= e($label) ?></option></select>
@@ -222,12 +222,14 @@ $employeeActions = [
     <div class="modal fade employee-dialog" id="deleteEmployeeModal" tabindex="-1" aria-labelledby="deleteEmployeeTitle" aria-describedby="deleteEmployeeDescription" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
             <div class="modal-content">
-                <div class="modal-header"><h2 class="modal-title fs-5" id="deleteEmployeeTitle">Delete Employee</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Delete Employee"></button></div>
+                <div class="modal-header"><h2 class="modal-title fs-5" id="deleteEmployeeTitle">Remove employee?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Remove Employee"></button></div>
                 <div class="modal-body">
-                    <p id="deleteEmployeeDescription">Delete <strong id="deleteEmployeeName"></strong> from the employee list?</p>
+                    <h3 class="h6" id="deleteEmployeeName"></h3>
+                    <dl class="employee-summary-meta mb-3"><div><dt>Employee Number</dt><dd id="deleteEmployeeNumber">—</dd></div><div><dt>Branch</dt><dd id="deleteEmployeeBranch">—</dd></div></dl>
+                    <p id="deleteEmployeeDescription">This action will remove the employee from the current directory. Check the employee record before continuing.</p>
                     <div class="employee-mutation-feedback alert alert-warning" hidden><p role="alert" class="mb-0"></p></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary employee-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteEmployeeBtn">Delete employee</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary employee-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteEmployeeBtn"><span class="employee-submit-label" data-idle-label="Remove employee">Remove employee</span></button></div>
             </div>
         </div>
     </div>
@@ -239,19 +241,31 @@ $employeeActions = [
                     <div class="modal-header"><h2 class="modal-title fs-5" id="compensationModalLabel" tabindex="-1">Employee Compensation</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Employee Compensation"></button></div>
                     <div class="modal-body">
                         <p id="compensationEmployeeName" class="fw-semibold"></p>
+                        <p id="compensationEmployeeNumber" class="employee-dialog-identity"></p>
                         <div class="employee-read-feedback" hidden><p role="status" class="mb-2"></p><button type="button" class="btn btn-outline-danger employee-retry" hidden>Retry employee compensation</button></div>
                         <div class="employee-mutation-feedback alert alert-warning" hidden><p role="alert" class="mb-0"></p></div>
+                        <div class="employee-discard alert alert-warning" role="group" aria-labelledby="compensationDiscardTitle" hidden>
+                            <h3 class="h6" id="compensationDiscardTitle">Discard your changes?</h3><p>Unsaved edits will be lost.</p>
+                            <div class="d-flex flex-wrap gap-2"><button type="button" class="btn btn-primary employee-stay">Stay editing</button><button type="button" class="btn btn-outline-danger employee-discard-confirm">Discard changes</button></div>
+                        </div>
                         <input type="hidden" name="id" id="compensation_id">
                         <input type="hidden" name="employee_id" id="compensation_employee_id">
-                        <fieldset class="employee-fields"><legend class="visually-hidden">Compensation fields</legend><div class="row g-3">
-                            <div class="col-12 col-md-6"><label class="form-label" for="salary_type">Salary Type</label><select class="form-select" name="salary_type" id="salary_type" required><option value="">Select</option><option value="MONTHLY">Monthly</option><option value="DAILY">Daily</option><option value="HOURLY">Hourly</option></select></div>
-                            <div class="col-12 col-md-6"><label class="form-label" for="payroll_frequency">Payroll Frequency</label><select class="form-select" name="payroll_frequency" id="payroll_frequency" required><option value="">Select</option><option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="BI_WEEKLY">Bi-Weekly</option><option value="SEMI_MONTHLY">Semi-Monthly</option><option value="MONTHLY">Monthly</option></select></div>
-                            <div class="col-12 col-md-6"><label class="form-label" for="salary_rate">Salary Rate</label><div class="input-group"><span class="input-group-text">₱</span><input type="number" step="0.01" min="0" class="form-control text-end" id="salary_rate" name="salary_rate" required></div></div>
-                            <div class="col-12 col-md-6"><label class="form-label" for="effective_from">Effective From</label><input type="date" class="form-control" id="effective_from" name="effective_from" required></div>
-                            <div class="col-12 col-md-6"><label class="form-label" for="effective_to">Effective To</label><input type="date" class="form-control" id="effective_to" name="effective_to"></div>
-                        </div></fieldset>
+                        <fieldset class="employee-fields"><legend class="visually-hidden">Compensation fields</legend>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Pay Arrangement</legend><div class="row g-3">
+                                <div class="col-12 col-md-6 employee-control"><label class="form-label" for="salary_type">Salary Type</label><select class="form-select" name="salary_type" id="salary_type" aria-describedby="salary_type_error" required><option value="">Select</option><option value="MONTHLY">Monthly</option><option value="DAILY">Daily</option><option value="HOURLY">Hourly</option></select><p class="invalid-feedback" id="salary_type_error"></p></div>
+                                <div class="col-12 col-md-6 employee-control"><label class="form-label" for="payroll_frequency">Payroll Frequency</label><select class="form-select" name="payroll_frequency" id="payroll_frequency" aria-describedby="payroll_frequency_error" required><option value="">Select</option><option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="BI_WEEKLY">Bi-Weekly</option><option value="SEMI_MONTHLY">Semi-Monthly</option><option value="MONTHLY">Monthly</option></select><p class="invalid-feedback" id="payroll_frequency_error"></p></div>
+                            </div></fieldset>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Salary Rate</legend><div class="employee-control">
+                                <label class="form-label" for="salary_rate" id="salaryRateLabel">Salary rate (₱)</label><div class="input-group"><span class="input-group-text" aria-hidden="true">₱</span><input type="number" step="0.01" min="0" class="form-control text-end" id="salary_rate" name="salary_rate" aria-describedby="salaryRateHelp salary_rate_error" required></div>
+                                <p class="invalid-feedback" id="salary_rate_error"></p><p class="form-text mb-0" id="salaryRateHelp">The rate is separate from payroll frequency.</p>
+                            </div></fieldset>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Effective Period</legend><div class="row g-3">
+                                <div class="col-12 col-md-6 employee-control"><label class="form-label" for="effective_from">Effective From</label><input type="date" class="form-control" id="effective_from" name="effective_from" aria-describedby="effective_from_error" required><p class="invalid-feedback" id="effective_from_error"></p></div>
+                                <div class="col-12 col-md-6 employee-control"><label class="form-label" for="effective_to">Effective To</label><input type="date" class="form-control" id="effective_to" name="effective_to" aria-describedby="effective_to_error"><p class="invalid-feedback" id="effective_to_error"></p></div>
+                            </div></fieldset>
+                        </fieldset>
                     </div>
-                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="submit" class="btn btn-primary"><span id="compensationSpinner" class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>Save compensation</button></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="submit" class="btn btn-primary"><span id="compensationSpinner" class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span><span class="employee-submit-label" data-idle-label="Save compensation">Save compensation</span></button></div>
                 </form>
             </div>
         </div>
@@ -483,6 +497,8 @@ $employeeActions = [
             $('#exportEmployeesBtn').prop('disabled', employeeExportPending);
             const records = res.data.map(employeePresentation);
             closeEmployeeMenu(false);
+            const priorFocus = document.activeElement;
+            const restoreRecordFocus = $(priorFocus).closest('#employeesTable, #employeeCards').length > 0 && priorFocus?.dataset?.id;
             employeeRecords = new Map(records.map(record => [record.id, record]));
             $('#employeePositionNotice').prop('hidden', !records.some(record => !record.positionProvided));
             const emptyText = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
@@ -502,6 +518,7 @@ $employeeActions = [
                 $(this).attr('aria-label', `${$(this).data('label')}: sort ${active && context.sortDir === 'ASC' ? 'descending' : 'ascending'}`);
             });
             renderPagination(currentPage, res.totalPages);
+            if (restoreRecordFocus) focusEmployeeAction(priorFocus, priorFocus.dataset.id);
         }).fail(function (xhr, status) {
             if (sequence === listSequence && status !== 'abort') listFailed();
         }).always(function () {
@@ -557,19 +574,24 @@ $employeeActions = [
         });
         const unresolved = $dialog.find('select option:selected[data-unresolved]').length > 0;
         if (unresolved) failures.push('A current selection is unavailable in the loaded choices. It has been kept. Retry the choices or select an available value.');
-        const blocked = !state.ready || loading.length > 0 || failures.length > 0;
+        const readBlocked = !state.ready || loading.length > 0 || failures.length > 0;
+        const blocked = readBlocked || state.uncertain;
         const $feedback = $dialog.find('.employee-read-feedback');
         const retryHadFocus = $feedback.has(document.activeElement).length > 0;
-        $feedback.prop('hidden', !blocked).toggleClass('alert alert-danger', failures.length > 0);
+        $feedback.prop('hidden', !readBlocked).toggleClass('alert alert-danger', failures.length > 0);
         $feedback.find('[role="status"]').text([...failures, ...(loading.length ? [`Loading ${loading.join(', ')}…`] : [])].join(' '));
-        $feedback.find('.employee-retry').prop('hidden', failures.length === 0);
+        $feedback.find('.employee-retry').prop('hidden', failures.length === 0 || state.retryAllowed === false);
         $dialog.find('.employee-fields').prop('disabled', !state.ready || state.discard || state.pending);
         $dialog.find('select[name]').each(function () {
             const entry = state.lookups[this.name];
             $(this).prop('disabled', !!entry && !entry.ready);
         });
-        $dialog.find('[type="submit"]').prop('disabled', blocked || state.discard || state.pending);
-        $dialog.attr('aria-busy', loading.length ? 'true' : 'false');
+        $dialog.find('[type="submit"], #confirmDeleteEmployeeBtn').prop('disabled', blocked || state.discard || state.pending);
+        $dialog.find('.employee-submit-label').each(function () {
+            const pendingText = $dialog.is('#deleteEmployeeModal') ? 'Removing…' : $dialog.is('#editEmployeeModal') ? 'Saving changes…' : $dialog.is('#compensationModal') ? 'Saving compensation…' : 'Saving employee…';
+            $(this).text(state.pending ? pendingText : this.dataset.idleLabel);
+        });
+        $dialog.attr('aria-busy', loading.length || state.pending ? 'true' : 'false');
         if (retryHadFocus && failures.length === 0 && $dialog.hasClass('show')) focusDialog($dialog);
     }
 
@@ -611,17 +633,32 @@ $employeeActions = [
         if (state.xhr) state.xhr.abort();
         const sequence = state.sequence = (state.sequence || 0) + 1;
         state.detailError = '';
+        state.retryAllowed = true;
         dialogReadStatus($dialog);
         const compensation = $dialog.is('#compensationModal');
         state.xhr = $.ajax({url: `/hris/employees/${compensation ? 'getcompensation' : 'getemployee'}/${encodeURIComponent(state.employeeId)}`, type: 'GET', dataType: 'json'}).done(function (res) {
             if (employeeDialogs[$dialog.attr('id')] !== state || state.sequence !== sequence) return;
-            // Legacy compensation explicitly uses this response for an absent rate.
-            const noCompensation = compensation && res?.success === false && res.message === 'Data not found.';
-            if (!noCompensation && (!res || res.success !== true || !res.data || typeof res.data !== 'object')) {
+            if (compensation) {
+                const result = compensationReadState(res, state.employeeId);
+                if (result !== 'record') {
+                    state.detailError = result === 'unverified-absence'
+                        ? 'No compensation record is available for editing. Close this dialog and contact your payroll administrator to create or verify a rate.'
+                        : 'This compensation record could not be verified for the selected employee. Close the dialog and contact your payroll administrator.';
+                    state.ready = false;
+                    state.retryAllowed = result !== 'unverified-absence';
+                    return;
+                }
+            }
+            if (!res || res.success !== true || !res.data || typeof res.data !== 'object' || Array.isArray(res.data)) {
                 state.detailError = res?.message === 'Employee not found.' ? 'This employee is unavailable. Close this dialog and refresh the directory.' : 'Unable to load this record. Retry when ready. Any entered values are kept.';
                 return;
             }
             const emp = res.data;
+            if (!compensation && String(emp.id) !== String(state.employeeId)) {
+                state.detailError = 'This response does not match the selected employee. Close the dialog and refresh the directory.';
+                state.ready = false;
+                return;
+            }
             if ($dialog.is('#editEmployeeModal')) {
                 $dialog.find('input[name], select[name]').each(function () {
                     if (this.name === 'csrf_token') return;
@@ -638,11 +675,15 @@ $employeeActions = [
                 $('#view_employmentStatus').attr('class', 'badge hris-status employee-read-value ' + MonteroHris.statusClass(emp.employment_status, 'employment'));
             } else if (compensation) {
                 $('#compensation_employee_id').val(state.employeeId);
-                if (emp) {
-                    const fields = {compensation_id: emp.id, compensation_employee_id: emp.employee_id, salary_type: emp.salary_type, payroll_frequency: emp.payroll_frequency, salary_rate: emp.salary_rate, effective_from: emp.effective_from, effective_to: emp.effective_to || ''};
-                    Object.entries(fields).forEach(([id, value]) => $(`#${id}`).val(value));
+                const fields = {compensation_id: emp.id, compensation_employee_id: emp.employee_id, salary_type: emp.salary_type, payroll_frequency: emp.payroll_frequency, salary_rate: emp.salary_rate, effective_from: emp.effective_from, effective_to: emp.effective_to || ''};
+                for (const id of ['salary_type', 'payroll_frequency']) {
+                    const $select = $(`#${id}`), value = String(emp[id] ?? '');
+                    if (value && !$select.find('option').toArray().some(option => option.value === value)) $select.append($(new Option(`Current value (${value})`, value)).attr('data-unresolved', 'true'));
                 }
-                $('#compensationModalLabel').text(emp ? 'Edit Employee Compensation' : 'Add Employee Compensation');
+                Object.entries(fields).forEach(([id, value]) => $(`#${id}`).val(value));
+                $('#compensationModalLabel').text('Edit Employee Compensation');
+                updateSalaryRateCopy();
+                state.baseline = dialogValues($dialog);
             }
             state.ready = true;
             dialogReadStatus($dialog);
@@ -664,9 +705,41 @@ $employeeActions = [
         $dialog.find('input[name], select[name]').each(function () {
             const message = errors[this.name];
             const text = typeof message === 'string' ? message : Array.isArray(message) ? message.filter(item => typeof item === 'string').join(' ') : '';
-            $(this).toggleClass('is-invalid', !!text).attr('aria-invalid', text ? 'true' : 'false');
-            $(this).siblings('.invalid-feedback').text(text);
+            setEmployeeFieldError(this, text);
         });
+    }
+
+    function setEmployeeFieldError(field, text) {
+        const $field = $(field);
+        $field.toggleClass('is-invalid', !!text).attr('aria-invalid', text ? 'true' : 'false');
+        const $control = $field.closest('.employee-control');
+        ($control.length ? $control.find('.invalid-feedback') : $field.siblings('.invalid-feedback')).text(text).toggleClass('d-block', !!text);
+    }
+
+    function compensationReadState(response, employeeId) {
+        if (response?.success === false && response.message === 'Data not found.') return 'unverified-absence';
+        const record = response?.data;
+        if (response?.success !== true || !/^[1-9]\d*$/.test(String(employeeId)) || !record || typeof record !== 'object' || Array.isArray(record)
+            || !/^[1-9]\d*$/.test(String(record.id)) || String(record.employee_id) !== String(employeeId)) return 'unverified';
+        return 'record';
+    }
+
+    function salaryRateCopy(type) {
+        const units = {DAILY: ['Daily rate (₱)', 'per day'], HOURLY: ['Hourly rate (₱)', 'per hour'], MONTHLY: ['Monthly rate (₱)', 'per month']};
+        const selected = Object.hasOwn(units, type) ? units[type] : null;
+        return {label: selected?.[0] || 'Salary rate (₱)', help: selected ? `Stored amount ${selected[1]}. Payroll frequency is configured separately; no conversion is performed here.` : 'The rate is separate from payroll frequency. No conversion is performed here.'};
+    }
+
+    function updateSalaryRateCopy() {
+        const copy = salaryRateCopy($('#salary_type').val());
+        $('#salaryRateLabel').text(copy.label);
+        $('#salaryRateHelp').text(copy.help);
+    }
+
+    function mutationOutcome(response) {
+        if (response?.success === true) return 'success';
+        if (response?.success === false || response?.error) return 'failure';
+        return 'uncertain';
     }
 
     function focusDialog($dialog) {
@@ -691,14 +764,19 @@ $employeeActions = [
     // Endpoint validation/response/access correctness and A15 remain separately gated.
     function employeeMutation($dialog, url, data, onSuccess) {
         const state = employeeDialogs[$dialog.attr('id')];
-        if (state.pending) return;
+        if (state.pending || state.uncertain || !state.ready) return;
         state.pending = true;
+        employeeFieldFeedback($dialog);
         $dialog.find('.employee-mutation-feedback').prop('hidden', true);
         $dialog.find('[type="submit"], #confirmDeleteEmployeeBtn').prop('disabled', true);
         $('#compensationSpinner', $dialog).removeClass('d-none');
+        dialogReadStatus($dialog);
         $.ajax({url, type: 'POST', data, dataType: 'json'}).done(function (res) {
-            if (!res || res.success !== true) {
-                mutationFeedback($dialog, res?.success === false || res?.error ? (res.message || res.error || 'The request was not completed. Your entries are kept.') : 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
+            const outcome = mutationOutcome(res);
+            if (outcome !== 'success') {
+                state.uncertain = outcome === 'uncertain';
+                if (res?.errors && typeof res.errors === 'object' && !Array.isArray(res.errors)) employeeFieldFeedback($dialog, res.errors);
+                mutationFeedback($dialog, outcome === 'failure' ? (typeof res.message === 'string' ? res.message : typeof res.error === 'string' ? res.error : 'The request was not completed. Your entries are kept.') : uncertainMutationMessage());
                 return;
             }
             state.pending = false;
@@ -706,14 +784,21 @@ $employeeActions = [
             showToast(res.message || 'Request completed.', 'success');
             bootstrap.Modal.getInstance($dialog[0]).hide();
             onSuccess();
-        }).fail(function () {
-            mutationFeedback($dialog, 'The result could not be confirmed. Your entries are kept. Check the record before trying again.');
+        }).fail(function (xhr) {
+            const rejected = [400, 401, 403, 404, 422].includes(xhr?.status);
+            state.uncertain = !rejected;
+            const res = xhr?.responseJSON;
+            if (rejected && res?.errors && typeof res.errors === 'object' && !Array.isArray(res.errors)) employeeFieldFeedback($dialog, res.errors);
+            mutationFeedback($dialog, rejected ? (typeof res?.message === 'string' ? res.message : 'The request was rejected or the record is unavailable. Your entries are kept. Check your access and record before trying again.') : uncertainMutationMessage());
         }).always(function () {
             state.pending = false;
             dialogReadStatus($dialog);
-            $dialog.find('#confirmDeleteEmployeeBtn').prop('disabled', false);
             $('#compensationSpinner', $dialog).addClass('d-none');
         });
+    }
+
+    function uncertainMutationMessage() {
+        return 'The result could not be confirmed. Your entries are kept. Do not submit again until the saved record is verified. Close and reopen this dialog to reload the record.';
     }
 
     function submitEmployee(form) {
@@ -767,7 +852,7 @@ $employeeActions = [
             closeEmployeeMenu(true);
             // A display:none transition may move native focus to body before this event.
             const active = document.activeElement === document.body && employeeListFocus && !$(employeeListFocus).is(':visible') ? employeeListFocus : document.activeElement;
-            if ($(active).is('[data-employee-action]')) focusEmployeeAction(active, active.dataset.id);
+            if ($(active).is('[data-employee-action], [data-employee-menu]')) focusEmployeeAction(active, active.dataset.id);
             else if ($(active).closest('.employee-table-region, .employee-mobile-sort').length && !$(active).is(':visible')) {
                 (mobileCards.matches ? document.getElementById('employeeMobileSortBy') : document.querySelector('.employee-sort')).focus();
             }
@@ -787,7 +872,7 @@ $employeeActions = [
             const $dialog = $(this), trigger = event.relatedTarget || $dialog.data('employee-trigger');
             const form = $dialog.find('form')[0];
             if (form) form.reset();
-            const state = employeeDialogs[this.id] = {trigger, employeeId: trigger?.dataset.id, baseline: {}, ready: $dialog.is('#addEmployeeModal, #deleteEmployeeModal'), lookups: {}, pending: false, discard: false};
+            const state = employeeDialogs[this.id] = {trigger, employeeId: trigger?.dataset.id, baseline: {}, ready: $dialog.is('#addEmployeeModal, #deleteEmployeeModal'), lookups: {}, pending: false, discard: false, uncertain: false};
             state.returnTrigger = $dialog.data('employee-return-trigger') || trigger;
             $dialog.find('.employee-discard, .employee-mutation-feedback').prop('hidden', true);
             employeeFieldFeedback($dialog);
@@ -798,8 +883,20 @@ $employeeActions = [
                 $('#view_employmentStatus').attr('class', 'badge hris-status employee-read-value');
             }
             if ($dialog.is('#editEmployeeModal')) $('#editEmployeeIdentity').text(`${trigger?.dataset.name || 'Loading employee…'}${trigger?.dataset.number ? ` · ${trigger.dataset.number}` : ''}`);
-            if ($dialog.is('#compensationModal')) { $('#compensation_id, #compensation_employee_id').val(''); $('#compensationModalLabel').text('Employee Compensation'); $('#compensationEmployeeName').text(trigger?.dataset.name || ''); }
-            if ($dialog.is('#deleteEmployeeModal')) { pendingDeleteId = state.employeeId; $('#deleteEmployeeName').text(trigger?.dataset.name || 'this employee'); }
+            if ($dialog.is('#compensationModal')) {
+                $('#compensation_id, #compensation_employee_id').val('');
+                $('#salary_type, #payroll_frequency').find('option[data-unresolved]').remove();
+                $('#compensationModalLabel').text('Employee Compensation');
+                $('#compensationEmployeeName').text(trigger?.dataset.name || '');
+                $('#compensationEmployeeNumber').text(trigger?.dataset.number || 'Employee number unavailable');
+                updateSalaryRateCopy();
+            }
+            if ($dialog.is('#deleteEmployeeModal')) {
+                pendingDeleteId = state.employeeId;
+                $('#deleteEmployeeName').text(trigger?.dataset.name || 'this employee');
+                $('#deleteEmployeeNumber').text(trigger?.dataset.number || '—');
+                $('#deleteEmployeeBranch').text(trigger?.dataset.branch || '—');
+            }
             if ($dialog.is('#addEmployeeModal, #editEmployeeModal')) {
                 // Reset choices for a new dialog session; retries in this session keep values.
                 $dialog.find('select[name]').each(function () {
@@ -814,11 +911,12 @@ $employeeActions = [
         }).on('shown.bs.modal', function () { focusDialog($(this)); }).on('hide.bs.modal', function (event) {
             const $dialog = $(this), state = employeeDialogs[this.id];
             if (state.pending) { event.preventDefault(); return; }
-            if (!state.allowHide && $dialog.is('#addEmployeeModal, #editEmployeeModal') && dialogIsDirty($dialog)) {
+            if (!state.allowHide && $dialog.is('#addEmployeeModal, #editEmployeeModal, #compensationModal') && dialogIsDirty($dialog)) {
                 event.preventDefault();
                 if (!state.discard) state.lastFocus = document.activeElement;
                 state.discard = true;
                 $dialog.find('.employee-discard').prop('hidden', false);
+                $dialog.find('.employee-discard p').text(state.uncertain ? 'Your current entries will be lost. The last request is still unconfirmed; check the saved record before submitting again.' : 'Unsaved edits will be lost.');
                 dialogReadStatus($dialog);
                 $dialog.find('.employee-stay').trigger('focus');
             }
@@ -842,10 +940,11 @@ $employeeActions = [
             Object.keys(state.lookups).forEach(name => { if (!state.lookups[name].xhr) loadDialogLookup($dialog, name); });
         });
         $('.employee-dialog select').on('change', function () { dialogReadStatus($(this).closest('.modal')); });
-        $('#addEmployeeForm, #editEmployeeForm').find('input, select').on('invalid', function () {
-            $(this).addClass('is-invalid').attr('aria-invalid', 'true').siblings('.invalid-feedback').text(this.validationMessage);
+        $('#salary_type').on('change', updateSalaryRateCopy);
+        $('#addEmployeeForm, #editEmployeeForm, #compensationForm').find('input, select').on('invalid', function () {
+            setEmployeeFieldError(this, this.validationMessage);
         }).on('input change', function () {
-            $(this).removeClass('is-invalid').attr('aria-invalid', 'false').siblings('.invalid-feedback').text('');
+            setEmployeeFieldError(this, '');
         });
         $('#addEmployeeForm, #editEmployeeForm').on('submit', function (event) { event.preventDefault(); submitEmployee(this); });
         $('#confirmDeleteEmployeeBtn').on('click', function () {
@@ -858,7 +957,8 @@ $employeeActions = [
             if (from && to && to < from) { mutationFeedback($('#compensationModal'), 'Effective To cannot be earlier than Effective From.'); $('#effective_to').trigger('focus'); return; }
             if (isNaN(rate) || rate <= 0) { mutationFeedback($('#compensationModal'), 'Please enter a valid salary rate.'); $('#salary_rate').trigger('focus'); return; }
             const id = $('#compensation_id').val();
-            employeeMutation($('#compensationModal'), id ? '/hris/employees/updatecompensation/' + id : '/hris/employees/createcompensation', $(this).serialize(), function () {});
+            if (!id) { mutationFeedback($('#compensationModal'), 'No compensation record is available for editing. Contact your payroll administrator.'); return; }
+            employeeMutation($('#compensationModal'), '/hris/employees/updatecompensation/' + id, $(this).serialize(), function () {});
         });
     });
 </script>
