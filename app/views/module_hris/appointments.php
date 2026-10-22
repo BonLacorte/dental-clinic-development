@@ -3,17 +3,18 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="employmentTypesHeading">Employment Types</h1>
+            <div class="org-page-intro"><p class="org-eyebrow">Organization</p><h1 class="h5 mb-0" id="employmentTypesHeading">Employment Types</h1><p class="org-page-description">Manage employment types, descriptions and their active status.</p></div>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
-                <i class="bi bi-plus-lg"></i> Add Employment Type
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Employment Type
             </button>
         </div>
 
         <div class="card-body p-0">
+            <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
             <p class="hris-scroll-hint" id="appointmentsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
             <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="employmentTypesHeading" aria-describedby="appointmentsTableScrollHelp">
                 <table class="table table-hover align-middle mb-0 hris-data-table" id="appointmentsTable">
@@ -42,8 +43,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Appointment -->
-<div class="modal fade hris-dialog" id="addAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAppointmentModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-dialog" id="addAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAppointmentModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
 
             <form id="addAppointmentForm">
@@ -56,6 +57,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
 
                     <div class="mb-3">
                         <label for="addAppointmentForm_code" class="form-label">Code <span class="text-danger">*</span></label>
@@ -116,8 +118,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Appointment -->
-<div class="modal fade hris-dialog" id="editAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editAppointmentModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-dialog" id="editAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editAppointmentModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
 
             <form id="editAppointmentForm">
@@ -131,6 +133,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
 
                     <div class="mb-3">
                         <label for="editAppointmentForm_code" class="form-label">Code <span class="text-danger">*</span></label>
@@ -187,8 +190,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Delete Appointment Confirmation -->
-<div class="modal fade hris-dialog" id="deleteAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteAppointmentModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="deleteAppointmentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteAppointmentModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -197,6 +200,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
             </div>
 
             <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                 <p class="mb-0">
                     Are you sure you want to delete
                     <strong id="deleteAppointmentName"></strong>?
@@ -240,6 +244,7 @@ function employmentTypeMessage(message) {
 }
 
 $(document).ready(function () {
+    initOrganizationUX();
 
     document.title = document.title.replace('Appointments', 'Employment Types');
     getAllAppointments();
@@ -537,6 +542,40 @@ function deleteAppointment(id) {
             console.log(xhr.responseText);
             showToast('Something went wrong.', 'error');
         }
+    });
+}
+
+// Organization-only feedback and pending state. Messages are always rendered as text.
+function orgFeedback(message, type = 'info', form = null) {
+    const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
+    $target.removeClass('d-none org-feedback--error org-feedback--success')
+        .toggleClass('org-feedback--error', type === 'error')
+        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+}
+function orgBegin($scope) {
+    if ($scope.data('orgPending')) return false;
+    $scope.data('orgPending', true).attr('aria-busy', 'true');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', true);
+    return true;
+}
+function orgEnd($scope) {
+    $scope.data('orgPending', false).removeAttr('aria-busy');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', false);
+}
+function initOrganizationUX() {
+    let returnFocus = null;
+    $(document).on('click', '.organization-page button, .organization-page a', function () {
+        returnFocus = this;
+    });
+    $('.organization-dialog').on('shown.bs.modal', function () {
+        $(this).find('.org-form-feedback').addClass('d-none').empty();
+        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+        // Destructive dialogs initially focus Cancel, never the destructive action.
+        const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
+        (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hidden.bs.modal', function () {
+        if (returnFocus?.isConnected) returnFocus.focus();
+        else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
     });
 }
 

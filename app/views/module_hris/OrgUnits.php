@@ -4,10 +4,10 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="officesHeading">Manage Offices</h1>
+            <div class="org-page-intro"><p class="org-eyebrow">Organization</p><h1 class="h5 mb-0" id="officesHeading">Offices</h1><p class="org-page-description">Organize departments, teams, sections and units across your clinic.</p></div>
 
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">
@@ -17,20 +17,21 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     <i class="bi bi-arrows-collapse"></i> Collapse All
                 </button>
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
-                    <i class="bi bi-plus-lg"></i> Add Office
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Office
                 </button>
             </div>
         </div>
 
         <div class="card-body p-0">
+            <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
             <div id="orgUnitsTree"></div>
         </div>
     </div>
 </div>
 
 <!-- Add Office -->
-<div class="modal fade hris-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addOfficeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
@@ -41,6 +42,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="parentSelect" class="form-label">Parent Unit</label>
@@ -81,8 +83,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Office -->
-<div class="modal fade hris-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editOfficeForm">
                 <input type="hidden" name="id">
@@ -94,6 +96,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="editParentSelect" class="form-label">Parent Unit</label>
@@ -136,8 +139,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <!-- View Office Employees -->
-<div class="modal fade hris-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewUnitEmployeesHeading">
@@ -147,6 +150,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
             </div>
 
             <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                 <p class="hris-scroll-hint" id="unitEmployeesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
                 <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="unitEmployeesTableScrollHelp">
                     <table class="table table-hover align-middle mb-0 hris-data-table" id="unitEmployeesTable">
@@ -177,6 +181,7 @@ let currentPage = 1;
 let orgUnitsFlat = [];
 
 $(document).ready(function () {
+    initOrganizationUX();
     getAllOrgUnits();
 
     $('#addOfficeForm').on('submit', function (e) {
@@ -582,6 +587,40 @@ function deleteOffice(id) {
         }
     });
 }
+// Organization-only feedback and pending state. Messages are always rendered as text.
+function orgFeedback(message, type = 'info', form = null) {
+    const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
+    $target.removeClass('d-none org-feedback--error org-feedback--success')
+        .toggleClass('org-feedback--error', type === 'error')
+        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+}
+function orgBegin($scope) {
+    if ($scope.data('orgPending')) return false;
+    $scope.data('orgPending', true).attr('aria-busy', 'true');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', true);
+    return true;
+}
+function orgEnd($scope) {
+    $scope.data('orgPending', false).removeAttr('aria-busy');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', false);
+}
+function initOrganizationUX() {
+    let returnFocus = null;
+    $(document).on('click', '.organization-page button, .organization-page a', function () {
+        returnFocus = this;
+    });
+    $('.organization-dialog').on('shown.bs.modal', function () {
+        $(this).find('.org-form-feedback').addClass('d-none').empty();
+        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+        // Destructive dialogs initially focus Cancel, never the destructive action.
+        const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
+        (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hidden.bs.modal', function () {
+        if (returnFocus?.isConnected) returnFocus.focus();
+        else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
+    });
+}
+
 </script>
 </body>
 </html>

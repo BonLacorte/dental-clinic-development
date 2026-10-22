@@ -1,17 +1,18 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="branchesHeading">Manage Branches</h1>
+            <div class="org-page-intro"><p class="org-eyebrow">Organization</p><h1 class="h5 mb-0" id="branchesHeading">Branches</h1><p class="org-page-description">Manage clinic locations and their branch details.</p></div>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBranchModal">
-                <i class="bi bi-plus-lg"></i> Add Branch
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Branch
             </button>
         </div>
 
         <div class="card-body p-0">
+            <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
             <p class="hris-scroll-hint" id="branchesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
             <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="branchesHeading" aria-describedby="branchesTableScrollHelp">
                 <table class="table table-hover align-middle mb-0 hris-data-table" id="branchesTable">
@@ -38,8 +39,8 @@
 </div>
 
 <!-- Add Branch -->
-<div class="modal fade hris-dialog" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
             <form id="addBranchForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
@@ -50,6 +51,7 @@
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="mb-3">
                         <label for="addBranchForm_name" class="form-label">Branch Name</label>
                         <input id="addBranchForm_name" type="text" class="form-control" name="name">
@@ -81,8 +83,8 @@
 </div>
 
 <!-- Edit Branch -->
-<div class="modal fade hris-dialog" id="editBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editBranchModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="editBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editBranchModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
             <form id="editBranchForm">
                 <input type="hidden" name="id" id="editBranchId">
@@ -94,6 +96,7 @@
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="mb-3">
                         <label for="editBranchForm_name" class="form-label">Branch Name</label>
                         <input id="editBranchForm_name" type="text" class="form-control" name="name">
@@ -125,8 +128,8 @@
 </div>
 
 <!-- Delete confirmation modal (replaces window.confirm) -->
-<div class="modal fade hris-dialog" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteBranchModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteBranchModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -135,6 +138,7 @@
             </div>
 
             <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                 Are you sure you want to delete this branch? This action cannot be undone.
             </div>
 
@@ -167,6 +171,7 @@ function esc(str) {
 }
 
 $(document).ready(function () {
+    initOrganizationUX();
     getAllBranches(currentPage);
 
     $('#addBranchForm').on('submit', function (e) {
@@ -541,6 +546,40 @@ function deleteBranch(id) {
     });
 
 }
+// Organization-only feedback and pending state. Messages are always rendered as text.
+function orgFeedback(message, type = 'info', form = null) {
+    const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
+    $target.removeClass('d-none org-feedback--error org-feedback--success')
+        .toggleClass('org-feedback--error', type === 'error')
+        .toggleClass('org-feedback--success', type === 'success').text(message || '');
+}
+function orgBegin($scope) {
+    if ($scope.data('orgPending')) return false;
+    $scope.data('orgPending', true).attr('aria-busy', 'true');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', true);
+    return true;
+}
+function orgEnd($scope) {
+    $scope.data('orgPending', false).removeAttr('aria-busy');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', false);
+}
+function initOrganizationUX() {
+    let returnFocus = null;
+    $(document).on('click', '.organization-page button, .organization-page a', function () {
+        returnFocus = this;
+    });
+    $('.organization-dialog').on('shown.bs.modal', function () {
+        $(this).find('.org-form-feedback').addClass('d-none').empty();
+        const target = $(this).find('[id^="confirmDelete"], input:not([type="hidden"]), select, textarea, .btn-close').filter(':visible').first()[0];
+        // Destructive dialogs initially focus Cancel, never the destructive action.
+        const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
+        (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hidden.bs.modal', function () {
+        if (returnFocus?.isConnected) returnFocus.focus();
+        else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
+    });
+}
+
 </script>
 </body>
 </html>
