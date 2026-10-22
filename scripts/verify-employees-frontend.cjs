@@ -14,7 +14,7 @@ function $(selector) {
     const key = typeof selector === 'string' ? selector : 'element';
     const chain = {length: 0, on(event, ...args) { events.set(`${key}|${event}`, args.at(-1)); return chain; },
         has() { return chain; }, each() { return chain; }, find() { return chain; }, closest() { return chain; },
-        filter() { return chain; }, toArray() { return []; }, is() { return false; }, trigger() { return chain; },
+        filter() { return chain; }, toArray() { return []; }, is() { return typeof selector === 'object' && selector?.visible !== false; }, trigger() { return chain; },
         removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, data() { return undefined; }};
     for (const method of ['text', 'html', 'val', 'prop', 'attr']) chain[method] = function (...args) {
         const property = method === 'prop' || method === 'attr' ? args[0] : method;
@@ -44,10 +44,12 @@ for (const markup of [row, card]) {
     assert(markup.includes('000071') && markup.includes('Ana María') && markup.includes('例'));
     assert(markup.includes('Fictional clinic &amp; team') && markup.includes('Dentist') && markup.includes('Regular') && markup.includes('Probationary'));
     assert(!markup.includes('<img') && !markup.includes('INTERNAL-DO-NOT-DISPLAY'));
-    assert.equal((markup.match(/data-id="71"/g) || []).length, 5);
-    assert.equal((markup.match(/\sid="/g) || []).length, 0);
-    for (const action of ['View', 'Edit', 'Compensation', 'Delete']) assert(markup.includes(`>${action}</span>`));
+    assert.equal((markup.match(/data-id="71"/g) || []).length, 2, 'Identity and contextual trigger share the record');
+    assert.equal((markup.match(/\sid="/g) || []).length, 1, 'Only unique menu trigger ID per representation');
+    assert(markup.includes('aria-haspopup="menu"') && markup.includes('bi-three-dots'));
 }
+for (const action of ['View details', 'Edit employee', 'Manage compensation', 'Remove employee']) assert(record.actions.includes(`>${action}</span>`));
+assert(row.includes('employeeActions-table-0') && card.includes('employeeActions-card-0'));
 assert(card.includes('2026-10-01'), 'Previously approved card hire date preserved');
 assert(!row.includes('2026-10-01'), 'Hire date remains in supplementary sorting/cards, not new directory columns');
 assert.equal(evaluate('employeePresentation({...fixture, position:null}).position'), 'Not assigned');
@@ -107,7 +109,7 @@ assert.equal(requests.length, countBefore + 1);
 const baseline = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf8') : cp.execFileSync('git', ['show', 'b5526bb4a7999bbd3c253fcdda1c8419a171314d:app/views/module_hris/employees.php'], {cwd:root,encoding:'utf8'});
 const original = vm.createContext({$: () => {}, console});
 vm.runInContext(script(baseline), original);
-for (const name of ['dialogValues','dialogIsDirty','dialogReadStatus','populateChoices','loadDialogLookup','loadDialogRecord','focusDialog','openEmployeeDialog','mutationFeedback','employeeMutation','submitEmployee','renderPagination']) {
+for (const name of ['dialogValues','dialogIsDirty','dialogReadStatus','populateChoices','loadDialogLookup','loadDialogRecord','focusDialog','mutationFeedback','employeeMutation','submitEmployee','renderPagination']) {
     assert.equal(evaluate(`${name}.toString()`), vm.runInContext(`${name}.toString()`, original), `Protected function changed: ${name}`);
 }
 for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBtn', 'compensationForm']) {
@@ -115,8 +117,48 @@ for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBt
     const chunk = source => source.slice(source.indexOf(start), source.indexOf('\n        });', source.indexOf(start)) + 12);
     assert.equal(chunk(view), chunk(baseline), `Mutation event changed: ${id}`);
 }
-assert.equal((view.match(/\.on\('click', '\.viewEmployeeBtn/g) || []).length, 1);
+assert.equal((view.match(/\.on\('click\.employeeActions'/g) || []).length, 1);
 console.log('PASS: simulated frontend rendering/XSS/action parity, legacy permissions, shared applied state, explicit Search/Clear, all mobile sorts/directions, pagination, stale-response protection, one list request per interaction and protected mutation/dialog functions.');
+
+// Programmatic Bootstrap/portal/keyboard protocol, without layout or a browser.
+{
+    const doc = context.document;
+    const parent = label => ({label,appendChild(node){node.parentElement=this;}});
+    const body = parent('body'), host = parent('host'), cell = parent('table cell');
+    const classSet = new Set(['dropdown-menu']);
+    const items = Array.from({length:4},(_,index) => ({index,focus(){doc.activeElement=this;}}));
+    const menu = {classList:{add:c=>classSet.add(c),remove:c=>classSet.delete(c)},setAttribute(){},querySelectorAll:()=>items,contains:target=>items.includes(target)};
+    const trigger = {id:'employeeActions-table-0',dataset:{id:'71'},parentElement:cell,attributes:{},setAttribute(name,value){this.attributes[name]=value;},hasAttribute:n=>n==='data-employee-menu',contains:target=>target===trigger,focus(){doc.activeElement=this;}};
+    doc.body=body;doc.contains=()=>true;
+    doc.getElementById=id=>id==='employeeActionMenu'?menu:id==='employeeMenuHost'?host:{focus(){}};
+    let constructed=0,disposed=0;
+    context.bootstrap={Dropdown:class {
+        constructor(button,config){
+            constructed++;assert.equal(menu.parentElement,cell,'Menu sibling during Bootstrap construction');
+            const popper=config.popperConfig({modifiers:[]});
+            assert.equal(popper.strategy,'fixed');assert.equal(popper.placement,'bottom-end');
+            assert(popper.modifiers.some(x=>x.name==='preventOverflow'&&x.options.rootBoundary==='viewport'));
+        }
+        show(){assert.equal(menu.parentElement,body,'Portal escapes the scrolling table');assert(!classSet.has('dropdown-menu'),'Avoid conflicting Bootstrap delegated sibling keyboard API');classSet.add('show');}
+        hide(){classSet.delete('show');}
+        dispose(){disposed++;}
+    }};
+    context.menuTrigger=trigger;
+    evaluate('openEmployeeMenu(menuTrigger)');assert.equal(doc.activeElement,items[0]);
+    const key=name=>({key:name,preventDefault(){},stopPropagation(){}});
+    context.menuKey=key('End');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,items[3]);
+    context.menuKey=key('ArrowDown');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,items[0]);
+    context.menuKey=key('ArrowUp');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,items[3]);
+    context.menuKey=key('Home');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,items[0]);
+    context.menuKey=key('Escape');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,trigger);assert.equal(menu.parentElement,host);
+    evaluate('openEmployeeMenu(menuTrigger,true)');assert.equal(doc.activeElement,items[3]);
+    context.menuKey=key('Tab');evaluate('employeeMenuKeydown(menuKey)');assert.equal(doc.activeElement,trigger);
+    evaluate('openEmployeeMenu(menuTrigger)');
+    events.get('element|pointerdown.employeeMenu focusin.employeeMenu')({target:{}});
+    assert.equal(evaluate('employeeMenu'),null,'Outside interaction closes the menu');
+    assert.equal(constructed,disposed,'Every popup lifecycle disposes its positioning instance');
+    console.log('PASS: simulated singleton-menu/portal positioning configuration, keyboard arrows/Home/End/Escape/Tab, outside close, focus return and disposal. Real menu geometry remains unverified.');
+}
 
 // Binary transport is SIMULATED. Workbook validity is tested separately by PHP read-back.
 (async () => {

@@ -2394,3 +2394,92 @@
     }
   }
 }
+
+@media screen {
+  .admin-shell .employee-page .employee-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  .admin-shell .employee-page .employee-card .employee-row-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .admin-shell .employee-action-menu {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    margin: 0;
+    padding: 8px 0;
+    width: min(19rem, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--montero-control-border);
+    border-radius: var(--montero-control-radius);
+    background: var(--montero-surface);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell .employee-action-menu.show {
+    display: block;
+  }
+
+  .admin-shell .employee-action-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 16px;
+    white-space: normal;
+    font-size: .9375rem;
+    color: var(--montero-text);
+    background-color: transparent;
+  }
+
+  .admin-shell .employee-action-menu .dropdown-item:is(:hover, :focus) {
+    color: var(--montero-primary-hover);
+    background: var(--montero-primary-tint);
+  }
+
+  .admin-shell .employee-action-menu .dropdown-item > .bi {
+    flex: 0 0 1rem;
+  }
+
+  .admin-shell .employee-action-menu .dropdown-divider {
+    height: 0;
+    margin: 8px 0;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .employee-action-menu .dropdown-item:focus-visible {
+    outline-offset: -3px;
+  }
+}
+
+@media print {
+  .employee-action-menu,
+  .employee-page :is(.employee-menu-trigger, .employee-position-notice) {
+    display: none !important;
+  }
+
+  .employee-page button.employee-name {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+  }
+
+  .employee-page .employee-number {
+    display: block;
+  }
+}

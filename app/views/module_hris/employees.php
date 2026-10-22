@@ -96,6 +96,8 @@ $employeeActions = [
         </div>
     </div>
 
+    <div id="employeeMenuHost" hidden><div id="employeeActionMenu" class="dropdown-menu employee-action-menu" role="menu" aria-label="Employee actions"></div></div>
+
     <?php
     // Existing field names, select IDs and request contracts are retained.
     $employeeGroups = [
@@ -248,6 +250,8 @@ $employeeActions = [
     let loadedList = null;
     let employeeExportPending = false;
     let pendingDeleteId = null;
+    let employeeMenu = null;
+    let employeeRecords = new Map();
     const employeeDialogs = {};
     const lookupDefinitions = {
         branch_id: {url: '/hris/branches/getallbranches', label: 'Branch'},
@@ -271,16 +275,18 @@ $employeeActions = [
     }
 
     // Both representations use these same escaped values and permission decisions.
-    function employeePresentation(emp) {
+    function employeePresentation(emp, index = 0) {
         const name = employeeName(emp);
         const identity = `data-id="${esc(emp.id)}" data-name="${esc(name)}" data-number="${esc(emp.employee_no)}" data-branch="${esc(emp.branch_name)}"`;
-        const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-employee-action="${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i><span class="employee-action-label">${label}</span></button>` : '';
+        const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="dropdown-item ${className}${color === 'danger' ? ' text-danger' : ''}" role="menuitem" tabindex="-1" data-employee-action="${className}" ${identity}><i class="bi bi-${icon}" aria-hidden="true"></i><span>${label}</span></button>` : '';
         // Legacy compensation visibility is unchanged; policy review stays separate.
-        const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
-            + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil-square', 'primary')
-            + action(true, 'editCompensationBtn', 'Compensation', 'cash-stack', 'primary')
-            + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
+        const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View details', 'eye', 'primary')
+            + action(employeeActions.edit, 'editEmployeeBtn', 'Edit employee', 'pencil-square', 'primary')
+            + action(true, 'editCompensationBtn', 'Manage compensation', 'cash-stack', 'primary')
+            + (employeeActions.delete ? '<div class="dropdown-divider" role="separator"></div>' : '')
+            + action(employeeActions.delete, 'deleteEmployeeBtn', 'Remove employee', 'trash', 'danger');
         return {
+            id: String(emp.id), attributes: identity, index,
             name: esc(name), number: esc(emp.employee_no) || '—', branch: esc(emp.branch_name) || '—',
             identity: employeeActions.view ? `<button type="button" class="employee-name viewEmployeeBtn" data-employee-action="viewEmployeeBtn" ${identity}>${esc(name)}</button>` : `<span class="employee-name">${esc(name)}</span>`,
             positionProvided: Object.hasOwn(emp, 'position') && (emp.position === null || typeof emp.position === 'string'),
@@ -292,11 +298,85 @@ $employeeActions = [
     }
 
     function employeeTableRow(record) {
-        return `<tr><td><div class="employee-identity">${record.identity}<span class="employee-number">${record.number}</span></div></td><td>${record.position}</td><td>${record.branch}</td><td>${record.employmentType}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions">${record.actions}</div></td></tr>`;
+        return `<tr><td><div class="employee-identity">${record.identity}<span class="employee-number">${record.number}</span></div></td><td>${record.position}</td><td>${record.branch}</td><td>${record.employmentType}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions">${employeeMenuTrigger(record, 'table')}</div></td></tr>`;
     }
 
     function employeeCard(record) {
-        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.identity}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Position</dt><dd>${record.position}</dd></div><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Employment Type</dt><dd>${record.employmentType}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions" role="group" aria-label="Actions for ${record.name}">${record.actions}</div></article></li>`;
+        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.identity}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Position</dt><dd>${record.position}</dd></div><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Employment Type</dt><dd>${record.employmentType}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions">${employeeMenuTrigger(record, 'card')}</div></article></li>`;
+    }
+
+    function employeeMenuTrigger(record, representation) {
+        if (!record.actions) return '<span class="text-body-secondary">No available actions</span>';
+        return `<button type="button" class="btn btn-outline-secondary employee-menu-trigger" id="employeeActions-${representation}-${record.index}" data-employee-menu ${record.attributes} aria-label="Actions for ${record.name}" aria-haspopup="menu" aria-expanded="false" aria-controls="employeeActionMenu"><i class="bi bi-three-dots" aria-hidden="true"></i></button>`;
+    }
+
+    function closeEmployeeMenu(restoreFocus = false) {
+        const active = employeeMenu;
+        if (!active) return;
+        employeeMenu = null;
+        active.instance?.hide();
+        active.instance?.dispose();
+        active.menu.classList.remove('show');
+        active.menu.classList.add('dropdown-menu');
+        active.trigger.setAttribute('aria-expanded', 'false');
+        document.getElementById('employeeMenuHost').appendChild(active.menu);
+        if (restoreFocus) focusEmployeeAction(active.trigger, active.trigger.dataset.id);
+    }
+
+    function openEmployeeMenu(trigger, last = false) {
+        if (employeeMenu?.trigger === trigger) { closeEmployeeMenu(true); return; }
+        closeEmployeeMenu(false);
+        const record = employeeRecords.get(trigger.dataset.id);
+        if (!record?.actions) return;
+        const menu = document.getElementById('employeeActionMenu');
+        menu.innerHTML = record.actions;
+        menu.setAttribute('aria-labelledby', trigger.id);
+        // Bootstrap resolves its menu sibling at construction. Then portal it out of
+        // overflow containers; the existing bundled Popper anchors it to the trigger.
+        trigger.parentElement.appendChild(menu);
+        menu.classList.add('dropdown-menu');
+        employeeMenu = {trigger, menu, instance: null};
+        try {
+            employeeMenu.instance = new bootstrap.Dropdown(trigger, {
+                autoClose: false,
+                reference: trigger,
+                popperConfig(config) {
+                    return {...config, placement: 'bottom-end', strategy: 'fixed', modifiers: [
+                        ...(config.modifiers || []),
+                        {name: 'preventOverflow', options: {boundary: 'clippingParents', rootBoundary: 'viewport', padding: 12, altAxis: true}},
+                        {name: 'flip', options: {rootBoundary: 'viewport', padding: 12, fallbackPlacements: ['top-end', 'bottom-start', 'top-start']}}
+                    ]};
+                }
+            });
+            // Bootstrap's delegated keyboard API assumes a sibling toggle. While
+            // portaled, use our own scoped menu class and complete keyboard model.
+            menu.classList.remove('dropdown-menu');
+            document.body.appendChild(menu);
+            employeeMenu.instance.show();
+            const items = menu.querySelectorAll('[role="menuitem"]:not(:disabled)');
+            items[last ? items.length - 1 : 0]?.focus();
+        } catch (error) {
+            closeEmployeeMenu(true);
+            $('#employeeListStatus').text('Employee actions are unavailable. Refresh the page and try again.');
+        }
+    }
+
+    function employeeMenuKeydown(event) {
+        if (!employeeMenu) return;
+        if (event.key === 'Escape' || event.key === 'Tab') {
+            if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); }
+            // Tab continues naturally from the row trigger, not from the body portal.
+            closeEmployeeMenu(true);
+            return;
+        }
+        if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const items = [...employeeMenu.menu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
+        const current = items.indexOf(document.activeElement);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+            : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+        items[next]?.focus();
     }
 
     function focusEmployeeAction(trigger, employeeId) {
@@ -305,7 +385,8 @@ $employeeActions = [
             return;
         }
         const replacement = employeeId && $('#employeesTable button, #employeeCards button').filter(':visible').toArray().find(button =>
-            button.dataset.id === String(employeeId) && button.dataset.employeeAction === trigger?.dataset.employeeAction);
+            button.dataset.id === String(employeeId) && (trigger?.hasAttribute('data-employee-menu')
+                ? button.hasAttribute('data-employee-menu') : button.dataset.employeeAction === trigger?.dataset.employeeAction));
         (replacement || document.getElementById('employeesHeading')).focus();
     }
 
@@ -359,6 +440,7 @@ $employeeActions = [
     }
 
     function getAllEmployees(page) {
+        closeEmployeeMenu(false);
         const sequence = ++listSequence;
         if (listRequest) listRequest.abort();
         requestedPage = page;
@@ -380,6 +462,8 @@ $employeeActions = [
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
             $('#exportEmployeesBtn').prop('disabled', employeeExportPending);
             const records = res.data.map(employeePresentation);
+            closeEmployeeMenu(false);
+            employeeRecords = new Map(records.map(record => [record.id, record]));
             $('#employeePositionNotice').prop('hidden', !records.some(record => !record.positionProvided));
             const emptyText = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
             $('#employeesTable tbody').html(records.map(employeeTableRow).join('') || `<tr><td colspan="6" class="text-center py-4">${emptyText}</td></tr>`);
@@ -555,9 +639,10 @@ $employeeActions = [
         ($target.length ? $target : $dialog.find('.modal-title')).trigger('focus');
     }
 
-    function openEmployeeDialog(id, trigger) {
+    function openEmployeeDialog(id, trigger, returnTrigger = trigger) {
         const $dialog = $(id);
         $dialog.data('employee-trigger', trigger);
+        $dialog.data('employee-return-trigger', returnTrigger);
         bootstrap.Modal.getOrCreateInstance($dialog[0]).show(trigger);
     }
 
@@ -620,16 +705,29 @@ $employeeActions = [
             getAllEmployees(1);
         });
         $('#employeesPagination').on('click', '.page-btn', function () { getAllEmployees($(this).data('page')); });
-        $('.employee-page').on('click', '.viewEmployeeBtn, .editEmployeeBtn, .deleteEmployeeBtn, .editCompensationBtn', function () {
+        $(document).on('click.employeeActions', '.employee-page [data-employee-action], #employeeActionMenu [data-employee-action]', function () {
             const id = $(this).hasClass('viewEmployeeBtn') ? '#viewEmployeeModal' : $(this).hasClass('editEmployeeBtn') ? '#editEmployeeModal' : $(this).hasClass('deleteEmployeeBtn') ? '#deleteEmployeeModal' : '#compensationModal';
-            openEmployeeDialog(id, this);
+            const returnTrigger = employeeMenu?.trigger || this;
+            closeEmployeeMenu(false);
+            openEmployeeDialog(id, this, returnTrigger);
         });
+        $('.employee-page').on('click', '.employee-menu-trigger', function () { openEmployeeMenu(this); });
+        $('.employee-page').on('keydown', '.employee-menu-trigger', function (event) {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); openEmployeeMenu(this, event.key === 'ArrowUp'); }
+        });
+        $('#employeeActionMenu').on('keydown', employeeMenuKeydown);
+        $(document).on('pointerdown.employeeMenu focusin.employeeMenu', function (event) {
+            if (employeeMenu && !employeeMenu.menu.contains(event.target) && !employeeMenu.trigger.contains(event.target)) closeEmployeeMenu(false);
+        });
+        $('.employee-table-region').on('scroll.employeeMenu', function () { employeeMenu?.instance?.update(); });
+        $(window).on('resize.employeeMenu', function () { closeEmployeeMenu(true); });
         const mobileCards = window.matchMedia('(max-width: 767.98px)');
         let employeeListFocus = null;
         $(document).on('focusin.employeeResponsive', function (event) {
             employeeListFocus = $(event.target).closest('.employee-table-region, .employee-mobile-sort, #employeeCards').length ? event.target : null;
         });
         mobileCards.addEventListener('change', function () {
+            closeEmployeeMenu(true);
             // A display:none transition may move native focus to body before this event.
             const active = document.activeElement === document.body && employeeListFocus && !$(employeeListFocus).is(':visible') ? employeeListFocus : document.activeElement;
             if ($(active).is('[data-employee-action]')) focusEmployeeAction(active, active.dataset.id);
@@ -653,6 +751,7 @@ $employeeActions = [
             const form = $dialog.find('form')[0];
             if (form) form.reset();
             const state = employeeDialogs[this.id] = {trigger, employeeId: trigger?.dataset.id, baseline: {}, ready: $dialog.is('#addEmployeeModal, #deleteEmployeeModal'), lookups: {}, pending: false, discard: false};
+            state.returnTrigger = $dialog.data('employee-return-trigger') || trigger;
             $dialog.find('.employee-discard, .employee-mutation-feedback').prop('hidden', true);
             $dialog.find('.employee-details dd').text('—');
             if ($dialog.is('#compensationModal')) { $('#compensation_id, #compensation_employee_id').val(''); $('#compensationModalLabel').text('Employee Compensation'); $('#compensationEmployeeName').text(trigger?.dataset.name || ''); }
@@ -685,7 +784,7 @@ $employeeActions = [
             if (state.xhr) state.xhr.abort();
             Object.values(state.lookups).forEach(entry => { ++entry.sequence; if (entry.xhr) entry.xhr.abort(); });
             if ($dialog.is('#deleteEmployeeModal')) pendingDeleteId = null;
-            focusEmployeeAction(state.trigger, state.employeeId);
+            focusEmployeeAction(state.returnTrigger, state.employeeId);
         });
         $('.employee-stay').on('click', function () {
             const $dialog = $(this).closest('.modal'), state = employeeDialogs[$dialog.attr('id')];
