@@ -13,10 +13,11 @@ function $(selector) {
     if (typeof selector === 'function') { ready.push(selector); return; }
     if (selector?.__testChain) return selector.__testChain;
     const key = typeof selector === 'string' ? selector : 'element';
-    const chain = {length: 0, on(event, ...args) { events.set(`${key}|${event}`, args.at(-1)); return chain; },
+    const chain = {0:{testSelector:key},length: 0, on(event, ...args) { events.set(`${key}|${event}`, args.at(-1)); return chain; },
         has() { return chain; }, each() { return chain; }, find() { return chain; }, closest() { return chain; },
         filter() { return chain; }, toArray() { return []; }, is() { return typeof selector === 'object' && selector?.visible !== false; }, trigger() { return chain; },
-        removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, toggleClass() { return chain; }, siblings() { return chain; }, data() { return undefined; }};
+        hasClass(name) {return selector?.classes?.includes(name) || false;},
+        removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, toggleClass() { return chain; }, siblings() { return chain; }, data(name,...args) {if(args.length){values.set(`${key}|data|${name}`,args[0]);return chain;}return values.get(`${key}|data|${name}`)??selector?.dataset?.[name];}};
     for (const method of ['text', 'html', 'val', 'prop', 'attr']) chain[method] = function (...args) {
         const property = method === 'prop' || method === 'attr' ? args[0] : method;
         const id = `${key}|${property}`;
@@ -95,6 +96,16 @@ for (const field of ['employee_no', 'name', 'branch_name', 'employment_type', 'd
         assert(values.get('#employeeSortSummary|text').includes(field === 'created_at' ? (dir === 'ASC' ? 'oldest' : 'newest') : (dir === 'ASC' ? 'ascending' : 'descending')));
     }
 }
+for(const field of ['name','branch_name','employment_type','employment_status']) {
+    for(const dir of ['ASC','DESC']) {
+        const count=requests.length;
+        events.get('.employee-sort|click').call({dataset:{sort:field}});
+        assert.equal(requests.length,count+1,'One request per header sort');
+        const request=requests.at(-1);assert.equal(request.config.data.sort_by,field);assert.equal(request.config.data.sort_dir,dir);
+        request.succeed({success:true,data:[fixture],currentPage:1,totalPages:3});
+        assert.equal(values.get('#employeeMobileSortBy|val'),field);assert.equal(values.get('#employeeMobileSortDir|val'),dir,'Supplementary controls synchronize with headers');
+    }
+}
 evaluate('getAllEmployees(2)');
 assert.equal(requests.at(-1).config.data.page, 2);
 requests.at(-1).succeed({success:true,data:[fixture],currentPage:2,totalPages:3});
@@ -119,6 +130,16 @@ for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBt
     assert.equal(chunk(view), chunk(baseline), `Mutation event changed: ${id}`);
 }
 assert.equal((view.match(/\.on\('click\.employeeActions'/g) || []).length, 1);
+{
+    const opened=[];
+    context.bootstrap={Modal:{getOrCreateInstance:element=>({show:trigger=>opened.push({target:element.testSelector,trigger})})}};
+    const action=events.get('element|click.employeeActions');
+    for(const [className,target] of [['viewEmployeeBtn','#viewEmployeeModal'],['editEmployeeBtn','#editEmployeeModal'],['editCompensationBtn','#compensationModal'],['deleteEmployeeBtn','#deleteEmployeeModal']]) {
+        const trigger={classes:[className],dataset:{id:'71',name:'Fictional employee',number:'000071',branch:'Fictional clinic'}};
+        action.call(trigger);assert.equal(opened.at(-1).target,target);assert.equal(opened.at(-1).trigger,trigger,'Selected identity passed to the existing modal');
+    }
+    assert.equal(opened.length,4,'One modal invocation per action activation');
+}
 console.log('PASS: simulated frontend rendering/XSS/action parity, legacy permissions, shared applied state, explicit Search/Clear, all mobile sorts/directions, pagination, stale-response protection, one list request per interaction and protected mutation/dialog functions.');
 
 // Compensation contracts and shared mutation states. No application or database requests.

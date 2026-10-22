@@ -17,7 +17,7 @@ assert new.replace('                p.name AS position,\n', '').replace('       
 assert 'position' not in re.search(r'private function sortColumn.*?^    }', text, re.S | re.M).group().split('$columns = [', 1)[1]
 fields = ['id','tenant_id','employee_no','firstname','middlename','lastname','email','contact_no','branch_id','employment_type_id','employment_status_id','position_id','date_hired','date_resigned','status','created_at','deleted_at']
 fixtures = []
-for ident, tenant, position, deleted in [(1,1,100,None),(2,1,None,None),(3,1,200,None),(4,2,200,None),(5,1,100,'2026-10-20')]:
+for ident, tenant, position, deleted in [(1,1,100,None),(2,1,None,None),(3,1,200,None),(4,2,200,None),(5,1,100,'2026-10-20')] + [(ident,1,100,None) for ident in range(6,20)]:
     fixtures.append([ident,tenant,f'000{ident}','Fictional',None,f'Sample {ident}',None,None,10,1,1,position,'2026-10-01',None,'ACTIVE',f'2026-10-{ident:02}',deleted])
 params = {}
 values = []
@@ -34,17 +34,26 @@ db = sqlite3.connect(':memory:')
 db.row_factory = sqlite3.Row
 db.create_function('CONCAT_WS', -1, lambda sep,*parts: sep.join(str(p) for p in parts if p is not None))
 search_sql = re.search(r'private function employeeSearchSql.*?return "(.*?)";', text, re.S).group(1)
-columns = {'name':'e.lastname','branch_name':'b.name','employment_type':'et.name','employment_status':'es.name','employee_no':'e.employee_no','date_hired':'e.date_hired','created_at':'e.created_at'}
-for field, expression in columns.items():
+columns = dict(re.findall(r"'([^']+)' => '([^']+)'", re.search(r'private function sortColumn.*?^    }', text, re.S | re.M).group()))
+cases = 0
+for field in ['name','branch_name','employment_type','employment_status','employee_no','date_hired','created_at']:
+    expression = columns[field]
     for direction in ['ASC','DESC']:
         for search in ['', 'Sample 1', 'no match']:
-            bound = {**params,'tenant_id':1,'limit':10,'offset':0,'search':'%'+search+'%'}
             def execute(sql):
                 sql = sql.replace('{$whereSearch}', search_sql if search else '').replace('{$orderBy}',expression).replace('{$direction}',direction)
                 return [dict(r) for r in db.execute(prefix + sql,bound)]
-            previous, current = execute(old), execute(new)
-            assert [{k:v for k,v in r.items() if k!='position'} for r in current] == previous
-            assert len({r['id'] for r in current}) == len(current)
-            for row in current:
-                assert row['position'] == ('Dentist' if row['id']==1 else None)
-print('PASS: 42 read-only SELECT fixture comparisons preserve all existing list fields, search/order/page semantics, null position, employee tenant/deletion filtering and Position tenant isolation; no database/schema writes.')
+            combined = []
+            for offset in [0,10,20]:
+                bound = {**params,'tenant_id':1,'limit':10,'offset':offset,'search':'%'+search+'%'}
+                previous, current = execute(old), execute(new)
+                assert [{k:v for k,v in r.items() if k!='position'} for r in current] == previous
+                assert len(current) <= 10
+                for row in current:
+                    assert row['position'] == (None if row['id'] in [2,3] else 'Dentist')
+                combined.extend(current); cases += 1
+            assert len({r['id'] for r in combined}) == len(combined)
+            if not search:
+                assert len(combined) == 17 and {r['id'] for r in combined}.isdisjoint({4,5})
+db.close()
+print(f'PASS: {cases} read-only SELECT fixture comparisons across three pages preserve all existing list fields, search/order/page semantics, null position, employee tenant/deletion filtering and Position tenant isolation; no database/schema writes. This is SQLite SELECT simulation, not MySQL/application verification.')
