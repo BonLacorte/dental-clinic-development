@@ -2281,7 +2281,19 @@
 
 @media print {
   .employee-page :is(.employee-cards, .employee-mobile-sort, .employee-action-label,
-    .employee-result-context, .employee-order-summary, .employee-search-help) {
+    .employee-result-context, .employee-order-summary, .employee-search-help,
+    #exportEmployeesBtn, .employee-export-status) {
     display: none !important;
+  }
+}
+
+@media screen {
+  .admin-shell .employee-page .employee-export-status:not(:empty) {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid var(--montero-control-border);
+    border-radius: var(--montero-control-radius);
+    background: var(--montero-canvas);
+    color: var(--montero-text);
   }
 }

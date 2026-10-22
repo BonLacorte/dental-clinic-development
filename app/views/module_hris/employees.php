@@ -17,6 +17,11 @@ $employeeActions = [
                 <p class="mb-0 text-body-secondary">Employee records and employment details</p>
             </div>
             <div class="employee-header-actions">
+                <?php if (!empty($can_export)): ?>
+                <button type="button" class="btn btn-outline-primary" id="exportEmployeesBtn" data-csrf="<?= e($csrf_token) ?>" aria-describedby="employeeExportStatus" title="Export assigned branches using the applied search and order" disabled>
+                    <i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Export Excel
+                </button>
+                <?php endif; ?>
                 <?php if ($navCanPermission('hris.employee.create')): ?>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Employee
@@ -40,6 +45,7 @@ $employeeActions = [
         <div class="employee-list-feedback">
         <p id="employeeListStatus" role="status" class="employee-result-context mb-0">Loading employees…</p>
         <p id="employeeSortSummary" class="employee-order-summary mb-0">Sorted by newest added.</p>
+        <p id="employeeExportStatus" role="status" class="employee-export-status mb-0"></p>
         <p id="employeeScrollHelp" class="visually-hidden">Scroll the table horizontally to reach every column and action. Keyboard: focus the table region and use the arrow keys.</p>
             <div id="employeeListError" class="alert alert-danger m-3" hidden>
                 <p role="alert" class="mb-2"></p>
@@ -236,6 +242,7 @@ $employeeActions = [
     let listSequence = 0;
     let requestedPage = 1;
     let loadedList = null;
+    let employeeExportPending = false;
     let pendingDeleteId = null;
     const employeeDialogs = {};
     const lookupDefinitions = {
@@ -293,6 +300,55 @@ $employeeActions = [
         (replacement || document.getElementById('employeesHeading')).focus();
     }
 
+    async function exportEmployees() {
+        if (employeeExportPending || !loadedList) return;
+        // Only successfully loaded criteria apply; unsubmitted text and failed requests do not.
+        const applied = {...loadedList};
+        const button = document.getElementById('exportEmployeesBtn');
+        if (!button) return;
+        employeeExportPending = true;
+        $(button).prop('disabled', true).attr('aria-busy', 'true');
+        $('#employeeExportStatus').removeClass('text-danger').text(`Preparing Excel for your permitted branches${applied.search ? ` matching “${applied.search}”` : ''}…`);
+        try {
+            const response = await fetch('/hris/employees/export', {
+                method: 'POST', credentials: 'same-origin',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest'},
+                body: new URLSearchParams({csrf_token: button.dataset.csrf, search: applied.search, sort_by: applied.sortBy, sort_dir: applied.sortDir})
+            });
+            const type = response.headers.get('Content-Type') || '';
+            if (!response.ok || !type.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                const error = type.includes('application/json') ? await response.json().catch(() => null) : null;
+                throw new Error(typeof error?.message === 'string' ? error.message : 'Export is unavailable. Check your session and try again.');
+            }
+            const disposition = response.headers.get('Content-Disposition') || '';
+            const filename = disposition.match(/filename="(Montero_Dental_Employees_\d{4}-\d{2}-\d{2}\.xlsx)"/);
+            const blob = await response.blob();
+            const signature = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
+            if (!filename || signature.join(',') !== '80,75,3,4') {
+                throw new Error('The export response was not a valid Excel download. Please try again.');
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            try {
+                link.href = url;
+                link.download = filename[1];
+                link.hidden = true;
+                document.body.appendChild(link);
+                link.click();
+            } finally {
+                link.remove();
+                // Allow the browser to begin the download before releasing the blob.
+                window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+            }
+            $('#employeeExportStatus').text('Excel download started. The file includes permitted branches for the applied search and order.');
+        } catch (error) {
+            $('#employeeExportStatus').addClass('text-danger').text(error instanceof Error ? error.message : 'Unable to prepare the export. Please try again.');
+        } finally {
+            employeeExportPending = false;
+            $(button).prop('disabled', !loadedList).attr('aria-busy', 'false');
+        }
+    }
+
     function getAllEmployees(page) {
         const sequence = ++listSequence;
         if (listRequest) listRequest.abort();
@@ -313,6 +369,7 @@ $employeeActions = [
             }
             currentPage = res.currentPage;
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
+            $('#exportEmployeesBtn').prop('disabled', employeeExportPending);
             const records = res.data.map(employeePresentation);
             const emptyText = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
             $('#employeesTable tbody').html(records.map(employeeTableRow).join('') || `<tr><td colspan="6" class="text-center py-4">${emptyText}</td></tr>`);
@@ -541,6 +598,7 @@ $employeeActions = [
 
     $(function () {
         getAllEmployees(1);
+        $('#exportEmployeesBtn').on('click', exportEmployees);
         $('#employeeSearchForm').on('submit', function (event) { event.preventDefault(); currentSearch = $('#employeeSearchInput').val(); getAllEmployees(1); });
         $('#clearEmployeeSearchBtn').on('click', function () { $('#employeeSearchInput').val(''); currentSearch = ''; getAllEmployees(1); });
         $('#retryEmployeeList').on('click', function () { getAllEmployees(requestedPage); });
@@ -557,8 +615,13 @@ $employeeActions = [
             openEmployeeDialog(id, this);
         });
         const mobileCards = window.matchMedia('(max-width: 767.98px)');
+        let employeeListFocus = null;
+        $(document).on('focusin.employeeResponsive', function (event) {
+            employeeListFocus = $(event.target).closest('.employee-table-region, .employee-mobile-sort, #employeeCards').length ? event.target : null;
+        });
         mobileCards.addEventListener('change', function () {
-            const active = document.activeElement;
+            // A display:none transition may move native focus to body before this event.
+            const active = document.activeElement === document.body && employeeListFocus && !$(employeeListFocus).is(':visible') ? employeeListFocus : document.activeElement;
             if ($(active).is('[data-employee-action]')) focusEmployeeAction(active, active.dataset.id);
             else if ($(active).closest('.employee-table-region, .employee-mobile-sort').length && !$(active).is(':visible')) {
                 (mobileCards.matches ? document.getElementById('employeeMobileSortBy') : document.querySelector('.employee-sort')).focus();

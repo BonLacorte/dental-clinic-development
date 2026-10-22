@@ -15,7 +15,7 @@ function $(selector) {
     const chain = {length: 0, on(event, ...args) { events.set(`${key}|${event}`, args.at(-1)); return chain; },
         has() { return chain; }, each() { return chain; }, find() { return chain; }, closest() { return chain; },
         filter() { return chain; }, toArray() { return []; }, is() { return false; }, trigger() { return chain; },
-        removeAttr() { return chain; }, data() { return undefined; }};
+        removeAttr() { return chain; }, removeClass() { return chain; }, addClass() { return chain; }, data() { return undefined; }};
     for (const method of ['text', 'html', 'val', 'prop', 'attr']) chain[method] = function (...args) {
         const property = method === 'prop' || method === 'attr' ? args[0] : method;
         const id = `${key}|${property}`;
@@ -113,3 +113,48 @@ for (const id of ['addEmployeeForm, #editEmployeeForm', 'confirmDeleteEmployeeBt
 }
 assert.equal((view.match(/\.on\('click', '\.viewEmployeeBtn/g) || []).length, 1);
 console.log('PASS: simulated frontend rendering/XSS/action parity, legacy permissions, shared applied state, explicit Search/Clear, all mobile sorts/directions, pagination, stale-response protection, one list request per interaction and protected mutation/dialog functions.');
+
+// Binary transport is SIMULATED. Workbook validity is tested separately by PHP read-back.
+(async () => {
+    const exports = [], downloads = [], revoked = [];
+    const button = {dataset:{csrf:'fictional-test-token'}};
+    context.document.getElementById = id => id === 'exportEmployeesBtn' ? button : {focus(){}};
+    context.document.body = {appendChild(){}};
+    context.document.createElement = () => ({click(){downloads.push(this.download);},remove(){}});
+    context.window.setTimeout = callback => callback();
+    context.URLSearchParams = URLSearchParams;
+    context.URL = {createObjectURL:() => 'blob:fictional-test',revokeObjectURL:value => revoked.push(value)};
+    const binary = {ok:true,headers:{get:header => header === 'Content-Type' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'attachment; filename="Montero_Dental_Employees_2026-10-22.xlsx"'},blob:async () => new Blob([new Uint8Array([80,75,3,4])])};
+    let resolveResponse;
+    context.fetch = (url, config) => {exports.push({url,config});return new Promise(resolve => {resolveResponse=resolve;});};
+    evaluate('loadedList = {search:"applied fictional search", sortBy:"name", sortDir:"DESC"}');
+    values.set('#employeeSearchInput|val','unsubmitted different search');
+    const listCount = requests.length;
+    const pending = evaluate('exportEmployees()');
+    await evaluate('exportEmployees()');
+    assert.equal(exports.length,1,'Double click cannot duplicate export');
+    assert.equal(exports[0].url,'/hris/employees/export');
+    assert.equal(exports[0].config.method,'POST');
+    assert.equal(exports[0].config.body.get('search'),'applied fictional search');
+    assert.equal(exports[0].config.body.get('sort_by'),'name');
+    assert.equal(exports[0].config.body.get('sort_dir'),'DESC');
+    assert.equal(exports[0].config.body.get('csrf_token'),'fictional-test-token');
+    evaluate('loadedList = {search:"later list", sortBy:"date_hired", sortDir:"ASC"}');
+    resolveResponse(binary); await pending;
+    assert.equal(downloads.length,1); assert.equal(revoked.length,1);
+    assert.equal(evaluate('employeeExportPending'),false);
+    context.fetch = async () => ({ok:false,headers:{get:() => 'application/json'},json:async () => ({message:'Narrow your search: limit exceeded.'})});
+    await evaluate('exportEmployees()');
+    assert.equal(values.get('#employeeExportStatus|text'),'Narrow your search: limit exceeded.');
+    assert.equal(downloads.length,1,'JSON errors never download a workbook');
+    context.fetch = async () => ({ok:true,headers:{get:() => 'text/html'}});
+    await evaluate('exportEmployees()');
+    assert.equal(downloads.length,1,'Redirect/login HTML never downloads as Excel');
+    context.fetch = async () => ({...binary,blob:async () => new Blob(['employee,name,csv'])});
+    await evaluate('exportEmployees()');
+    assert.equal(downloads.length,1,'Mislabeled non-ZIP bytes rejected');
+    assert(values.get('#employeeExportStatus|text').includes('not a valid Excel download'));
+    assert.equal(requests.length,listCount,'Export never refetches the list');
+    assert.equal(evaluate('employeeExportPending'),false);
+    console.log('PASS: simulated Excel transport uses successful applied criteria, one POST/CSRF, duplicate-click guard, error recovery, JSON/HTML/non-ZIP rejection, download and URL cleanup.');
+})().catch(error => {console.error(error);process.exitCode=1;});
