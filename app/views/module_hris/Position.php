@@ -3,33 +3,34 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="positionsHeading">Positions</h1>
+            <div class="org-page-intro"><p class="org-eyebrow">Organization</p><h1 class="h5 mb-0" id="positionsHeading">Positions</h1><p class="org-page-description">Maintain the position names used for your clinic team.</p></div>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPositionModal">
-                <i class="bi bi-plus-lg"></i> Add Position
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Position
             </button>
         </div>
 
         <div class="card-body p-0">
+            <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
+            <div class="org-toolbar"><div class="org-search"><label for="positionSearch" class="form-label">Search positions</label><input id="positionSearch" type="search" class="form-control" placeholder="Search position names" aria-controls="positionsTable" disabled></div><button id="clearPositionSearch" type="button" class="btn btn-outline-secondary" disabled>Clear Search</button></div>
+            <p id="positionResults" class="org-results" role="status" aria-live="polite"></p>
             <p class="hris-scroll-hint" id="positionsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
             <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="positionsHeading" aria-describedby="positionsTableScrollHelp">
                 <table class="table table-hover align-middle mb-0 hris-data-table" id="positionsTable">
                     <caption class="visually-hidden">Positions and their existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" width="80" class="ps-4">#</th>
-                            <th scope="col">Position Name</th>
-                            <th scope="col" width="180">Created At</th>
-                            <th scope="col" width="120" class="text-end pe-4">Actions</th>
+                            <th scope="col" class="ps-4">Position Name</th>
+                            <th scope="col" class="text-end pe-4" style="width: 13rem">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody id="positionsTableBody">
                         <tr>
-                            <td colspan="4" class="text-center">
+                            <td colspan="2" class="text-center">
                                 Loading...
                             </td>
                         </tr>
@@ -41,8 +42,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Position -->
-<div class="modal fade hris-dialog" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addPositionModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-dialog" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addPositionModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
 
             <form id="addPositionForm">
@@ -55,6 +56,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
 
                     <div class="mb-3">
                         <label for="addPositionForm_name" class="form-label">Position Name</label>
@@ -63,7 +65,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             type="text"
                             class="form-control"
                             name="name"
-                            placeholder="Software Engineer">
+                            placeholder="e.g. Dental Assistant" aria-describedby="addPositionNameHelp">
+                        <p class="form-text" id="addPositionNameHelp">Enter the position name used by your clinic, such as Dentist or Receptionist.</p>
                     </div>
 
                 </div>
@@ -85,8 +88,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Position -->
-<div class="modal fade hris-dialog" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editPositionModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-dialog" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editPositionModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
 
             <form id="editPositionForm">
@@ -100,6 +103,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
 
                     <div class="mb-3">
                         <label for="editPositionForm_name" class="form-label">Position Name</label>
@@ -107,7 +111,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         <input id="editPositionForm_name"
                             type="text"
                             class="form-control"
-                            name="name">
+                            name="name" placeholder="e.g. Dentist">
                     </div>
 
                 </div>
@@ -129,8 +133,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Delete Position Confirmation -->
-<div class="modal fade hris-dialog" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletePositionModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletePositionModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -139,6 +143,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
             </div>
 
             <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                 <p class="mb-0">
                     Are you sure you want to delete
                     <strong id="deletePositionName"></strong>?
@@ -164,12 +169,17 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
 <script>
 
-let currentPage = 1;
+let positions = [];
 let positionIdToDelete = null;
 
 $(document).ready(function () {
+    initOrganizationUX();
 
     getAllPositions();
+    $('#positionSearch').on('input', renderPositions);
+    $('#clearPositionSearch').on('click', function () {
+        $('#positionSearch').val(''); renderPositions(); $('#positionSearch').trigger('focus');
+    });
 
     $('#addPositionForm').on('submit', function (e) {
         e.preventDefault();
@@ -187,7 +197,7 @@ $(document).ready(function () {
 
     $(document).on('click', '.deletePositionBtn', function () {
         positionIdToDelete = $(this).data('id');
-        let name = $(this).closest('tr').find('td:nth-child(2)').text();
+        let name = $(this).attr('data-name');
 
         $('#deletePositionName').text(name);
 
@@ -204,72 +214,48 @@ $(document).ready(function () {
 
 });
 
+function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+}
 function getAllPositions() {
-    showLoader("Loading positions...");
-
+    $('#positionsTable').attr('aria-busy', 'true');
+    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state"><div role="status">Loading positions…</div></td></tr>');
+    $('#positionSearch, #clearPositionSearch').prop('disabled', true);
     $.ajax({
         url: '/hris/positions/getallpositions',
         type: 'GET',
         dataType: 'json',
-
         success: function (res) {
-
-            hideLoader();
-
-            let rows = '';
-
-            if (!res.data || res.data.length === 0) {
-                rows = `
-                    <tr>
-                        <td colspan="4" class="text-center">
-                            No positions found
-                        </td>
-                    </tr>
-                `;
-
-            } else {
-
-                res.data.forEach((position, index) => {
-                    rows += `
-                        <tr>
-                            <td class="ps-4">${index + 1}</td>
-                            <td>${position.name}</td>
-                            <td>${position.created_at ?? '-'}</td>
-                            <td class="text-end pe-4">
-
-                                <button class="btn btn-sm editPositionBtn hris-action"
-                                    data-id="${position.id}" aria-label="Edit position" title="Edit position">
-                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                                </button>
-
-                                <button class="btn btn-sm deletePositionBtn hris-action hris-action--danger"
-                                    data-id="${position.id}" aria-label="Delete position" title="Delete position">
-                                    <i class="bi bi-trash" aria-hidden="true"></i>
-                                </button>
-
-                            </td>
-                        </tr>
-                    `;
-
-                });
-
-            }
-
-            $('#positionsTableBody').html(rows);
-
+            $('#positionsTable').removeAttr('aria-busy');
+            if (!res.success || !Array.isArray(res.data)) { positionReadError(); return; }
+            positions = res.data;
+            renderPositions();
+            $('#positionSearch, #clearPositionSearch').prop('disabled', false);
         },
-
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Unable to load positions.', 'error');
-        }
-
+        error: positionReadError
     });
+}
+function positionReadError() {
+    $('#positionsTable').removeAttr('aria-busy');
+    $('#positionsTableBody').html('<tr><td colspan="2" class="org-state"><div role="status">Unable to load positions. <button class="btn btn-outline-secondary" type="button" id="retryPositions">Try Again</button></div></td></tr>');
+    $('#positionResults').text('Positions could not be loaded.');
+}
+$(document).on('click', '#retryPositions', getAllPositions);
+function renderPositions() {
+    const query = $('#positionSearch').val().trim().toLocaleLowerCase();
+    const filtered = positions.filter(position => String(position.name ?? '').toLocaleLowerCase().includes(query));
+    $('#positionsTableBody').html(filtered.map(position => `<tr>
+        <th scope="row" class="ps-4"><span class="org-record-name">${esc(position.name)}</span><span class="org-record-meta">Created: ${esc(position.created_at ?? '-')}</span></th>
+        <td class="text-end pe-4"><div class="org-row-actions">
+            <button type="button" class="btn btn-sm editPositionBtn hris-action" data-id="${esc(position.id)}" aria-label="Edit position ${esc(position.name)}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Edit</button>
+            <button type="button" class="btn btn-sm deletePositionBtn hris-action hris-action--danger" data-id="${esc(position.id)}" data-name="${esc(position.name)}" aria-label="Delete position ${esc(position.name)}"><i class="bi bi-trash" aria-hidden="true"></i> Delete</button>
+        </div></td></tr>`).join('') || '<tr><td colspan="2" class="org-state">' + (positions.length ? 'No positions match your search.' : 'No positions found. Add a position to get started.') + '</td></tr>');
+    $('#positionResults').text(filtered.length + ' of ' + positions.length + ' positions');
 }
 
 function addPosition(form) {
     let $form = $(form);
+    if (!orgBegin($form)) return;
 
     let formData = {
         name: $form.find('[name="name"]').val(),
@@ -281,21 +267,21 @@ function addPosition(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving position...");
+            orgFeedback("Saving position...", 'info', $form);
         },
 
         success: function (res) {
 
-            hideLoader();
-
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Please check the position name and try again.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgEnd($form);
+            orgFeedback(res.message, 'success');
 
             $('#addPositionForm')[0].reset();
 
@@ -307,11 +293,7 @@ function addPosition(form) {
 
         error: function (xhr) {
 
-            hideLoader();
-
-            console.log(xhr.responseText);
-
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this position. Your entry has been kept; try again.', 'error', $form);
 
         }
 
@@ -351,8 +333,6 @@ function getPosition(id) {
 
             hideLoader();
 
-            console.log(xhr.responseText);
-
             showToast('Unable to load position.', 'error');
 
         }
@@ -362,6 +342,7 @@ function getPosition(id) {
 
 function updatePosition(form) {
     let $form = $(form);
+    if (!orgBegin($form)) return;
 
     let id = $form.find('[name="id"]').val();
 
@@ -375,21 +356,21 @@ function updatePosition(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating position...");
+            orgFeedback("Updating position...", 'info', $form);
         },
 
         success: function (res) {
 
-            hideLoader();
-
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Please check the position name and try again.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgEnd($form);
+            orgFeedback(res.message, 'success');
 
             bootstrap.Modal.getInstance(
                 document.getElementById('editPositionModal')
@@ -401,11 +382,7 @@ function updatePosition(form) {
 
         error: function (xhr) {
 
-            hideLoader();
-
-            console.log(xhr.responseText);
-
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this position. Your entry has been kept; try again.', 'error', $form);
 
         }
 
@@ -413,6 +390,8 @@ function updatePosition(form) {
 }
 
 function deletePosition(id) {
+    const $scope = $('#confirmDeletePositionBtn');
+    if (!orgBegin($scope)) return;
 
     $.ajax({
         url: '/hris/positions/delete/' + id,
@@ -421,32 +400,74 @@ function deletePosition(id) {
             csrf_token: $('input[name="csrf_token"]').first().val()
         },
         dataType: 'json',
+        complete: function () { orgEnd($scope); },
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deletePositionModal')).hide();
-            showLoader("Deleting position...");
+            orgFeedback("Deleting position...", 'info', null);
         },
 
         success: function (res) {
 
-            hideLoader();
-
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Unable to delete this position.', 'error');
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgFeedback(res.message, 'success');
             positionIdToDelete = null;
             getAllPositions();
 
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to delete this position. Try again.', 'error');
         }
+    });
+}
+
+// Organization-only feedback and pending state. Messages are always rendered as text.
+function orgFeedback(message, type = 'info', form = null) {
+    const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
+    $target.removeClass('d-none org-feedback--error org-feedback--success')
+        .toggleClass('org-feedback--error', type === 'error')
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
+}
+function orgBegin($scope) {
+    if ($scope.data('orgPending')) return false;
+    $scope.data('orgPending', true).attr('aria-busy', 'true');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', true);
+    return true;
+}
+function orgEnd($scope) {
+    $scope.data('orgPending', false).removeAttr('aria-busy');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', false);
+}
+function initOrganizationUX() {
+    let returnFocus = null;
+    $(document).on('click', '.organization-page button, .organization-page a', function () {
+        // Menu items become hidden on dismissal; return to their visible trigger.
+        returnFocus = this.closest('.dropdown')?.querySelector('[data-bs-toggle="dropdown"]') || this;
+    });
+    $('.organization-dialog').on('show.bs.modal', function () {
+        $(this).find('.org-form-feedback').addClass('d-none').empty();
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
+        // Destructive dialogs initially focus Cancel, never the destructive action.
+        const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
+        (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
+    }).on('hidden.bs.modal', function () {
+        if (returnFocus?.isConnected) returnFocus.focus();
+        else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
     });
 }
 

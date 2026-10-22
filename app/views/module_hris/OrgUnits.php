@@ -4,33 +4,39 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="officesHeading">Manage Offices</h1>
+            <div class="org-page-intro"><p class="org-eyebrow">Organization</p><h1 class="h5 mb-0" id="officesHeading">Offices</h1><p class="org-page-description">Organize departments, teams, sections and units across your clinic.</p></div>
 
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">
-                    <i class="bi bi-arrows-expand"></i> Expand All
+                    <i class="bi bi-arrows-expand" aria-hidden="true"></i> Expand All
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" id="collapseAllBtn">
-                    <i class="bi bi-arrows-collapse"></i> Collapse All
+                    <i class="bi bi-arrows-collapse" aria-hidden="true"></i> Collapse All
                 </button>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
-                    <i class="bi bi-plus-lg"></i> Add Office
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal" id="addOfficeButton">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Office
                 </button>
             </div>
         </div>
 
         <div class="card-body p-0">
-            <div id="orgUnitsTree"></div>
+            <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
+            <div class="org-toolbar">
+                <div class="org-search"><label class="form-label" for="officeSearch">Search offices</label><input type="search" class="form-control" id="officeSearch" placeholder="Search by name, code or type" aria-controls="orgUnitsTree" disabled></div>
+                <button class="btn btn-outline-secondary" type="button" id="clearOfficeSearch" disabled>Clear Search</button>
+            </div>
+            <p class="org-results" id="officeResults" role="status" aria-live="polite"></p>
+            <div id="orgUnitsTree" aria-busy="true"><p class="org-state" role="status">Loading offices…</p></div>
         </div>
     </div>
 </div>
 
 <!-- Add Office -->
-<div class="modal fade hris-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addOfficeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
@@ -41,6 +47,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="parentSelect" class="form-label">Parent Unit</label>
@@ -61,12 +68,12 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
                         <div class="col-md-8">
                             <label for="addOfficeForm_name" class="form-label">Name</label>
-                            <input id="addOfficeForm_name" type="text" class="form-control" name="name">
+                            <input id="addOfficeForm_name" type="text" class="form-control" name="name" placeholder="e.g. Clinical Operations">
                         </div>
 
                         <div class="col-md-4">
                             <label for="addOfficeForm_code" class="form-label">Code</label>
-                            <input id="addOfficeForm_code" type="text" class="form-control" name="code">
+                            <input id="addOfficeForm_code" type="text" class="form-control" name="code" placeholder="e.g. CLINICAL">
                         </div>
                     </div>
                 </div>
@@ -81,8 +88,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Office -->
-<div class="modal fade hris-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editOfficeForm">
                 <input type="hidden" name="id">
@@ -94,12 +101,12 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 </div>
 
                 <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="editParentSelect" class="form-label">Parent Unit</label>
-                            <select class="form-select" name="parent_id" id="editParentSelect">
-                                <option value="">-- None (Top Level) --</option>
-                            </select>
+                            <input class="form-control" id="editParentSelect" readonly aria-describedby="officeParentHelp">
+                            <p class="form-text" id="officeParentHelp">Current parent. Moving an existing unit is unavailable.</p>
                         </div>
 
                         <div class="col-md-6">
@@ -114,12 +121,12 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
                         <div class="col-md-8">
                             <label for="editOfficeForm_name" class="form-label">Name</label>
-                            <input id="editOfficeForm_name" type="text" class="form-control" name="name">
+                            <input id="editOfficeForm_name" type="text" class="form-control" name="name" placeholder="e.g. Clinical Operations">
                         </div>
 
                         <div class="col-md-4">
                             <label for="editOfficeForm_code" class="form-label">Code</label>
-                            <input id="editOfficeForm_code" type="text" class="form-control" name="code">
+                            <input id="editOfficeForm_code" type="text" class="form-control" name="code" placeholder="e.g. CLINICAL">
                         </div>
                     </div>
                 </div>
@@ -133,20 +140,31 @@ include '../app/views/module_hris/partials/hris_nav.php';
     </div>
 </div>
 
+<!-- Record-specific frontend confirmation; the existing delete request is unchanged. -->
+<div class="modal fade hris-dialog organization-dialog" id="deleteOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteOfficeModalTitle" aria-describedby="deleteOfficeDescription">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="deleteOfficeModalTitle">Delete Unit</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button></div>
+        <div class="modal-body"><p id="deleteOfficeDescription">Delete <strong id="deleteOfficeName"></strong>? This action cannot be undone.</p></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteOfficeBtn">Delete Unit</button></div>
+    </div></div>
+</div>
+
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <!-- View Office Employees -->
-<div class="modal fade hris-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal fade hris-dialog organization-dialog" id="viewUnitEmployeesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="directAssignmentHelp">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewUnitEmployeesHeading">
-                    Employees in <span id="viewUnitEmployeesTitle" class="fw-semibold">-</span>
+                    Assigned Employees — <span id="viewUnitEmployeesTitle" class="fw-semibold">-</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
 
             <div class="modal-body">
+                    <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
+                <p class="form-text" id="directAssignmentHelp">Employees assigned directly to this unit are listed below. Descendant units are not included.</p>
                 <p class="hris-scroll-hint" id="unitEmployeesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
                 <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="viewUnitEmployeesHeading" aria-describedby="unitEmployeesTableScrollHelp">
                     <table class="table table-hover align-middle mb-0 hris-data-table" id="unitEmployeesTable">
@@ -173,10 +191,17 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <script>
-let currentPage = 1;
 let orgUnitsFlat = [];
+let expandedOffices = new Set();
+let searchExpandedOffices = new Set();
+let officeSearchQuery = '';
+let officeIdToDelete = null;
+let employeeRead = null;
+let parentRead = null;
 
 $(document).ready(function () {
+    initOrganizationUX();
+    document.title = document.title.replace('Organizational Units', 'Offices');
     getAllOrgUnits();
 
     $('#addOfficeForm').on('submit', function (e) {
@@ -189,46 +214,51 @@ $(document).ready(function () {
         updateOffice(this);
     });
 
+    $('#addOfficeButton').on('click', function () { $('#addOfficeModal').data('parent', ''); });
     $('#addOfficeModal').on('show.bs.modal', function () {
-        loadParentOptions('#parentSelect');
+        loadParentOptions('#parentSelect', $(this).data('parent') || '');
     });
-
-    $(document).on('click', '.editOfficeBtn', function (e) {
-        e.stopPropagation();
-        getOffice($(this).data('id'));
+    $(document).on('click', '.addChildOfficeBtn', function () {
+        $('#addOfficeModal').data('parent', String($(this).data('id')));
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('addOfficeModal')).show();
     });
-
-    $(document).on('click', '.viewUnitEmployeesBtn', function (e) {
-        e.stopPropagation();
-        viewUnitEmployees($(this).data('id'), $(this).data('name'));
+    $(document).on('click', '.editOfficeBtn', function () { getOffice($(this).data('id')); });
+    $(document).on('click', '.viewUnitEmployeesBtn', function () {
+        viewUnitEmployees($(this).data('id'), $(this).attr('data-name'));
     });
-
-    $(document).on('click', '.deleteOfficeBtn', function (e) {
-        e.stopPropagation();
-        deleteOffice($(this).data('id'));
+    $(document).on('click', '.deleteOfficeBtn', function () {
+        officeIdToDelete = $(this).data('id');
+        $('#deleteOfficeName').text($(this).attr('data-name'));
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteOfficeModal')).show();
     });
-
+    $('#confirmDeleteOfficeBtn').on('click', function () {
+        if (officeIdToDelete !== null) deleteOffice(officeIdToDelete);
+    });
     $(document).on('click', '.org-toggle', function () {
-        let id = $(this).data('id');
-        let $icon = $(this).find('i');
-        let $children = $('#children-' + id);
-
-        let expanded = $children.hasClass('d-none');
-        $children.toggleClass('d-none', !expanded);
-        $(this).attr('aria-expanded', String(expanded));
-        $icon.toggleClass('bi-chevron-right', !expanded).toggleClass('bi-chevron-down', expanded);
+        const id = String($(this).data('id'));
+        const expanded = officeSearchQuery ? searchExpandedOffices : expandedOffices;
+        if (expanded.has(id)) expanded.delete(id); else expanded.add(id);
+        const open = expanded.has(id);
+        $(document.getElementById('children-' + id)).toggleClass('d-none', !open);
+        $(this).attr('aria-expanded', String(open)).find('i')
+            .toggleClass('bi-chevron-right', !open).toggleClass('bi-chevron-down', open);
     });
-
-    $('#expandAllBtn').on('click', function () {
-        $('.org-children').removeClass('d-none');
-        $('.org-toggle').attr('aria-expanded', 'true');
-        $('.org-toggle i').removeClass('bi-chevron-right').addClass('bi-chevron-down');
+    $('#expandAllBtn, #collapseAllBtn').on('click', function () {
+        const expanded = officeSearchQuery ? searchExpandedOffices : expandedOffices;
+        expanded.clear();
+        if (this.id === 'expandAllBtn') orgUnitsFlat.forEach(unit => expanded.add(String(unit.id)));
+        renderTree(orgUnitsFlat);
     });
-
-    $('#collapseAllBtn').on('click', function () {
-        $('.org-children').addClass('d-none');
-        $('.org-toggle').attr('aria-expanded', 'false');
-        $('.org-toggle i').removeClass('bi-chevron-down').addClass('bi-chevron-right');
+    $('#officeSearch').on('input', function () {
+        officeSearchQuery = this.value.trim().toLocaleLowerCase();
+        searchExpandedOffices = officeSearchAncestors(orgUnitsFlat, officeSearchQuery);
+        renderTree(orgUnitsFlat);
+    });
+    $('#clearOfficeSearch').on('click', function () {
+        $('#officeSearch').val('');
+        officeSearchQuery = '';
+        renderTree(orgUnitsFlat);
+        $('#officeSearch').trigger('focus');
     });
 });
 
@@ -243,62 +273,67 @@ function esc(str) {
 }
 
 function viewUnitEmployees(id, name) {
-    showLoader("Loading employees...");
-
+    if (employeeRead) employeeRead.abort();
     $('#viewUnitEmployeesTitle').text(name || '-');
+    $('#unitEmployeesTable tbody').html('<tr><td colspan="5" class="org-state"><div role="status">Loading assigned employees…</div></td></tr>');
+    $('#unitEmployeesTable').attr('aria-busy', 'true');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('viewUnitEmployeesModal')).show();
 
-    $.ajax({
+    employeeRead = $.ajax({
         url: '/hris/offices/getunitemployees/' + id,
         type: 'GET',
         dataType: 'json',
 
         success: function (res) {
-            hideLoader();
-
-            if (!res.success) {
-                showToast(res.message || 'Unable to load employees.', 'error');
+            $('#unitEmployeesTable').removeAttr('aria-busy');
+            if (!res.success || !Array.isArray(res.data)) {
+                orgFeedback('Unable to load assigned employees. Close and try again.', 'error', '#viewUnitEmployeesModal');
+                $('#unitEmployeesTable tbody').empty();
                 return;
             }
 
             $('#viewUnitEmployeesTitle').text(res.unit?.name || name || '-');
 
-            let employees = res.data || [];
-            let rows = '';
-
-            if (employees.length === 0) {
-                rows = `
-                    <tr>
-                        <td colspan="5" class="text-center py-3">No employees assigned to this unit.</td>
-                    </tr>
-                `;
-            } else {
-                employees.forEach(emp => {
-                    let fullName = `${emp.firstname ?? ''} ${emp.middlename ?? ''} ${emp.lastname ?? ''}`
-                        .replace(/\s+/g, ' ')
-                        .trim();
-
-                    rows += `
-                        <tr>
-                            <td>${esc(emp.employee_no) || '-'}</td>
-                            <td>${esc(fullName) || '-'}</td>
-                            <td>${esc(emp.position) || '-'}</td>
-                            <td>${esc(emp.branch_name) || '-'}</td>
-                            <td>${esc(emp.employment_status) || '-'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            $('#unitEmployeesTable tbody').html(rows);
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('viewUnitEmployeesModal')).show();
+            $('#unitEmployeesTable tbody').html(renderUnitEmployeeRows(res.data));
+            orgFeedback(res.data.length + ' employees assigned directly to this unit.', 'info', '#viewUnitEmployeesModal');
         },
-
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Unable to load employees.', 'error');
+        error: function (xhr, status) {
+            if (status === 'abort') return;
+            $('#unitEmployeesTable').removeAttr('aria-busy');
+            orgFeedback('Unable to load assigned employees. Close and try again.', 'error', '#viewUnitEmployeesModal');
+            $('#unitEmployeesTable tbody').empty();
         }
     });
+}
+
+function renderUnitEmployeeRows(employees) {
+    let rows = '';
+
+    if (employees.length === 0) {
+        rows = `
+            <tr>
+                <td colspan="5" class="text-center py-3">No employees assigned to this unit.</td>
+            </tr>
+        `;
+    } else {
+        employees.forEach(emp => {
+            let fullName = `${emp.firstname ?? ''} ${emp.middlename ?? ''} ${emp.lastname ?? ''}`
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            rows += `
+                <tr>
+                    <td>${esc(emp.employee_no) || '-'}</td>
+                    <td>${esc(fullName) || '-'}</td>
+                    <td>${esc(emp.position) || '-'}</td>
+                    <td>${esc(emp.branch_name) || '-'}</td>
+                    <td>${esc(emp.employment_status) || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    return rows;
 }
 
 function buildParentOptions(units, selected = '') {
@@ -306,8 +341,8 @@ function buildParentOptions(units, selected = '') {
 
     units.forEach(unit => {
         html += `
-            <option value="${unit.id}" ${unit.id == selected ? 'selected' : ''}>
-                ${unit.name}
+            <option value="${esc(unit.id)}" ${unit.id == selected ? 'selected' : ''}>
+                ${esc(unit.name)}
             </option>
         `;
     });
@@ -316,116 +351,141 @@ function buildParentOptions(units, selected = '') {
 }
 
 function loadParentOptions(selector, selected = '') {
-    $.ajax({
+    if (parentRead) parentRead.abort();
+    $(selector).prop('disabled', true).html('<option value="">Loading parent units…</option>');
+    parentRead = $.ajax({
         url: '/hris/offices/getallunits',
         type: 'GET',
         dataType: 'json',
 
         success: function (res) {
-            $(selector).html(buildParentOptions(res.data || [], selected));
+            if (!res.success || !Array.isArray(res.data)) {
+                orgFeedback('Unable to load parent units. Close and try again.', 'error', '#addOfficeForm');
+                return;
+            }
+            if (selected && !res.data.some(unit => String(unit.id) === String(selected))) {
+                orgFeedback('The selected parent unit is no longer available. Close and choose another parent.', 'error', '#addOfficeForm');
+                return;
+            }
+            $(selector).prop('disabled', false).html(buildParentOptions(res.data, selected));
         },
 
-        error: function (xhr) {
-            console.log(xhr.responseText);
-            showToast('Unable to load parent units.', 'error');
+        error: function (xhr, status) {
+            if (status === 'abort') return;
+            orgFeedback('Unable to load parent units. Close and try again.', 'error', '#addOfficeForm');
         }
     });
 }
 
 function getAllOrgUnits() {
-    showLoader("Loading offices...");
-
+    $('#orgUnitsTree').attr('aria-busy', 'true').html('<p class="org-state" role="status">Loading offices…</p>');
+    $('#officeSearch, #clearOfficeSearch, #expandAllBtn, #collapseAllBtn').prop('disabled', true);
     $.ajax({
         url: '/hris/offices/getallunits',
         type: 'GET',
         dataType: 'json',
-
         success: function (res) {
-            hideLoader();
-
-            orgUnitsFlat = res.data || [];
+            $('#orgUnitsTree').removeAttr('aria-busy');
+            if (!res.success || !Array.isArray(res.data)) { officeReadError(); return; }
+            orgUnitsFlat = res.data;
+            searchExpandedOffices = officeSearchAncestors(orgUnitsFlat, officeSearchQuery);
             renderTree(orgUnitsFlat);
+            $('#officeSearch, #clearOfficeSearch, #expandAllBtn, #collapseAllBtn').prop('disabled', false);
         },
-
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Unable to load offices.', 'error');
+        error: officeReadError
+    });
+}
+function officeReadError() {
+    $('#orgUnitsTree').removeAttr('aria-busy').html('<p class="org-state" role="status">Unable to load offices. <button type="button" class="btn btn-outline-secondary" id="retryOffices">Try Again</button></p>');
+    $('#officeResults').text('Offices could not be loaded.');
+}
+$(document).on('click', '#retryOffices', getAllOrgUnits);
+function officeMatches(unit, query) {
+    return [unit.name, unit.code, unit.type].some(value => String(value ?? '').toLocaleLowerCase().includes(query));
+}
+function officeSearchAncestors(units, query) {
+    const byId = new Map(units.map(unit => [String(unit.id), unit]));
+    const ancestors = new Set();
+    if (!query) return ancestors;
+    units.filter(unit => officeMatches(unit, query)).forEach(unit => {
+        const seen = new Set([String(unit.id)]);
+        let parent = byId.get(String(unit.parent_id));
+        while (parent && !seen.has(String(parent.id))) {
+            const id = String(parent.id);
+            ancestors.add(id); seen.add(id);
+            parent = byId.get(String(parent.parent_id));
         }
     });
+    return ancestors;
 }
-
-function renderTree(units) {
-    let $container = $('#orgUnitsTree');
-
-    if (!units || units.length === 0) {
-        $container.html('<div class="text-center text-muted py-4">No organizational units found.</div>');
-        return;
+function officeHighlight(value) {
+    const text = String(value ?? '');
+    const query = officeSearchQuery;
+    if (!query) return esc(text);
+    // Escape every segment separately; search input never becomes HTML or a RegExp.
+    let output = '', start = 0, index;
+    const lower = text.toLocaleLowerCase();
+    while ((index = lower.indexOf(query, start)) !== -1) {
+        output += esc(text.slice(start, index)) + '<mark>' + esc(text.slice(index, index + query.length)) + '</mark>';
+        start = index + query.length;
     }
-
-    // group children by parent_id ('' bucket = top level)
-    let byParent = {};
-    units.forEach(unit => {
-        let key = unit.parent_id ? unit.parent_id : '';
-        if (!byParent[key]) byParent[key] = [];
-        byParent[key].push(unit);
-    });
-
-    $container.html(buildTreeHTML(byParent, '', 0));
+    return output + esc(text.slice(start));
 }
-
-function buildTreeHTML(byParent, parentKey, depth) {
-    let children = byParent[parentKey];
-    if (!children || children.length === 0) return '';
-
-    let html = '';
-
-    children.forEach(unit => {
-        let hasChildren = !!byParent[unit.id];
-        let indentClass = depth > 0 ? `ps-${Math.min(depth * 4, 5)}` : '';
-
-        html += `
-            <div class="border-bottom">
-                <div class="d-flex align-items-center px-3 py-2 ${indentClass}">
-                    ${hasChildren
-                        ? `<button type="button" class="org-toggle btn btn-outline-secondary me-2" data-id="${unit.id}" aria-controls="children-${unit.id}" aria-expanded="false" aria-label="Toggle ${MonteroHris.escape(unit.name)}" title="Toggle ${MonteroHris.escape(unit.name)}">
-                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
-                           </button>`
-                        : `<span class="org-toggle-placeholder me-2 invisible" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>`
-                    }
-
-                    <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
-                        <span class="fw-semibold">${unit.name}</span>
-                        <span class="badge bg-secondary hris-unit-chip">${unit.type}</span>
-                        <span class="small text-muted">${unit.code ?? '-'}</span>
-                        <span class="small text-muted ms-auto">${unit.created_at}</span>
-                    </div>
-
-                    <div class="text-end">
-                        <button class="btn btn-sm viewUnitEmployeesBtn hris-action" data-id="${unit.id}" data-name="${unit.name}" aria-label="View employees in this office" title="View employees in this office">
-                            <i class="bi bi-eye" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-sm editOfficeBtn hris-action" data-id="${unit.id}" aria-label="Edit office" title="Edit office">
-                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-sm deleteOfficeBtn hris-action hris-action--danger" data-id="${unit.id}" aria-label="Delete office" title="Delete office">
-                            <i class="bi bi-trash" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="org-children d-none" id="children-${unit.id}">
-                    ${buildTreeHTML(byParent, unit.id, depth + 1)}
+function renderTree(units) {
+    const matches = units.filter(unit => officeMatches(unit, officeSearchQuery));
+    const visible = new Set(matches.map(unit => String(unit.id)));
+    if (officeSearchQuery) officeSearchAncestors(units, officeSearchQuery).forEach(id => visible.add(id));
+    const byId = new Map(units.map(unit => [String(unit.id), unit]));
+    const byParent = new Map();
+    units.forEach(unit => {
+        const key = byId.has(String(unit.parent_id)) ? String(unit.parent_id) : '';
+        if (!byParent.has(key)) byParent.set(key, []);
+        byParent.get(key).push(unit);
+    });
+    const visited = new Set();
+    let html = buildTreeHTML(byParent, '', visible, visited);
+    // Keep legacy orphaned/cyclic records discoverable without changing the stored hierarchy.
+    units.forEach(unit => {
+        if (!visited.has(String(unit.id)) && visible.has(String(unit.id))) {
+            html += buildOfficeNode(unit, byParent, visible, visited);
+        }
+    });
+    $('#orgUnitsTree').html(html || '<p class="org-state">' + (units.length ? 'No offices match your search.' : 'No organizational units found. Add an office to get started.') + '</p>');
+    $('#officeResults').text(officeSearchQuery ? matches.length + ' matching offices; ancestor context is included.' : units.length + ' organizational units');
+}
+function buildTreeHTML(byParent, parentKey, visible, visited) {
+    return (byParent.get(parentKey) || []).map(unit => buildOfficeNode(unit, byParent, visible, visited)).join('');
+}
+function buildOfficeNode(unit, byParent, visible, visited) {
+    const id = String(unit.id);
+    if (!visible.has(id) || visited.has(id)) return '';
+    visited.add(id);
+    const hasChildren = (byParent.get(id) || []).some(child => visible.has(String(child.id)) && !visited.has(String(child.id)));
+    const expanded = (officeSearchQuery ? searchExpandedOffices : expandedOffices).has(id);
+    const typeLabels = {DEPARTMENT: 'Department', TEAM: 'Team', SECTION: 'Section', UNIT: 'Unit'};
+    const type = Object.hasOwn(typeLabels, unit.type) ? typeLabels[unit.type] : unit.type;
+    return `<div class="org-node">
+        <div class="org-node-row">
+            ${hasChildren ? `<button type="button" class="org-toggle btn btn-outline-secondary" data-id="${esc(id)}" aria-controls="children-${esc(id)}" aria-expanded="${expanded}" aria-label="Expand or collapse ${esc(unit.name)}"><i class="bi ${expanded ? 'bi-chevron-down' : 'bi-chevron-right'}" aria-hidden="true"></i></button>` : '<span class="org-toggle-placeholder invisible" aria-hidden="true"></span>'}
+            <div class="org-node-identity"><span class="org-record-name">${officeHighlight(unit.name)}</span><span class="hris-unit-chip badge">${officeHighlight(type)}</span> <span class="org-record-meta">Code: ${officeHighlight(unit.code ?? '-')}</span><span class="org-record-meta">Created: ${esc(unit.created_at ?? '-')}</span></div>
+            <div class="org-node-actions">
+                <button type="button" class="btn viewUnitEmployeesBtn hris-action org-employees" data-id="${esc(id)}" data-name="${esc(unit.name)}" aria-label="View employees assigned directly to ${esc(unit.name)}"><i class="bi bi-people" aria-hidden="true"></i> View Assigned Employees</button>
+                <div class="dropdown"><button type="button" class="btn hris-action" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" aria-label="Actions for ${esc(unit.name)}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button type="button" class="dropdown-item addChildOfficeBtn" data-id="${esc(id)}" aria-label="Add child unit to ${esc(unit.name)}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add Child Unit</button></li>
+                        <li><button type="button" class="dropdown-item editOfficeBtn" data-id="${esc(id)}" aria-label="Edit unit ${esc(unit.name)}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Edit Unit</button></li>
+                        <li><button type="button" class="dropdown-item text-danger deleteOfficeBtn" data-id="${esc(id)}" data-name="${esc(unit.name)}" aria-label="Delete unit ${esc(unit.name)}"><i class="bi bi-trash" aria-hidden="true"></i> Delete Unit</button></li>
+                    </ul>
                 </div>
             </div>
-        `;
-    });
-
-    return html;
+        </div>
+        ${hasChildren ? `<div class="org-children ${expanded ? '' : 'd-none'}" id="children-${esc(id)}">${buildTreeHTML(byParent, id, visible, visited)}</div>` : ''}
+    </div>`;
 }
 
 function addOffice(form) {
     let $form = $(form);
+    if (officeParentUnavailable($form) || !orgBegin($form)) return;
 
     let formData = {
         parent_id: $form.find('[name="parent_id"]').val(),
@@ -440,29 +500,28 @@ function addOffice(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Saving office...");
+            orgFeedback("Saving office...", 'info', $form);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Something went wrong.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgEnd($form);
+            orgFeedback(res.message, 'success');
             $('#addOfficeForm')[0].reset();
             bootstrap.Modal.getInstance(document.getElementById('addOfficeModal')).hide();
             getAllOrgUnits();
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this unit. Your entries have been kept; try again.', 'error', $form);
         }
     });
 }
@@ -491,13 +550,13 @@ function getOffice(id) {
             $form.find('[name="code"]').val(unit.code);
             $form.find('[name="type"]').val(unit.type);
 
-            loadParentOptions('#editParentSelect', unit.parent_id);
+            const parent = orgUnitsFlat.find(item => String(item.id) === String(unit.parent_id));
+            $('#editParentSelect').val(parent ? parent.name : (unit.parent_id ? 'Parent unit ' + unit.parent_id : 'None (Top Level)'));
             bootstrap.Modal.getOrCreateInstance(document.getElementById('editOfficeModal')).show();
         },
 
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
             showToast('Unable to load office.', 'error');
         }
     });
@@ -505,6 +564,7 @@ function getOffice(id) {
 
 function updateOffice(form) {
     let $form = $(form);
+    if (officeParentUnavailable($form) || !orgBegin($form)) return;
     let id = $form.find('[name="id"]').val();
 
     let formData = {
@@ -520,36 +580,34 @@ function updateOffice(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
-            showLoader("Updating office...");
+            orgFeedback("Updating office...", 'info', $form);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Something went wrong.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgEnd($form);
+            orgFeedback(res.message, 'success');
             bootstrap.Modal.getInstance(document.getElementById('editOfficeModal')).hide();
             getAllOrgUnits();
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this unit. Your entries have been kept; try again.', 'error', $form);
         }
     });
 }
 
 function deleteOffice(id) {
-    if (!confirm('Are you sure you want to delete this office?')) {
-        return;
-    }
+    const $scope = $('#confirmDeleteOfficeBtn');
+    if (!orgBegin($scope)) return;
 
     $.ajax({
         url: '/hris/offices/deleteunit/' + id,
@@ -558,30 +616,83 @@ function deleteOffice(id) {
             csrf_token: $('input[name="csrf_token"]').first().val()
         },
         dataType: 'json',
+        complete: function () { orgEnd($scope); },
 
         beforeSend: function () {
-            showLoader("Deleting office...");
+            bootstrap.Modal.getInstance(document.getElementById('deleteOfficeModal')).hide();
+            orgFeedback("Deleting office...", 'info', null);
         },
 
         success: function (res) {
-            hideLoader();
 
             if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
+                orgFeedback(res.message || 'Unable to delete this unit.', 'error');
                 return;
             }
 
-            showToast(res.message, 'success');
+            officeIdToDelete = null;
+            orgFeedback(res.message, 'success');
             getAllOrgUnits();
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to delete this unit. Try again.', 'error');
         }
     });
 }
+function officeParentUnavailable($form) {
+    if ($form.is('#addOfficeForm') && $('#parentSelect').prop('disabled')) {
+        orgFeedback('Parent units are unavailable. Close and reopen the form to retry.', 'error', $form);
+        return true;
+    }
+    return false;
+}
+
+// Organization-only feedback and pending state. Messages are always rendered as text.
+function orgFeedback(message, type = 'info', form = null) {
+    const $target = form ? $(form).find('.org-form-feedback').first() : $('#orgPageFeedback');
+    $target.removeClass('d-none org-feedback--error org-feedback--success')
+        .toggleClass('org-feedback--error', type === 'error')
+        .toggleClass('org-feedback--success', type === 'success')
+        .text(message && typeof message === 'object' ? Object.values(message).join(' ') : (message || ''));
+    if (form && type === 'error') $target.attr('tabindex', '-1').trigger('focus');
+}
+function orgBegin($scope) {
+    if ($scope.data('orgPending')) return false;
+    $scope.data('orgPending', true).attr('aria-busy', 'true');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', true);
+    return true;
+}
+function orgEnd($scope) {
+    $scope.data('orgPending', false).removeAttr('aria-busy');
+    $scope.find(':submit').add($scope.filter('button')).prop('disabled', false);
+}
+function initOrganizationUX() {
+    let returnFocus = null;
+    $(document).on('click', '.organization-page button, .organization-page a', function () {
+        // Menu items become hidden on dismissal; return to their visible trigger.
+        returnFocus = this.closest('.dropdown')?.querySelector('[data-bs-toggle="dropdown"]') || this;
+    });
+    $('.organization-dialog').on('show.bs.modal', function () {
+        $(this).find('.org-form-feedback').addClass('d-none').empty();
+    }).on('shown.bs.modal', function () {
+        const target = $(this).find('input:not([type="hidden"]):not([readonly]), select, textarea').filter(':visible:enabled').first()[0]
+            || $(this).find('.btn-close')[0];
+        // Destructive dialogs initially focus Cancel, never the destructive action.
+        const cancel = $(this).find('.modal-footer [data-bs-dismiss="modal"]')[0];
+        (this.id.startsWith('delete') ? cancel : target)?.focus();
+    }).on('hide.bs.modal', function (event) {
+        const $form = $(this).find('form');
+        if ($form.data('orgPending')) {
+            event.preventDefault();
+            orgFeedback('Please wait while your changes are being saved.', 'info', $form);
+        }
+    }).on('hidden.bs.modal', function () {
+        if (returnFocus?.isConnected) returnFocus.focus();
+        else $('.organization-page h1').attr('tabindex', '-1').trigger('focus');
+    });
+}
+
 </script>
 </body>
 </html>
