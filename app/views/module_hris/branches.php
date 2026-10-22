@@ -19,10 +19,9 @@
                     <caption class="visually-hidden">Branch names, codes and addresses with existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" class="ps-4">Name</th>
-                            <th scope="col">Code</th>
+                            <th scope="col" class="ps-4">Branch Name / Code</th>
                             <th scope="col">Address</th>
-                            <th scope="col" class="text-end pe-4">Actions</th>
+                            <th scope="col" class="text-end pe-4" style="width: 13rem">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -54,17 +53,17 @@
                     <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="mb-3">
                         <label for="addBranchForm_name" class="form-label">Branch Name</label>
-                        <input id="addBranchForm_name" type="text" class="form-control" name="name">
+                        <input id="addBranchForm_name" type="text" class="form-control" name="name" placeholder="e.g. Makati Clinic">
                     </div>
 
                     <div class="mb-3">
                         <label for="addBranchForm_code" class="form-label">Branch Code</label>
-                        <input id="addBranchForm_code" type="text" class="form-control" name="code">
+                        <input id="addBranchForm_code" type="text" class="form-control" name="code" placeholder="e.g. MKT">
                     </div>
 
                     <div class="mb-3">
                         <label for="addBranchForm_address" class="form-label">Address</label>
-                        <textarea id="addBranchForm_address" class="form-control" name="address" rows="3"></textarea>
+                        <textarea id="addBranchForm_address" class="form-control" name="address" rows="3" placeholder="Street, city and postal code"></textarea>
                     </div>
                 </div>
 
@@ -99,17 +98,17 @@
                     <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
                     <div class="mb-3">
                         <label for="editBranchForm_name" class="form-label">Branch Name</label>
-                        <input id="editBranchForm_name" type="text" class="form-control" name="name">
+                        <input id="editBranchForm_name" type="text" class="form-control" name="name" placeholder="e.g. Makati Clinic">
                     </div>
 
                     <div class="mb-3">
                         <label for="editBranchForm_code" class="form-label">Branch Code</label>
-                        <input id="editBranchForm_code" type="text" class="form-control" name="code">
+                        <input id="editBranchForm_code" type="text" class="form-control" name="code" placeholder="e.g. MKT">
                     </div>
 
                     <div class="mb-3">
                         <label for="editBranchForm_address" class="form-label">Address</label>
-                        <textarea id="editBranchForm_address" class="form-control" name="address" rows="3"></textarea>
+                        <textarea id="editBranchForm_address" class="form-control" name="address" rows="3" placeholder="Street, city and postal code"></textarea>
                     </div>
                 </div>
 
@@ -139,7 +138,7 @@
 
             <div class="modal-body">
                     <div class="org-form-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
-                Are you sure you want to delete this branch? This action cannot be undone.
+                Delete <strong id="deleteBranchName"></strong>? This action cannot be undone.
             </div>
 
             <div class="modal-footer">
@@ -191,6 +190,7 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteBranchBtn', function () {
         pendingDeleteId = $(this).data('id');
+        $('#deleteBranchName').text($(this).attr('data-name'));
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById('deleteBranchModal')
         ).show();
@@ -213,7 +213,9 @@ $(document).ready(function () {
    GET ALL BRANCHES (server-side paginated)
 ========================= */
 function getAllBranches(page) {
-    showLoader("Loading branches...");
+    $('#branchesTable').attr('aria-busy', 'true');
+    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state" role="status">Loading branches…</td></tr>');
+    $('#branchesPagination').empty();
 
     $.ajax({
         url: '/hris/branches/getallbranches',
@@ -225,10 +227,10 @@ function getAllBranches(page) {
 
         success: function (res) {
 
-            hideLoader();
+            $('#branchesTable').removeAttr('aria-busy');
 
-            if (res.error) {
-                showToast(res.error, 'error');
+            if (res.error || res.success === false || !Array.isArray(res.data)) {
+                branchReadError();
                 return;
             }
 
@@ -242,8 +244,8 @@ function getAllBranches(page) {
 
                 rows = `
                     <tr>
-                        <td colspan="4" class="text-center">
-                            No branches found
+                        <td colspan="3" class="org-state">
+                            No branches found. Add a branch to get started.
                         </td>
                     </tr>
                 `;
@@ -253,23 +255,22 @@ function getAllBranches(page) {
                 branches.forEach((b) => {
                     rows += `
                         <tr>
-                            <td class="ps-4">${esc(b.name)}</td>
-                            <td>${esc(b.code)}</td>
+                            <th scope="row" class="ps-4"><span class="org-record-name">${esc(b.name)}</span><span class="org-record-meta">${esc(b.code)}</span></th>
                             <td>${esc(b.address) || '-'}</td>
-                            <td class="text-end pe-4">
+                            <td class="text-end pe-4"><div class="org-row-actions">
 
                                 <button
                                     class="btn btn-sm editBranchBtn hris-action"
-                                    data-id="${b.id}" aria-label="Edit branch" title="Edit branch">
-                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                    type="button" data-id="${esc(b.id)}" aria-label="Edit branch ${esc(b.name)} (${esc(b.code)})" title="Edit branch ${esc(b.name)}">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
                                 </button>
 
                                 <button
                                     class="btn btn-sm deleteBranchBtn hris-action hris-action--danger"
-                                    data-id="${b.id}" aria-label="Delete branch" title="Delete branch">
-                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                    type="button" data-id="${esc(b.id)}" data-name="${esc(b.name)} (${esc(b.code)})" aria-label="Delete branch ${esc(b.name)} (${esc(b.code)})" title="Delete branch ${esc(b.name)}">
+                                    <i class="bi bi-trash" aria-hidden="true"></i> Delete
                                 </button>
-                            </td>
+                            </div></td>
                         </tr>
                     `;
                 });
@@ -280,9 +281,8 @@ function getAllBranches(page) {
         },
 
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Unable to load branches.', 'error');
+            $('#branchesTable').removeAttr('aria-busy');
+            branchReadError();
         }
 
     });
@@ -291,6 +291,12 @@ function getAllBranches(page) {
 /* =========================
    PAGINATION UI
 ========================= */
+function branchReadError() {
+    $('#branchesTable').removeAttr('aria-busy');
+    $('#branchesTable tbody').html('<tr><td colspan="3" class="org-state" role="status">Unable to load branches. <button class="btn btn-outline-secondary" type="button" id="retryBranches">Try Again</button></td></tr>');
+}
+$(document).on('click', '#retryBranches', function () { getAllBranches(currentPage); });
+
 function renderPagination(page, totalPages) {
 
     let adjacents = 2;
@@ -366,6 +372,7 @@ function renderPagination(page, totalPages) {
 function addBranch(form) {
 
     let $form = $(form);
+    if (!orgBegin($form)) return;
 
     let formData = {
         name: $form.find('[name="name"]').val(),
@@ -380,6 +387,7 @@ function addBranch(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
             showLoader("Saving branch...");
@@ -388,12 +396,12 @@ function addBranch(form) {
         success: function (res) {
             hideLoader();
 
-            if (res.error) {
-                showToast(res.error, 'error');
+            if (res.error || res.success === false || res.type === 'error') {
+                orgFeedback(res.error || res.message || 'Unable to save this branch.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgFeedback(res.message, 'success');
             $('#addBranchForm')[0].reset();
             bootstrap.Modal.getInstance(document.getElementById('addBranchModal')).hide();
             getAllBranches(1);
@@ -402,8 +410,7 @@ function addBranch(form) {
 
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this branch. Your entries have been kept; try again.', 'error', $form);
 
         }
 
@@ -459,6 +466,7 @@ function getBranch(id) {
 function updateBranch(form) {
 
     let $form = $(form);
+    if (!orgBegin($form)) return;
     let id = $form.find('[name="id"]').val();
 
     let formData = {
@@ -474,6 +482,7 @@ function updateBranch(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
             showLoader("Updating branch...");
@@ -482,20 +491,19 @@ function updateBranch(form) {
         success: function (res) {
 
             hideLoader();
-            if (res.error) {
-                showToast(res.error, 'error');
+            if (res.error || res.success === false || res.type === 'error') {
+                orgFeedback(res.error || res.message || 'Unable to save this branch.', 'error', $form);
                 return;
             }
 
-            showToast(res.message, 'success');
+            orgFeedback(res.message, 'success');
             bootstrap.Modal.getInstance(document.getElementById('editBranchModal')).hide();
             getAllBranches(currentPage);
         },
 
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this branch. Your entries have been kept; try again.', 'error', $form);
         }
 
     });
@@ -507,12 +515,15 @@ function updateBranch(form) {
 ========================= */
 function deleteBranch(id) {
 
+    const $scope = $('#confirmDeleteBranchBtn');
+    if (!orgBegin($scope)) return;
     let csrfToken = $('#addBranchForm [name="csrf_token"]').val();
 
     $.ajax({
         url: '/hris/branches/deletebranch/' + id,
         type: 'POST',
         dataType: 'json',
+        complete: function () { orgEnd($scope); },
         data: {
             csrf_token: csrfToken
         },
@@ -526,11 +537,11 @@ function deleteBranch(id) {
             hideLoader();
             pendingDeleteId = null;
 
-            if (res.error) {
-                showToast(res.error, 'error');
+            if (res.error || res.success === false || res.type === 'error') {
+                orgFeedback(res.error || res.message || 'Unable to delete this branch.', 'error');
                 return;
             }
-            showToast(res.message, 'success');
+            orgFeedback(res.message, 'success');
             getAllBranches(currentPage);
 
         },
@@ -538,8 +549,7 @@ function deleteBranch(id) {
         error: function (xhr) {
             hideLoader();
             pendingDeleteId = null;
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to delete this branch. Try again.', 'error');
 
         }
 
