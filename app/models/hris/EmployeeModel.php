@@ -26,12 +26,14 @@ class EmployeeModel extends Model
                 e.branch_id, b.name AS branch_name,
                 e.employment_type_id, et.name AS employment_type,
                 e.employment_status_id, es.name AS employment_status,
+                p.name AS position,
                 e.date_hired, e.date_resigned,
                 e.status, e.created_at
             FROM hris_employees e
             LEFT JOIN tenant_branches b ON b.id = e.branch_id
             LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
             LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
+            LEFT JOIN hris_positions p ON p.id = e.position_id AND p.tenant_id = e.tenant_id
             WHERE e.tenant_id = :tenant_id
                 AND e.deleted_at IS NULL
                 {$whereSearch}
