@@ -15,23 +15,28 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
         <div class="card-body p-0">
             <div class="org-feedback d-none" id="orgPageFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
+            <div class="org-toolbar">
+                <div class="org-search"><label class="form-label" for="employmentTypeSearch">Search employment types</label><input id="employmentTypeSearch" type="search" class="form-control" placeholder="Search name, code or description" aria-controls="appointmentsTable" disabled></div>
+                <div class="org-filter"><label class="form-label" for="employmentTypeStatus">Status</label><select id="employmentTypeStatus" class="form-select" aria-controls="appointmentsTable" disabled><option value="all">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                <button type="button" class="btn btn-outline-secondary" id="clearEmploymentTypeFilters" disabled>Clear Filters</button>
+            </div>
+            <p id="employmentTypeResults" class="org-results" role="status" aria-live="polite"></p>
             <p class="hris-scroll-hint" id="appointmentsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
             <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="employmentTypesHeading" aria-describedby="appointmentsTableScrollHelp">
                 <table class="table table-hover align-middle mb-0 hris-data-table" id="appointmentsTable">
                     <caption class="visually-hidden">Employment types, descriptions and activity status with existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" width="120" class="ps-4">Code</th>
-                            <th scope="col">Employment Type Name</th>
+                            <th scope="col" class="ps-4">Employment Type / Code</th>
                             <th scope="col">Description</th>
-                            <th scope="col" width="100">Status</th>
-                            <th scope="col" width="140" class="text-end pe-4">Actions</th>
+                            <th scope="col" style="width: 8rem">Status</th>
+                            <th scope="col" style="width: 13rem" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody id="appointmentsTableBody">
                         <tr>
-                            <td colspan="5" class="text-center">
+                            <td colspan="4" class="text-center">
                                 Loading...
                             </td>
                         </tr>
@@ -94,9 +99,11 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             role="switch"
                             name="is_active"
                             id="addAppointmentIsActive"
+                            aria-describedby="addAppointmentActiveHelp"
                             value="1"
                             checked>
                         <label class="form-check-label" for="addAppointmentIsActive">Active</label>
+                        <p class="form-text" id="addAppointmentActiveHelp">Switch off to mark this employment type Inactive. Inactive records remain in this catalog; this does not delete the record.</p>
                     </div>
 
                 </div>
@@ -167,8 +174,10 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             role="switch"
                             name="is_active"
                             id="editAppointmentIsActive"
+                            aria-describedby="editAppointmentActiveHelp"
                             value="1">
                         <label class="form-check-label" for="editAppointmentIsActive">Active</label>
+                        <p class="form-text" id="editAppointmentActiveHelp">Switch off to mark this employment type Inactive. Inactive records remain in this catalog; this does not delete the record.</p>
                     </div>
 
                 </div>
@@ -204,7 +213,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                 <p class="mb-0">
                     Are you sure you want to delete
                     <strong id="deleteAppointmentName"></strong>?
-                    This action cannot be undone.
+                    Deleting removes it from this catalog. Mark it Inactive instead to keep it listed.
                 </p>
             </div>
 
@@ -227,6 +236,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 <script>
 
 let appointmentIdToDelete = null;
+let employmentTypes = [];
 
 // Copy only: preserve unknown messages and every server response value unchanged.
 function employmentTypeMessage(message) {
@@ -248,6 +258,12 @@ $(document).ready(function () {
 
     document.title = document.title.replace('Appointments', 'Employment Types');
     getAllAppointments();
+    $('#employmentTypeSearch').on('input', renderEmploymentTypes);
+    $('#employmentTypeStatus').on('change', renderEmploymentTypes);
+    $('#clearEmploymentTypeFilters').on('click', function () {
+        $('#employmentTypeSearch').val(''); $('#employmentTypeStatus').val('all');
+        renderEmploymentTypes(); $('#employmentTypeSearch').trigger('focus');
+    });
 
     $('#addAppointmentForm').on('submit', function (e) {
         e.preventDefault();
@@ -265,7 +281,7 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteAppointmentBtn', function () {
         appointmentIdToDelete = $(this).data('id');
-        let name = $(this).closest('tr').find('td.appointment-name').text();
+        let name = $(this).attr('data-name');
 
         $('#deleteAppointmentName').text(name);
 
@@ -282,80 +298,65 @@ $(document).ready(function () {
 
 });
 
+function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+}
 function getAllAppointments() {
-    showLoader("Loading employment types...");
-
+    $('#appointmentsTable').attr('aria-busy', 'true');
+    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state" role="status">Loading employment types…</td></tr>');
+    $('#employmentTypeSearch, #employmentTypeStatus, #clearEmploymentTypeFilters').prop('disabled', true);
     $.ajax({
         url: '/hris/appointments/getallappointments',
         type: 'GET',
         dataType: 'json',
-
         success: function (res) {
-
-            hideLoader();
-
-            let rows = '';
-
-            if (!res.data || res.data.length === 0) {
-                rows = `
-                    <tr>
-                        <td colspan="5" class="text-center">
-                            No employment types found
-                        </td>
-                    </tr>
-                `;
-
-            } else {
-
-                res.data.forEach((appointment) => {
-
-                    let statusBadge = parseInt(appointment.is_active) === 1
-                        ? '<span class="badge bg-success hris-status hris-status--positive">Active</span>'
-                        : '<span class="badge bg-secondary hris-status hris-status--neutral">Inactive</span>';
-
-                    let actions = `
-                        <button class="btn btn-sm editAppointmentBtn hris-action"
-                            data-id="${appointment.id}" aria-label="Edit employment type" title="Edit employment type">
-                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                        </button>
-
-                        <button class="btn btn-sm deleteAppointmentBtn hris-action hris-action--danger"
-                            data-id="${appointment.id}" aria-label="Delete employment type" title="Delete employment type">
-                            <i class="bi bi-trash" aria-hidden="true"></i>
-                        </button>
-                    `;
-
-                    rows += `
-                        <tr>
-                            <td class="ps-4">${appointment.code ?? '-'}</td>
-                            <td class="appointment-name">${appointment.name}</td>
-                            <td>${appointment.description ?? '-'}</td>
-                            <td>${statusBadge}</td>
-                            <td class="text-end pe-4">
-                                ${actions}
-                            </td>
-                        </tr>
-                    `;
-
-                });
-
-            }
-
-            $('#appointmentsTableBody').html(rows);
-
+            $('#appointmentsTable').removeAttr('aria-busy');
+            if (!res.success || !Array.isArray(res.data)) { employmentTypeReadError(); return; }
+            employmentTypes = res.data;
+            renderEmploymentTypes();
+            $('#employmentTypeSearch, #employmentTypeStatus, #clearEmploymentTypeFilters').prop('disabled', false);
         },
-
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Unable to load employment types.', 'error');
-        }
-
+        error: employmentTypeReadError
     });
+}
+function employmentTypeReadError() {
+    $('#appointmentsTable').removeAttr('aria-busy');
+    $('#appointmentsTableBody').html('<tr><td colspan="4" class="org-state" role="status">Unable to load employment types. <button class="btn btn-outline-secondary" type="button" id="retryEmploymentTypes">Try Again</button></td></tr>');
+    $('#employmentTypeResults').text('Employment types could not be loaded.');
+}
+$(document).on('click', '#retryEmploymentTypes', getAllAppointments);
+function renderEmploymentTypes() {
+    const query = $('#employmentTypeSearch').val().trim().toLocaleLowerCase();
+    const status = $('#employmentTypeStatus').val();
+    const filtered = employmentTypes.filter(appointment => {
+        const active = parseInt(appointment.is_active) === 1;
+        return [appointment.name, appointment.code, appointment.description].some(value => String(value ?? '').toLocaleLowerCase().includes(query))
+            && (status === 'all' || (status === 'active' ? active : !active));
+    });
+    $('#appointmentsTableBody').html(filtered.map(appointment => {
+        const active = parseInt(appointment.is_active) === 1;
+        const global = parseInt(appointment.is_global) === 1;
+        // The list includes current-tenant and global rows only. Backend ownership,
+        // not a role name, prohibits both operations on global defaults.
+        const editable = parseInt(appointment.is_global) === 0;
+        const identity = `${appointment.name ?? ''} (${appointment.code ?? '-'})`;
+        const actions = editable ? `<div class="org-row-actions">
+            <button type="button" class="btn btn-sm editAppointmentBtn hris-action" data-id="${esc(appointment.id)}" aria-label="Edit employment type ${esc(identity)}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Edit</button>
+            <button type="button" class="btn btn-sm deleteAppointmentBtn hris-action hris-action--danger" data-id="${esc(appointment.id)}" data-name="${esc(identity)}" aria-label="Delete employment type ${esc(identity)}"><i class="bi bi-trash" aria-hidden="true"></i> Delete</button>
+        </div>` : `<span class="org-record-meta">${global ? 'Protected default' : 'Actions unavailable'}</span>`;
+        return `<tr>
+            <th scope="row" class="ps-4 appointment-name"><span class="org-record-name">${esc(appointment.name)}</span><span class="org-record-meta">${esc(appointment.code ?? '-')}</span><span class="org-source ${global ? 'org-source--global' : ''}">${global ? 'System Default' : (editable ? 'Client-defined' : 'Source unavailable')}</span></th>
+            <td>${esc(appointment.description ?? '-')}</td>
+            <td><span class="badge hris-status ${active ? 'hris-status--positive' : 'hris-status--neutral'}">${active ? 'Active' : 'Inactive'}</span></td>
+            <td class="text-end pe-4">${actions}</td>
+        </tr>`;
+    }).join('') || '<tr><td colspan="4" class="org-state">' + (employmentTypes.length ? 'No employment types match your search and status filter.' : 'No employment types found. Add an employment type to get started.') + '</td></tr>');
+    $('#employmentTypeResults').text(filtered.length + ' of ' + employmentTypes.length + ' employment types · Status: ' + (status === 'all' ? 'All' : status === 'active' ? 'Active' : 'Inactive'));
 }
 
 function addAppointment(form) {
     let $form = $(form);
+    if (!orgBegin($form)) return;
 
     let formData = {
         code: $form.find('[name="code"]').val(),
@@ -370,6 +371,7 @@ function addAppointment(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
             showLoader("Saving employment type...");
@@ -380,11 +382,11 @@ function addAppointment(form) {
             hideLoader();
 
             if (!res.success) {
-                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
+                orgFeedback(employmentTypeMessage(res.message) || 'Please check the employment type details and try again.', 'error', $form);
                 return;
             }
 
-            showToast(employmentTypeMessage(res.message), 'success');
+            orgFeedback(employmentTypeMessage(res.message), 'success');
 
             $('#addAppointmentForm')[0].reset();
 
@@ -400,7 +402,7 @@ function addAppointment(form) {
 
             console.log(xhr.responseText);
 
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this employment type. Your entries have been kept; try again.', 'error', $form);
 
         }
 
@@ -454,6 +456,7 @@ function getAppointment(id) {
 
 function updateAppointment(form) {
     let $form = $(form);
+    if (!orgBegin($form)) return;
 
     let id = $form.find('[name="id"]').val();
 
@@ -470,6 +473,7 @@ function updateAppointment(form) {
         type: 'POST',
         data: formData,
         dataType: 'json',
+        complete: function () { orgEnd($form); },
 
         beforeSend: function () {
             showLoader("Updating employment type...");
@@ -480,11 +484,11 @@ function updateAppointment(form) {
             hideLoader();
 
             if (!res.success) {
-                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
+                orgFeedback(employmentTypeMessage(res.message) || 'Please check the employment type details and try again.', 'error', $form);
                 return;
             }
 
-            showToast(employmentTypeMessage(res.message), 'success');
+            orgFeedback(employmentTypeMessage(res.message), 'success');
 
             bootstrap.Modal.getInstance(
                 document.getElementById('editAppointmentModal')
@@ -500,7 +504,7 @@ function updateAppointment(form) {
 
             console.log(xhr.responseText);
 
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to save this employment type. Your entries have been kept; try again.', 'error', $form);
 
         }
 
@@ -508,6 +512,8 @@ function updateAppointment(form) {
 }
 
 function deleteAppointment(id) {
+    const $scope = $('#confirmDeleteAppointmentBtn');
+    if (!orgBegin($scope)) return;
 
     $.ajax({
         url: '/hris/appointments/delete/' + id,
@@ -516,6 +522,7 @@ function deleteAppointment(id) {
             csrf_token: $('input[name="csrf_token"]').first().val()
         },
         dataType: 'json',
+        complete: function () { orgEnd($scope); },
 
         beforeSend: function () {
             bootstrap.Modal.getInstance(document.getElementById('deleteAppointmentModal')).hide();
@@ -527,11 +534,11 @@ function deleteAppointment(id) {
             hideLoader();
 
             if (!res.success) {
-                showToast(employmentTypeMessage(res.message) || 'Something went wrong.', 'error');
+                orgFeedback(employmentTypeMessage(res.message) || 'Unable to delete this employment type.', 'error');
                 return;
             }
 
-            showToast(employmentTypeMessage(res.message), 'success');
+            orgFeedback(employmentTypeMessage(res.message), 'success');
             appointmentIdToDelete = null;
             getAllAppointments();
 
@@ -540,7 +547,7 @@ function deleteAppointment(id) {
         error: function (xhr) {
             hideLoader();
             console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
+            orgFeedback('Unable to delete this employment type. Try again.', 'error');
         }
     });
 }
