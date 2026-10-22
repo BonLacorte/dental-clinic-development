@@ -1,7 +1,7 @@
 # HRIS Employees UX modernization — A, B and C
 
 - Branch: `feat/hris-employees-ux-modernization`
-- Status: `IN_PROGRESS`
+- Status: `READY_FOR_REVIEW` — draft/source review only; PHP, application, browser and export runtime acceptance remain BLOCKED.
 - Last reviewed: 2026-10-22, Asia/Manila
 - Development baseline: `b5526bb4a7999bbd3c253fcdda1c8419a171314d`, merge of PR #11 at its reviewed head `6ed6f3d242d03d93a16d81e108d392b2c8fbfd39`.
 - Authorization: owner explicitly accepted prior runtime risk for this personal development repository and authorized PR #11 merge, A/B/C implementation, narrow export backend changes, commits, branch push and a draft PR. No production access/deployment or PR #8 integration.
@@ -22,6 +22,7 @@ MTD-01–07/10–13 apply to desktop presentation and mobile information/action 
 - B implemented: below-768px labeled cards and mobile field/direction sort controls; both render from a shared escaped representation of the same 10-row response. One delegated row-action handler and existing dialogs; responsive focus restoration chooses the visible matching action. Tablet retains local-scroll table; print hides cards/mobile controls and retains the table. No extra request on breakpoint changes.
 - B committed as `1ead774`.
 - C implemented: permission-conditioned Export Excel, successful-applied-context POST/CSRF, strict session/export policy and a dedicated bounded query, minimal-field XLSX service, private temporary files, binary response and cleanup. Follow-up B focus tracking also handles native focus moving to body during a responsive transition.
+- C committed as `6637846`.
 - B verification: JavaScript syntax and `node scripts/verify-employees-frontend.cjs` PASS with an externally captured baseline argument on this restricted executor. Tests use SIMULATED DOM/AJAX: safe escaping/Unicode/IDs, table/card/action parity, legacy permissions, applied state, Search/Clear, five fields plus date-added in both directions, pagination, stale-response protection, one request per interaction and exact protected mutation/dialog function comparisons. This is not visual browser evidence.
 
 ## Verification and limits
@@ -81,4 +82,15 @@ Before transfer, verify PHP >=8.3/64-bit, compatible existing PhpSpreadsheet 5.1
 
 Keep default limits until representative export memory/time/DB-index/concurrency benchmarks justify a separately reviewed configuration. Validate private temp directory ACLs and cleanup/disconnect behavior on the actual host. Run PHP lint and the suite, real authenticated/denied/invalid-CSRF HTTP tests, tenant/branch/deleted/stale-assignment isolation, >10 authorized matches, search/all sorts, real Excel read-back and limits. Then run the eight viewports/200% text, keyboard/breakpoint/dialog focus, table/card parity and request counts, long names/branches, empty/loading/error/Retry, permission cases, employee mutations only on separately approved disposable fictional fixtures, and same-data Payroll/payslip print regression checks. No new feature PR merge or production use is authorized by this implementation.
 
-Next: complete the final source/diff review, commit C, record exact commit inventory, push this feature branch and open its draft PR. Owner review and safe runtime verification remain necessary.
+## Commit/file transfer inventory
+
+| Commit | Purpose / exact application files |
+|---|---|
+| `b5526bb4a7999bbd3c253fcdda1c8419a171314d` | Accepted development prerequisite: merge of reviewed PR #11 (`6ed6f3d242d03d93a16d81e108d392b2c8fbfd39`). Senior must reconcile its Premium presentation with production separately; do not transfer its whole baseline automatically. |
+| `d32d51f99cf12989a2891fa64c6d32a2d5f7f507` | A: `app/views/module_hris/employees.php`, `public/assets/css/style.css`; adds this task handoff |
+| `1ead774cfa889258dd7c1a3c4614872d7f100204` | B: same view/CSS, `scripts/verify-employees-frontend.cjs`, task handoff |
+| `66378468184d022bc35e5d68b08411678157c779` | C: view/CSS, `routes/hris-routes.php`, `app/controllers/hris/EmployeeController.php`, `app/models/hris/EmployeeModel.php`, new `app/services/hris/EmployeeExportService.php`; JS verification update, new `scripts/verify-employee-export.php` and `scripts/verify-employees-preservation.py`, task handoff |
+
+The A→B→C application commits are sequential, not independent patches against arbitrary production source. This final handoff-only update contains no additional application behavior. No dependency/config/schema/permission-database/Payroll files changed. Production transfer remains a separately approved senior-developer operation after runtime/security validation and baseline reconciliation.
+
+Next: push `feat/hris-employees-ux-modernization` and open a **draft** PR into development main, then run the blocked checks in an existing authorized isolated environment. Do not merge the Employees PR automatically. Preserve the original `work` checkout and keep PR #8 separate.
