@@ -2022,3 +2022,432 @@
     display: none;
   }
 }
+
+/* MD-PAY-ITEMS-UX-001: page/dialog opt-in; no navigation, Payroll Run or print rules. */
+@media screen {
+  .admin-shell .payroll-items-page {
+    padding-block: 24px !important;
+    min-width: 0;
+  }
+
+  .admin-shell .payroll-items-page .payroll-items-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .admin-shell .payroll-items-page .payroll-eyebrow {
+    margin: 0 0 4px;
+    color: var(--montero-primary);
+    font-size: .875rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .payroll-items-page .payroll-items-header h1 {
+    margin: 0 0 8px;
+    color: var(--montero-text);
+    font-size: 1.75rem;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .admin-shell .payroll-items-page .payroll-description {
+    margin: 0;
+    color: var(--montero-muted);
+    max-width: 60ch;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-page .payroll-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .payroll-items-page .nav-tabs {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .admin-shell .payroll-items-page .nav-tabs .nav-link {
+    min-height: 48px;
+    white-space: normal;
+    text-align: start;
+    padding: 12px 16px;
+  }
+
+  .admin-shell .payroll-items-page .nav-tabs .nav-link.active {
+    background: var(--montero-primary-tint);
+    color: var(--montero-primary-active);
+    border-bottom: 3px solid var(--montero-primary);
+  }
+
+  .admin-shell .payroll-items-page .payroll-search-toolbar,
+  .admin-shell .payroll-items-page .payroll-sort-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .admin-shell .payroll-items-page .payroll-search-field {
+    flex: 1 1 20rem;
+    max-width: 36rem;
+    min-width: 0;
+  }
+
+  .admin-shell .payroll-items-page .payroll-search-toolbar .col-auto {
+    padding: 0;
+  }
+
+  .admin-shell .payroll-items-page .payroll-sort-toolbar {
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .admin-shell .payroll-items-page .payroll-sort-toolbar label {
+    color: var(--montero-muted);
+    font-weight: 500;
+  }
+
+  .admin-shell .payroll-items-page .payroll-sort-toolbar .form-select {
+    width: auto;
+    max-width: 100%;
+    min-width: 10rem;
+  }
+
+  .admin-shell .payroll-items-page .payroll-list-feedback {
+    margin: 12px 0 0;
+    color: var(--montero-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-page .payroll-list-feedback:empty {
+    display: none;
+  }
+
+  .admin-shell .payroll-items-page .payroll-table-scroll {
+    overscroll-behavior-x: contain;
+  }
+
+  .admin-shell .payroll-items-page :is(#recordsTable, #typesTable) {
+    min-width: 52rem;
+    table-layout: auto;
+  }
+
+  .admin-shell .payroll-items-page #typesTable {
+    min-width: 42rem;
+  }
+
+  .admin-shell .payroll-items-page .table > :not(caption) > * > * {
+    padding: 16px;
+    vertical-align: middle;
+    white-space: normal;
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .admin-shell .payroll-items-page .table thead th {
+    background: var(--montero-canvas);
+    border-bottom: 1px solid var(--montero-divider);
+    font-weight: 600;
+  }
+
+  .admin-shell .payroll-items-page .table .payroll-text-cell {
+    min-width: 10rem;
+    max-width: 22rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-page .table th[scope="row"] {
+    min-width: 13rem;
+    font-weight: 400;
+  }
+
+  /* Explicit field classes override the baseline's positional amount alignment. */
+  .admin-shell .payroll-items-page :is(#recordsTable, #typesTable) .payroll-text-cell {
+    text-align: left;
+    white-space: normal;
+  }
+
+  .admin-shell .payroll-items-page :is(#recordsTable, #typesTable) .payroll-numeric,
+  .admin-shell .payroll-items-page .table th:has(.record-sort[data-sort="amount"], .record-sort[data-sort="salary_rate"], .record-sort[data-sort="remaining_balance"], .type-sort[data-sort="default_value"]) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 9rem;
+  }
+
+  .admin-shell .payroll-items-page .payroll-identity,
+  .admin-shell .payroll-items-page .payroll-amount {
+    color: var(--montero-text);
+    font-weight: 600;
+  }
+
+  .admin-shell .payroll-items-page .payroll-amount {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .payroll-items-page .payroll-meta {
+    display: block;
+    margin-top: 4px;
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-page .payroll-period {
+    white-space: nowrap;
+  }
+
+  .admin-shell .payroll-items-page .payroll-balance {
+    background-color: var(--montero-primary-tint);
+  }
+
+  .admin-shell .payroll-items-page .payroll-status {
+    display: inline-block;
+    border: 1px solid var(--montero-control-border);
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: var(--montero-text);
+    font-size: .875rem;
+    white-space: nowrap;
+  }
+
+  .admin-shell .payroll-items-page .payroll-status-active {
+    background: var(--montero-primary-tint);
+    color: var(--montero-primary-active);
+  }
+
+  .admin-shell .payroll-items-page .payroll-status-paid {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success-text-emphasis);
+    border-color: var(--bs-success-text-emphasis);
+  }
+
+  .admin-shell .payroll-items-page .payroll-status-cancelled {
+    background: var(--montero-canvas);
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .payroll-items-page .table .btn-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0;
+    text-align: inherit;
+    text-decoration: none;
+    white-space: normal;
+    font-weight: 600;
+  }
+
+  .admin-shell .payroll-items-page .payroll-sort-indicator {
+    color: var(--montero-primary);
+    font-size: 1rem;
+  }
+
+  .admin-shell .payroll-items-page .table :is(.payroll-actions, .payroll-actions-heading) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .admin-shell .payroll-items-page .payroll-row-actions {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .admin-shell .payroll-items-page .payroll-row-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .admin-shell .payroll-items-page .payroll-table-state {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .payroll-items-page .payroll-table-state .btn {
+    margin: 8px;
+  }
+
+  .admin-shell .payroll-items-page .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-shell .payroll-items-page .payroll-page-info {
+    margin: 0;
+    color: var(--montero-muted);
+    font-size: .875rem;
+  }
+
+  .admin-shell .payroll-items-page .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .admin-shell .payroll-items-page .page-link {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  .admin-shell .payroll-items-dialog .modal-content > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .admin-shell .payroll-items-dialog .modal-title {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .admin-shell .payroll-items-dialog .modal-body {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .admin-shell .payroll-items-dialog .modal-footer {
+    flex-shrink: 0;
+    gap: 8px;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-field-help,
+  .admin-shell .payroll-items-dialog .payroll-dialog-context {
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-form-section {
+    min-width: 0;
+    margin: 0;
+    padding-top: 16px;
+    padding-bottom: 8px;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-form-section legend {
+    float: none;
+    width: auto;
+    margin: 0 0 12px;
+    color: var(--montero-primary);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-required {
+    color: var(--bs-danger-text-emphasis);
+  }
+
+  .admin-shell :is(.payroll-items-page, .payroll-items-dialog) .payroll-error {
+    color: var(--bs-danger-text-emphasis);
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-dialog-feedback {
+    margin: 0 0 16px;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-dialog-feedback:empty,
+  .admin-shell .payroll-items-dialog .payroll-dialog-context:empty {
+    display: none;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-discard {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--montero-control-border);
+    border-radius: 8px;
+    background: var(--montero-canvas);
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-discard .btn {
+    margin-bottom: 8px;
+  }
+
+  .admin-shell .payroll-items-dialog .payroll-delete-context {
+    font-size: 1.125rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .payroll-items-dialog [inert] {
+    opacity: .7;
+  }
+
+  .admin-shell :is(.payroll-items-page, .payroll-items-dialog) :is(.btn, .form-control, .form-select) {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .admin-shell :is(.payroll-items-page, .payroll-items-dialog) :is(button, a, input, select, [tabindex]):focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--montero-surface);
+  }
+
+  .admin-shell .payroll-items-page .payroll-workspace-feedback {
+    flex: 1 0 100%;
+    margin: 0;
+    color: var(--montero-primary-active);
+  }
+
+  @media (max-width: 767.98px) {
+    .admin-shell .payroll-items-page .payroll-items-header {
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .admin-shell .payroll-items-page .payroll-search-field,
+    .admin-shell .payroll-items-page .payroll-sort-toolbar .form-select {
+      flex: 1 1 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .admin-shell .payroll-items-page .card-footer nav {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .admin-shell .payroll-items-dialog .modal-footer .btn {
+      flex: 1 1 8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-shell :is(.payroll-items-page, .payroll-items-dialog) *,
+    .admin-shell .payroll-items-dialog {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
