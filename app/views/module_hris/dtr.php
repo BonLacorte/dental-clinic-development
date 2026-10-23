@@ -1,13 +1,13 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-3 management-page attendance-page hris-page">
+<div class="container-fluid py-3 management-page attendance-page hris-page attendance-workspace">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h1 class="h4 mb-1" id="dtrHeading">Daily Time Record</h1>
+            <p class="attendance-eyebrow">HRIS · Attendance</p><h1 class="h4 mb-1" tabindex="-1" id="dtrHeading">Daily Time Record</h1>
             <div class="text-muted">
-                Employee attendance and time records
+                Review daily attendance and the existing monthly time summaries.
             </div>
         </div>
     </div>
@@ -17,6 +17,8 @@
     <div class="card shadow-sm mb-3">
         <div class="card-body">
 
+            <h2 class="h6">Choose employee and reporting month</h2>
+            <p class="text-muted small">Select the reporting period, then view the available records.</p>
             <form method="GET" action="#">
 
                 <div class="row g-3 align-items-end">
@@ -64,10 +66,10 @@
                     <?php endif; ?>
 
 
-                    <div class="col-md-2">
+                    <div class="col-md-4 col-lg-3">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i>
-                            View
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            View Records
                         </button>
                     </div>
 
@@ -79,13 +81,14 @@
     </div>
 
 
+    <p id="dtrSelectedContext" class="attendance-context" role="status"></p>
     <!-- Summary -->
     <?php if ($employeeId > 0): ?>
 
         <div class="row g-3 mb-3">
 
-            <div class="col-md-3">
-                <div class="card h-100">
+            <div class="col-6 col-xl-3">
+                <div class="card h-100 attendance-metric">
                     <div class="card-body">
                         <div class="text-muted small">
                             Days Present
@@ -99,11 +102,11 @@
             </div>
 
 
-            <div class="col-md-3">
-                <div class="card h-100">
+            <div class="col-6 col-xl-3">
+                <div class="card h-100 attendance-metric">
                     <div class="card-body">
                         <div class="text-muted small">
-                            Late
+                            Late Minutes
                         </div>
 
                         <div class="fs-4 fw-semibold">
@@ -115,11 +118,11 @@
             </div>
 
 
-            <div class="col-md-3">
-                <div class="card h-100">
+            <div class="col-6 col-xl-3">
+                <div class="card h-100 attendance-metric">
                     <div class="card-body">
                         <div class="text-muted small">
-                            Undertime
+                            Undertime Minutes
                         </div>
 
                         <div class="fs-4 fw-semibold">
@@ -131,11 +134,11 @@
             </div>
 
 
-            <div class="col-md-3">
-                <div class="card h-100">
+            <div class="col-6 col-xl-3">
+                <div class="card h-100 attendance-metric">
                     <div class="card-body">
                         <div class="text-muted small">
-                            Overtime
+                            Overtime Minutes
                         </div>
 
                         <div class="fs-4 fw-semibold">
@@ -150,7 +153,7 @@
 
 
         <!-- Attendance -->
-        <div class="card shadow-sm">
+        <div class="card shadow-sm attendance-log">
 
             <div class="card-header bg-white">
                 <div class="fw-semibold">
@@ -177,9 +180,9 @@
                             <th scope="col">Day</th>
                             <th scope="col">Time In</th>
                             <th scope="col">Time Out</th>
-                            <th scope="col" class="text-end">Late</th>
-                            <th scope="col" class="text-end">Undertime</th>
-                            <th scope="col" class="text-end">Overtime</th>
+                            <th scope="col" class="text-end">Late (mins)</th>
+                            <th scope="col" class="text-end">Undertime (mins)</th>
+                            <th scope="col" class="text-end">Overtime (mins)</th>
                             <th scope="col" class="text-end">Hours</th>
                             <th scope="col">Status</th>
                         </tr>
@@ -269,6 +272,12 @@
 
         </div>
 
+    <?php else: ?>
+        <div class="card attendance-initial"><div class="card-body text-center py-5">
+            <i class="bi bi-calendar3 attendance-empty-icon" aria-hidden="true"></i>
+            <h2 class="h5 mt-3">Choose an employee to view records</h2>
+            <p class="text-muted mb-0">Monthly attendance and time summaries will appear here.</p>
+        </div></div>
     <?php endif; ?>
 
 </div>
@@ -276,6 +285,15 @@
 
 
 <?php include '../app/views/partials/admin-footer.php'; ?>
+<script>
+// Display the submitted server selection. Changing controls does not relabel the loaded records.
+const dtrEmployee = document.getElementById('dtrFilter1_employee_id');
+const dtrMonth = document.getElementById('dtrFilter1_month').value;
+if (document.querySelector('.attendance-log')) {
+    const employee = dtrEmployee?.selectedOptions[0]?.value ? dtrEmployee.selectedOptions[0].textContent.trim().replace(/\s+/g, ' ') : 'Selected employee';
+    document.getElementById('dtrSelectedContext').textContent = employee + ' · Reporting month: ' + dtrMonth;
+}
+</script>
 
 
 </body>
