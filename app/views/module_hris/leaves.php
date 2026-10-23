@@ -1,17 +1,17 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page attendance-workspace">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="leavesHeading">Manage Leaves</h1>
+            <div class="attendance-heading"><p class="attendance-eyebrow">HRIS · Attendance</p><h1 class="h4 mb-1" tabindex="-1" id="leavesHeading">Leave Management</h1><p class="text-muted mb-0">Review leave periods, request statuses and paid or unpaid leave types.</p></div>
 
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeaveTypeModal">
-                    <i class="bi bi-plus-lg"></i> Add Leave Type
+            <div class="d-flex gap-2 attendance-context-actions">
+                <button class="btn btn-primary btn-sm" hidden data-leave-add="typesPane" data-bs-toggle="modal" data-bs-target="#addLeaveTypeModal">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Leave Type
                 </button>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeaveRequestModal">
-                    <i class="bi bi-plus-lg"></i> Add Leave Request
+                <button class="btn btn-primary btn-sm" data-leave-add="requestsPane" data-bs-toggle="modal" data-bs-target="#addLeaveRequestModal">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Leave Request
                 </button>
             </div>
         </div>
@@ -41,17 +41,18 @@
                         </div>
                         <div class="col-auto">
                             <button class="btn btn-outline-primary" type="submit">
-                                <i class="bi bi-search"></i> Search
+                                <i class="bi bi-search" aria-hidden="true"></i> Search
                             </button>
                         </div>
                         <div class="col-auto">
                             <button class="btn btn-outline-secondary" type="button" id="clearRequestSearchBtn">Clear</button>
                         </div>
-                        <div class="col-auto hris-order-control"><button type="button" class="btn btn-outline-secondary request-sort hris-created-sort" data-sort="created_at" aria-pressed="true" aria-label="Date added: newest first. Sort oldest first" title="Sort by date added">Date added: newest first</button></div>
+                        <div class="col-auto attendance-sort-control"><label class="form-label" for="requestSortBy">Sort by</label><div class="d-flex gap-2"><select class="form-select" id="requestSortBy"><option value="employee_name">Employee</option><option value="leave_type">Leave type</option><option value="date_from">Period start</option><option value="date_to">Period end</option><option value="status">Status</option><option value="approved_by_name">Approved by</option><option value="approved_at">Approved at</option><option value="created_at" selected>Date added</option></select><button type="button" id="requestSortByDirection" class="btn btn-outline-secondary">Descending ↓</button></div></div>
                     </form>
                 </div>
 
                 <div class="card-body p-0">
+                    <p class="attendance-list-status px-4 pt-3 mb-0" role="status" aria-live="polite"></p>
                     <p class="hris-scroll-hint" id="leaveRequestsTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
                     <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="requests-tab" aria-describedby="leaveRequestsTableScrollHelp">
                         <table class="table table-hover align-middle mb-0 hris-data-table" id="leaveRequestsTable">
@@ -60,12 +61,11 @@
                                 <tr>
                                     <th scope="col" class="ps-4"><button class="btn btn-link p-0 request-sort" data-sort="employee_name">Employee</button></th>
                                     <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="leave_type">Leave Type</button></th>
-                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="date_from">Date From</button></th>
-                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="date_to">Date To</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="date_from">Leave Period</button></th>
                                     <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="status">Status</button></th>
                                     <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="approved_by_name">Approved By</button></th>
                                     <th scope="col"><button class="btn btn-link p-0 request-sort" data-sort="approved_at">Approved At</button></th>
-                                    <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
+                                    <th scope="col" class="hris-created-at attendance-created"><button class="btn btn-link p-0 request-sort" data-sort="created_at">Created At</button></th>
                                     <th scope="col" class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="col-auto">
                             <button class="btn btn-outline-primary" type="submit">
-                                <i class="bi bi-search"></i> Search
+                                <i class="bi bi-search" aria-hidden="true"></i> Search
                             </button>
                         </div>
                         <div class="col-auto">
@@ -101,6 +101,7 @@
                 </div>
 
                 <div class="card-body p-0">
+                    <p class="attendance-list-status px-4 pt-3 mb-0" role="status" aria-live="polite"></p>
                     <p class="hris-scroll-hint" id="leaveTypesTableScrollHelp">Use horizontal scrolling when columns extend beyond this view.</p>
                     <div class="table-responsive hris-table-region" tabindex="0" role="region" aria-labelledby="types-tab" aria-describedby="leaveTypesTableScrollHelp">
                         <table class="table table-hover align-middle mb-0 hris-data-table" id="leaveTypesTable">
@@ -108,8 +109,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col" class="ps-4"><button class="btn btn-link p-0 type-sort" data-sort="name">Name</button></th>
-                                    <th scope="col"><button class="btn btn-link p-0 type-sort" data-sort="is_paid">Is Paid</button></th>
-                                    <th scope="col" class="hris-created-at"><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
+                                    <th scope="col"><button class="btn btn-link p-0 type-sort" data-sort="is_paid">Classification</button></th>
+                                    <th scope="col" class="hris-created-at attendance-created"><button class="btn btn-link p-0 type-sort" data-sort="created_at">Created At</button></th>
                                     <th scope="col" class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
@@ -128,8 +129,8 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveRequestModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveRequestModalTitle">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <form id="addLeaveRequestForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
@@ -140,25 +141,31 @@
                 </div>
 
                 <div class="modal-body">
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="addLeaveRequestForm_employee_id" class="form-label">Employee</label>
+                            <label for="addLeaveRequestForm_employee_id" class="form-label">Employee <span class="attendance-required">(required)</span></label>
                             <select id="addLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
                         </div>
                         <div class="col-md-6">
-                            <label for="addLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
+                            <label for="addLeaveRequestForm_leave_type_id" class="form-label">Leave Type <span class="attendance-required">(required)</span></label>
                             <select id="addLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
                         </div>
                         <div class="col-md-4">
-                            <label for="addLeaveRequestForm_date_from" class="form-label">Date From</label>
+                            <label for="addLeaveRequestForm_date_from" class="form-label">Date From <span class="attendance-required">(required)</span></label>
                             <input id="addLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
                         </div>
                         <div class="col-md-4">
-                            <label for="addLeaveRequestForm_date_to" class="form-label">Date To</label>
+                            <label for="addLeaveRequestForm_date_to" class="form-label">Date To <span class="attendance-required">(required)</span></label>
                             <input id="addLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
                         </div>
                         <div class="col-md-4">
-                            <label for="addLeaveRequestForm_status" class="form-label">Status</label>
+                            <label for="addLeaveRequestForm_status" class="form-label">Status <span class="attendance-required">(required)</span></label>
                             <select id="addLeaveRequestForm_status" class="form-select" name="status">
                                 <option value="PENDING">PENDING</option>
                                 <option value="APPROVED">APPROVED</option>
@@ -182,38 +189,44 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveRequestModalTitle">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveRequestModalTitle">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <form id="editLeaveRequestForm">
                 <input type="hidden" name="id">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editLeaveRequestModalTitle">Edit Leave Request</h5>
+                    <div><h5 class="modal-title" id="editLeaveRequestModalTitle">Edit Leave Request</h5><p class="small text-muted mb-0" data-attendance-record></p></div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="editLeaveRequestForm_employee_id" class="form-label">Employee</label>
+                            <label for="editLeaveRequestForm_employee_id" class="form-label">Employee <span class="attendance-required">(required)</span></label>
                             <select id="editLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
                         </div>
                         <div class="col-md-6">
-                            <label for="editLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
+                            <label for="editLeaveRequestForm_leave_type_id" class="form-label">Leave Type <span class="attendance-required">(required)</span></label>
                             <select id="editLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
                         </div>
                         <div class="col-md-4">
-                            <label for="editLeaveRequestForm_date_from" class="form-label">Date From</label>
+                            <label for="editLeaveRequestForm_date_from" class="form-label">Date From <span class="attendance-required">(required)</span></label>
                             <input id="editLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
                         </div>
                         <div class="col-md-4">
-                            <label for="editLeaveRequestForm_date_to" class="form-label">Date To</label>
+                            <label for="editLeaveRequestForm_date_to" class="form-label">Date To <span class="attendance-required">(required)</span></label>
                             <input id="editLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
                         </div>
                         <div class="col-md-4">
-                            <label for="editLeaveRequestForm_status" class="form-label">Status</label>
+                            <label for="editLeaveRequestForm_status" class="form-label">Status <span class="attendance-required">(required)</span></label>
                             <select id="editLeaveRequestForm_status" class="form-select" name="status">
                                 <option value="PENDING">PENDING</option>
                                 <option value="APPROVED">APPROVED</option>
@@ -237,8 +250,8 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveTypeModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveTypeModalTitle">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <form id="addLeaveTypeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
@@ -249,12 +262,18 @@
                 </div>
 
                 <div class="modal-body">
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
                     <div class="mb-3">
-                        <label for="addLeaveTypeForm_name" class="form-label">Name</label>
+                        <label for="addLeaveTypeForm_name" class="form-label">Name <span class="attendance-required">(required)</span></label>
                         <input id="addLeaveTypeForm_name" type="text" class="form-control" name="name">
                     </div>
                     <div class="mb-3">
-                        <label for="addLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
+                        <label for="addLeaveTypeForm_is_paid" class="form-label">Is Paid <span class="attendance-required">(required)</span></label>
                         <select id="addLeaveTypeForm_is_paid" class="form-select" name="is_paid">
                             <option value="1">YES</option>
                             <option value="0">NO</option>
@@ -271,25 +290,31 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveTypeModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveTypeModalTitle">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <form id="editLeaveTypeForm">
                 <input type="hidden" name="id">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editLeaveTypeModalTitle">Edit Leave Type</h5>
+                    <div><h5 class="modal-title" id="editLeaveTypeModalTitle">Edit Leave Type</h5><p class="small text-muted mb-0" data-attendance-record></p></div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
                     <div class="mb-3">
-                        <label for="editLeaveTypeForm_name" class="form-label">Name</label>
+                        <label for="editLeaveTypeForm_name" class="form-label">Name <span class="attendance-required">(required)</span></label>
                         <input id="editLeaveTypeForm_name" type="text" class="form-control" name="name">
                     </div>
                     <div class="mb-3">
-                        <label for="editLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
+                        <label for="editLeaveTypeForm_is_paid" class="form-label">Is Paid <span class="attendance-required">(required)</span></label>
                         <select id="editLeaveTypeForm_is_paid" class="form-select" name="is_paid">
                             <option value="1">YES</option>
                             <option value="0">NO</option>
@@ -306,15 +331,21 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveRequestModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveRequestModalTitle">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteLeaveRequestModalTitle">Delete Leave Request</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this leave request? This action cannot be undone.
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
+                Delete this leave request: <strong class="attendance-delete-record" data-attendance-record></strong>?<p class="text-muted mt-2 mb-0">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
@@ -324,15 +355,21 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveTypeModalTitle">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade hris-dialog attendance-dialog" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveTypeModalTitle">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteLeaveTypeModalTitle">Delete Leave Type</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this leave type? This action cannot be undone.
+                    <div class="attendance-feedback alert alert-warning" role="status" aria-live="polite" tabindex="-1" hidden></div>
+                    <div class="attendance-discard alert alert-warning" hidden>
+                        <p>Leave this dialog and discard your unsaved changes?</p>
+                        <button type="button" class="btn btn-secondary attendance-stay">Stay and edit</button>
+                        <button type="button" class="btn btn-outline-danger attendance-discard-confirm">Discard changes</button>
+                    </div>
+                Delete this leave type: <strong class="attendance-delete-record" data-attendance-record></strong>?<p class="text-muted mt-2 mb-0">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
@@ -345,6 +382,214 @@
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <script>
+// Page-local Attendance presentation and dialog states. Request options stay owned by each CRUD function.
+const attendanceReads = new Map();
+let attendanceDetailPending = false;
+function attendanceListStart(table, columns, label) {
+    const version = (attendanceReads.get(table) || 0) + 1;
+    attendanceReads.set(table, version);
+    $(table).attr('aria-busy', 'true').find('tbody').html(`<tr><td colspan="${columns}" class="attendance-empty" role="status">Loading ${esc(label)}…</td></tr>`);
+    return version;
+}
+function attendanceListEnd(table, version, failed, retry) {
+    if (attendanceReads.get(table) !== version) return false;
+    $(table).attr('aria-busy', 'false');
+    const $status = $(table).closest('.tab-pane, .management-card').find('.attendance-list-status').first();
+    $status.empty();
+    if (failed) {
+        $(table).find('tbody').empty();
+        $status.append(document.createTextNode('Records could not be loaded. '), $('<button>', {
+            type: 'button', class: 'btn btn-outline-primary', text: 'Retry loading'
+        }).on('click', retry));
+    }
+    return true;
+}
+function attendanceDate(value) {
+    // Date-only strings are formatted without timezone conversion. Unexpected values remain visible.
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value ?? ''));
+    if (!match || +match[2] < 1 || +match[2] > 12 || +match[3] < 1 || +match[3] > 31) return esc(value) || '—';
+    return `${match[3]} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+match[2] - 1]} ${match[1]}`;
+}
+function attendanceLabel(value, labels) {
+    return esc(Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value) || '—';
+}
+function attendanceTime(value) {
+    // Retain seconds and overnight ordering exactly as supplied; no duration calculation.
+    return esc(value) || '—';
+}
+function attendanceSortControls(id, keys, change) {
+    const $select = $('#' + id);
+    $select.on('change', function () { if (Object.hasOwn(keys, this.value)) change(this.value); });
+    $('#' + id + 'Direction').on('click', function () { change($select.val()); });
+    return function (key, direction) {
+        $select.val(key);
+        $('#' + id + 'Direction').text(direction === 'ASC' ? 'Ascending ↑' : 'Descending ↓')
+            .attr('aria-label', `Sorted ${direction === 'ASC' ? 'ascending' : 'descending'}. Reverse sort direction`);
+    };
+}
+function attendanceSnapshot($modal) {
+    const values = new URLSearchParams($modal.find('form').serialize());
+    values.sort();
+    return values.toString();
+}
+function attendanceUnlock(state) {
+    if (!state.disabledFields) return;
+    state.disabledFields.forEach(([field, disabled]) => { field.disabled = disabled; });
+    state.disabledFields = null;
+}
+function attendanceFeedback($modal, message) {
+    $modal.find('.attendance-feedback').text(message).prop('hidden', !message);
+}
+function attendanceValidation($modal, res) {
+    attendanceFeedback($modal, res.message || 'Changes were not saved. Review the values and try again.');
+    if (!res.errors || typeof res.errors !== 'object' || Array.isArray(res.errors)) return;
+    $modal.find('input:not([type="hidden"]), select, textarea').each(function () {
+        const message = res.errors[this.name];
+        if (typeof message !== 'string') return;
+        const id = this.id + 'Error';
+        $(this).addClass('is-invalid').attr('aria-invalid', 'true').attr('data-attendance-error', id);
+        const describedBy = this.getAttribute('aria-describedby') || '';
+        this.setAttribute('aria-describedby', (describedBy + ' ' + id).trim());
+        $(this).after($('<div>', {id, class: 'invalid-feedback attendance-field-error', text: message}));
+    });
+}
+function attendanceClearValidation($modal) {
+    $modal.find('[data-attendance-error]').each(function () {
+        const errorId = this.dataset.attendanceError;
+        const ids = (this.getAttribute('aria-describedby') || '').split(/\s+/).filter(id => id !== errorId);
+        if (ids.length) this.setAttribute('aria-describedby', ids.join(' ')); else this.removeAttribute('aria-describedby');
+        $(this).removeClass('is-invalid').removeAttr('aria-invalid data-attendance-error');
+    });
+    $modal.find('.attendance-field-error').remove();
+}
+function attendanceRead(selector, options) {
+    // Keep row actions disabled while the selected record is being loaded.
+    if (attendanceDetailPending) return;
+    attendanceDetailPending = true;
+    const $modal = $(selector), trigger = $modal.data('attendance-trigger');
+    const $actions = $('.attendance-workspace table button');
+    $actions.prop('disabled', true);
+    const beforeSend = options.beforeSend, success = options.success, error = options.error;
+    $.ajax({...options,
+        beforeSend: function () { if (beforeSend) beforeSend(); },
+        success: function (res) { success(res); },
+        error: function (xhr) { if (error) error(xhr); if (trigger && document.contains(trigger)) trigger.focus(); },
+        complete: function () { attendanceDetailPending = false; $actions.prop('disabled', false); }
+    });
+}
+function attendanceMutation(selector, options) {
+    const $modal = $(selector), state = $modal.data('attendance-state');
+    if (!state || state.pending || state.uncertain || $modal.find('[data-attendance-lookup]').toArray().some(select => select.dataset.attendanceLookup !== 'ready')) return;
+    state.pending = true;
+    state.allowHide = false;
+    attendanceClearValidation($modal);
+    attendanceFeedback($modal, 'Saving changes. Please wait…');
+    // Lock dialog controls after the caller has serialized the original fields.
+    $modal.find('button').prop('disabled', true);
+    state.disabledFields = $modal.find('input, select, textarea').toArray().map(field => [field, field.disabled]);
+    state.disabledFields.forEach(([field]) => { field.disabled = true; });
+    $modal.attr('aria-busy', 'true');
+    const success = options.success, beforeSend = options.beforeSend;
+    $.ajax({...options,
+        beforeSend: function () { if (beforeSend) beforeSend(); },
+        success: function (res) {
+            state.pending = false;
+            if (res && res.success === true) {
+                state.allowHide = true;
+                attendanceUnlock(state);
+                attendanceFeedback($modal, 'Changes saved.');
+                success(res);
+                bootstrap.Modal.getInstance($modal[0])?.hide();
+            } else if (res && res.success === false) {
+                attendanceValidation($modal, res);
+                showToast(res.message || 'Changes were not saved.', 'error');
+            } else {
+                attendanceUncertain($modal, state);
+            }
+        },
+        error: function (xhr) {
+            state.pending = false;
+            // Only an explicit, structured rejection establishes that retry is safe.
+            if (xhr.status >= 400 && xhr.status < 500 && xhr.responseJSON?.success === false) {
+                attendanceValidation($modal, xhr.responseJSON);
+                showToast(xhr.responseJSON.message || 'Changes were not saved.', 'error');
+            } else attendanceUncertain($modal, state);
+        },
+        complete: function () {
+            hideLoader();
+            state.pending = false;
+            attendanceUnlock(state);
+            $modal.attr('aria-busy', 'false').find('button').prop('disabled', false);
+            if (state.uncertain) $modal.find('[type="submit"], .btn-danger').prop('disabled', true);
+            if (!state.allowHide) $modal.find('.attendance-feedback').trigger('focus');
+        }
+    });
+}
+function attendanceUncertain($modal, state) {
+    state.uncertain = true;
+    const message = 'The save outcome could not be confirmed. Close this dialog and reload the records to verify the result before trying again. Your entered values are still here.';
+    attendanceFeedback($modal, message);
+    showToast('Save outcome unknown. Reload records to verify before trying again.', 'error', 8000);
+}
+$(function () {
+    const $dialogs = $('.attendance-dialog');
+    $dialogs.each(function () {
+        $(this).data('attendance-state', {pending: false, uncertain: false, allowHide: false});
+    });
+    $dialogs.on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const $controls = $(this).find('a[href], button, input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])')
+            .filter(':visible:not(:disabled)').filter(function () { return this.tabIndex >= 0; });
+        const first = $controls[0], last = $controls[$controls.length - 1];
+        if (first && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+            event.preventDefault();
+            (event.shiftKey ? last : first).focus();
+        }
+    });
+    $dialogs.on('show.bs.modal', function (event) {
+        const $modal = $(this), state = $modal.data('attendance-state');
+        state.trigger = event.relatedTarget || $modal.data('attendance-trigger') || document.activeElement;
+        state.allowHide = false;
+        $modal.find('.attendance-discard').prop('hidden', true);
+        if (!state.uncertain) { attendanceFeedback($modal, ''); attendanceClearValidation($modal); }
+    }).on('shown.bs.modal', function () {
+        const $modal = $(this), state = $modal.data('attendance-state');
+        state.baseline = attendanceSnapshot($modal);
+        const $focus = $modal.find('form').length ? $modal.find('input:not([type="hidden"]), select, textarea').filter(':visible:not(:disabled)').first() : $modal.find('[data-bs-dismiss="modal"]').last();
+        $focus.trigger('focus');
+    }).on('hide.bs.modal', function (event) {
+        const $modal = $(this), state = $modal.data('attendance-state');
+        if (state.pending) { event.preventDefault(); return; }
+        if (!state.allowHide && $modal.find('form').length && state.baseline !== attendanceSnapshot($modal)) {
+            event.preventDefault();
+            state.lastFocus = document.activeElement;
+            $modal.find('.attendance-discard').prop('hidden', false).find('.attendance-stay').trigger('focus');
+        }
+    }).on('hidden.bs.modal', function () {
+        const state = $(this).data('attendance-state'), trigger = state.trigger;
+        const replacement = trigger?.dataset.id && Array.from(document.querySelectorAll('.attendance-workspace table button')).find(button => button.dataset.id === trigger.dataset.id && button.className === trigger.className);
+        const target = trigger && document.contains(trigger) ? trigger : replacement || document.querySelector('.attendance-workspace h1');
+        target?.focus();
+    });
+    $dialogs.find('.attendance-stay').on('click', function () {
+        const $modal = $(this).closest('.modal'), state = $modal.data('attendance-state');
+        $modal.find('.attendance-discard').prop('hidden', true);
+        state.lastFocus?.focus();
+    });
+    $dialogs.find('.attendance-discard-confirm').on('click', function () {
+        const $modal = $(this).closest('.modal');
+        // Restore the dialog snapshot on explicit discard; values are never submitted here.
+        $modal.data('attendance-state').allowHide = true;
+        const form = $modal.find('form')[0];
+        if (form) {
+            const values = new URLSearchParams($modal.data('attendance-state').baseline);
+            for (const field of form.elements) if (field.name && values.has(field.name)) field.value = values.get(field.name);
+        }
+        bootstrap.Modal.getInstance($modal[0]).hide();
+    });
+});
+
+
 let requestPage = 1;
 let requestSearch = '';
 let requestSortBy = 'created_at';
@@ -355,6 +600,48 @@ let typeSortBy = 'created_at';
 let typeSortDir = 'DESC';
 let pendingRequestDeleteId = null;
 let pendingTypeDeleteId = null;
+
+function attendanceLookup(selector, retry, options) {
+    const $selects = $(selector), success = options.success;
+    const previous = $selects.toArray().map(select => select.value);
+    $selects.attr('data-attendance-lookup', 'loading').prop('disabled', true);
+    $selects.next('.attendance-lookup-feedback').remove();
+    $selects.after('<div class="attendance-lookup-feedback form-text" role="status">Loading choices…</div>');
+    attendanceLookupActions();
+    return $.ajax({...options,
+        success: function (res) {
+            if (!res.success || !Array.isArray(res.data)) { failed(); return; }
+            success(res);
+            $selects.each(function (index) {
+                if (previous[index] && Array.from(this.options).some(option => option.value === previous[index])) this.value = previous[index];
+            }).attr('data-attendance-lookup', 'ready').prop('disabled', false);
+            $selects.each(function () {
+                const $modal = $(this).closest('.modal'), state = $modal.data('attendance-state');
+                if (state?.baseline !== undefined) {
+                    const baseline = new URLSearchParams(state.baseline);
+                    baseline.set(this.name, this.value); baseline.sort(); state.baseline = baseline.toString();
+                }
+            });
+            $selects.next('.attendance-lookup-feedback').remove();
+            attendanceLookupActions();
+        },
+        error: failed
+    });
+    function failed() {
+        $selects.attr('data-attendance-lookup', 'error');
+        $selects.next('.attendance-lookup-feedback').empty().append(document.createTextNode('Choices could not be loaded. '), $('<button>', {
+            type: 'button', class: 'btn btn-outline-primary', text: 'Retry choices'
+        }).on('click', retry));
+        attendanceLookupActions();
+    }
+}
+function attendanceLookupActions() {
+    const ready = $('.employeeSelect, .leaveTypeSelect').toArray().every(select => select.dataset.attendanceLookup === 'ready');
+    $('#addLeaveRequestForm, #editLeaveRequestForm').each(function () {
+        const state = $(this).closest('.modal').data('attendance-state');
+        $(this).find('[type="submit"]').prop('disabled', !ready || !!state?.pending || !!state?.uncertain);
+    });
+}
 
 function esc(str) {
     return String(str ?? '').replace(/[&<>"']/g, c => ({
@@ -370,7 +657,16 @@ function formDataWithoutId(form) {
     return $.param($(form).serializeArray().filter(item => item.name !== 'id'));
 }
 
+let syncRequestSort;
 $(document).ready(function () {
+    syncRequestSort = attendanceSortControls('requestSortBy', {'employee_name': 'Employee', 'leave_type': 'Leave type', 'date_from': 'Period start', 'date_to': 'Period end', 'status': 'Status', 'approved_by_name': 'Approved by', 'approved_at': 'Approved at', 'created_at': 'Date added'}, key => {
+        requestSortDir = requestSortBy === key && requestSortDir === 'ASC' ? 'DESC' : 'ASC';
+        requestSortBy = key; getAllLeaveRequests(1);
+    });
+    $('#leaveTabs button').on('shown.bs.tab', function () {
+        const pane = this.getAttribute('aria-controls');
+        $('[data-leave-add]').each(function () { this.hidden = this.dataset.leaveAdd !== pane; });
+    });
     loadEmployees();
     loadLeaveTypeOptions();
     getAllLeaveRequests(1);
@@ -451,19 +747,23 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '.editLeaveRequestBtn', function () {
+        $('#editLeaveRequestModal').data('attendance-trigger', this).find('[data-attendance-record]').text($(this).closest('tr').find('.attendance-identity, .attendance-period').find('strong, .attendance-secondary').map(function () { return $(this).text().trim(); }).get().join(' · '));
         getLeaveRequest($(this).data('id'));
     });
 
     $(document).on('click', '.deleteLeaveRequestBtn', function () {
+        $('#deleteLeaveRequestModal').data('attendance-trigger', this).find('[data-attendance-record]').text($(this).closest('tr').find('.attendance-identity, .attendance-period').find('strong, .attendance-secondary').map(function () { return $(this).text().trim(); }).get().join(' · '));
         pendingRequestDeleteId = $(this).data('id');
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteLeaveRequestModal')).show();
     });
 
     $(document).on('click', '.editLeaveTypeBtn', function () {
+        $('#editLeaveTypeModal').data('attendance-trigger', this).find('[data-attendance-record]').text($(this).closest('tr').find('.attendance-identity, .attendance-period').find('strong, .attendance-secondary').map(function () { return $(this).text().trim(); }).get().join(' · '));
         getLeaveType($(this).data('id'));
     });
 
     $(document).on('click', '.deleteLeaveTypeBtn', function () {
+        $('#deleteLeaveTypeModal').data('attendance-trigger', this).find('[data-attendance-record]').text($(this).closest('tr').find('.attendance-identity, .attendance-period').find('strong, .attendance-secondary').map(function () { return $(this).text().trim(); }).get().join(' · '));
         pendingTypeDeleteId = $(this).data('id');
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteLeaveTypeModal')).show();
     });
@@ -482,7 +782,7 @@ $(document).ready(function () {
 });
 
 function loadEmployees() {
-    $.ajax({
+    attendanceLookup('.employeeSelect', loadEmployees, {
         url: '/hris/leaves/employees/options',
         type: 'GET',
         dataType: 'json',
@@ -495,7 +795,6 @@ function loadEmployees() {
             $('.employeeSelect').html(options);
         },
         error: function (xhr) {
-            console.log(xhr.responseText);
             showToast('Failed to load employees.', 'error');
         }
     });
@@ -517,7 +816,7 @@ function bindLeaveDateRules(formSelector) {
 }
 
 function loadLeaveTypeOptions() {
-    $.ajax({
+    attendanceLookup('.leaveTypeSelect', loadLeaveTypeOptions, {
         url: '/hris/leaves/types/options',
         type: 'GET',
         dataType: 'json',
@@ -529,14 +828,13 @@ function loadLeaveTypeOptions() {
             $('.leaveTypeSelect').html(options);
         },
         error: function (xhr) {
-            console.log(xhr.responseText);
             showToast('Failed to load leave types.', 'error');
         }
     });
 }
 
 function getAllLeaveRequests(page) {
-    showLoader("Loading leave requests...");
+    const version = attendanceListStart('#leaveRequestsTable', 8, 'leave requests');
 
     $.ajax({
         url: '/hris/leaves/requests/getall',
@@ -549,15 +847,16 @@ function getAllLeaveRequests(page) {
             sort_dir: requestSortDir
         },
         success: function (res) {
-            hideLoader();
+            if (!attendanceListEnd('#leaveRequestsTable', version, !res || res.success !== true || !Array.isArray(res.data), () => getAllLeaveRequests(page))) return;
+            if (!res || res.success !== true || !Array.isArray(res.data)) return;
             requestPage = res.currentPage;
             renderRequestRows(res.data || []);
             renderPagination('#requestsPagination', res.currentPage, res.totalPages, 'request-page-btn');
             applySortIndicators('.request-sort', requestSortBy, requestSortDir);
+            syncRequestSort(requestSortBy, requestSortDir);
         },
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
+            attendanceListEnd('#leaveRequestsTable', version, true, () => getAllLeaveRequests(page));
             showToast('Unable to load leave requests.', 'error');
         }
     });
@@ -567,24 +866,23 @@ function renderRequestRows(requests) {
     let rows = '';
 
     if (requests.length === 0) {
-        rows = '<tr><td colspan="9" class="text-center py-3">No leave requests found</td></tr>';
+        rows = '<tr><td colspan="8" class="attendance-empty" role="status">No leave requests found</td></tr>';
     } else {
         requests.forEach(req => {
             rows += `
                 <tr>
-                    <td class="ps-4">${esc(req.employee_name) || '-'}</td>
+                    <td class="ps-4 attendance-identity"><strong>${esc(req.employee_name) || '—'}</strong><span class="attendance-secondary">${esc(req.employee_no) || '—'}</span></td>
                     <td>${esc(req.leave_type) || '-'}</td>
-                    <td>${esc(req.date_from)}</td>
-                    <td>${esc(req.date_to)}</td>
-                    <td><span class="badge text-bg-secondary hris-status ${MonteroHris.statusClass(req.status, 'leave')}">${esc(req.status)}</span></td>
+                    <td class="attendance-period"><span class="attendance-secondary">From ${attendanceDate(req.date_from)}</span><span class="attendance-secondary">To ${attendanceDate(req.date_to)}</span></td>
+                    <td><span class="badge text-bg-secondary hris-status ${MonteroHris.statusClass(req.status, 'leave')}">${attendanceLabel(req.status, {PENDING: 'Pending', APPROVED: 'Approved', REJECTED: 'Rejected', CANCELLED: 'Cancelled'})}</span></td>
                     <td>${esc(req.approved_by_name) || '-'}</td>
                     <td>${esc(req.approved_at) || '-'}</td>
-                    <td class="hris-created-at">${esc(req.created_at) || '-'}</td>
+                    <td class="hris-created-at attendance-created">${esc(req.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm editLeaveRequestBtn hris-action" data-id="${req.id}" aria-label="Edit leave request" title="Edit leave request">
+                        <button class="btn btn-sm editLeaveRequestBtn hris-action" data-id="${req.id}" aria-label="Edit leave request: ${esc(req.employee_name)}" title="Edit leave request">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-sm deleteLeaveRequestBtn hris-action hris-action--danger" data-id="${req.id}" aria-label="Delete leave request" title="Delete leave request">
+                        <button class="btn btn-sm deleteLeaveRequestBtn hris-action hris-action--danger" data-id="${req.id}" aria-label="Delete leave request: ${esc(req.employee_name)}" title="Delete leave request">
                             <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
@@ -597,7 +895,7 @@ function renderRequestRows(requests) {
 }
 
 function getAllLeaveTypes(page) {
-    showLoader("Loading leave types...");
+    const version = attendanceListStart('#leaveTypesTable', 4, 'leave types');
 
     $.ajax({
         url: '/hris/leaves/types/getall',
@@ -610,15 +908,15 @@ function getAllLeaveTypes(page) {
             sort_dir: typeSortDir
         },
         success: function (res) {
-            hideLoader();
+            if (!attendanceListEnd('#leaveTypesTable', version, !res || res.success !== true || !Array.isArray(res.data), () => getAllLeaveTypes(page))) return;
+            if (!res || res.success !== true || !Array.isArray(res.data)) return;
             typePage = res.currentPage;
             renderTypeRows(res.data || []);
             renderPagination('#typesPagination', res.currentPage, res.totalPages, 'type-page-btn');
             applySortIndicators('.type-sort', typeSortBy, typeSortDir);
         },
         error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
+            attendanceListEnd('#leaveTypesTable', version, true, () => getAllLeaveTypes(page));
             showToast('Unable to load leave types.', 'error');
         }
     });
@@ -628,19 +926,19 @@ function renderTypeRows(types) {
     let rows = '';
 
     if (types.length === 0) {
-        rows = '<tr><td colspan="4" class="text-center py-3">No leave types found</td></tr>';
+        rows = '<tr><td colspan="4" class="attendance-empty" role="status">No leave types found</td></tr>';
     } else {
         types.forEach(type => {
             rows += `
                 <tr>
-                    <td class="ps-4">${esc(type.name)}</td>
-                    <td>${type.is_paid == 1 ? 'YES' : 'NO'}</td>
-                    <td class="hris-created-at">${esc(type.created_at) || '-'}</td>
+                    <td class="ps-4 attendance-identity"><strong>${esc(type.name)}</strong></td>
+                    <td><span class="hris-status">${type.is_paid == 1 ? 'Paid' : 'Unpaid'}</span></td>
+                    <td class="hris-created-at attendance-created">${esc(type.created_at) || '-'}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm editLeaveTypeBtn hris-action" data-id="${type.id}" aria-label="Edit leave type" title="Edit leave type">
+                        <button class="btn btn-sm editLeaveTypeBtn hris-action" data-id="${type.id}" aria-label="Edit leave type: ${esc(type.name)}" title="Edit leave type">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-sm deleteLeaveTypeBtn hris-action hris-action--danger" data-id="${type.id}" aria-label="Delete leave type" title="Delete leave type">
+                        <button class="btn btn-sm deleteLeaveTypeBtn hris-action hris-action--danger" data-id="${type.id}" aria-label="Delete leave type: ${esc(type.name)}" title="Delete leave type">
                             <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </td>
@@ -695,7 +993,7 @@ function applySortIndicators(selector, sortBy, sortDir) {
 }
 
 function addLeaveRequest(form) {
-    $.ajax({
+    attendanceMutation('#addLeaveRequestModal', {
         url: '/hris/leaves/requests/create',
         type: 'POST',
         data: $(form).serialize(),
@@ -714,19 +1012,18 @@ function addLeaveRequest(form) {
             $('#addLeaveRequestForm [name="date_to"]').removeAttr('min');
             bootstrap.Modal.getInstance(document.getElementById('addLeaveRequestModal')).hide();
             getAllLeaveRequests(1);
-        },
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
 
 function getLeaveRequest(id) {
+    if ($('.employeeSelect, .leaveTypeSelect').toArray().some(select => select.dataset.attendanceLookup !== 'ready')) {
+        showToast('Employee and leave type choices must finish loading. Use Retry choices in Add Leave Request if loading failed.', 'error', 8000);
+        return;
+    }
     showLoader("Loading leave request...");
 
-    $.ajax({
+    attendanceRead('#editLeaveRequestModal', {
         url: '/hris/leaves/requests/getbyid/' + id,
         type: 'GET',
         dataType: 'json',
@@ -752,7 +1049,6 @@ function getLeaveRequest(id) {
         },
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
             showToast('Unable to load leave request.', 'error');
         }
     });
@@ -761,7 +1057,7 @@ function getLeaveRequest(id) {
 function updateLeaveRequest(form) {
     let id = $(form).find('[name="id"]').val();
 
-    $.ajax({
+    attendanceMutation('#editLeaveRequestModal', {
         url: '/hris/leaves/requests/update/' + id,
         type: 'POST',
         data: formDataWithoutId(form),
@@ -778,17 +1074,12 @@ function updateLeaveRequest(form) {
             showToast(res.message, 'success');
             bootstrap.Modal.getInstance(document.getElementById('editLeaveRequestModal')).hide();
             getAllLeaveRequests(requestPage);
-        },
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
 
 function deleteLeaveRequest(id) {
-    $.ajax({
+    attendanceMutation('#deleteLeaveRequestModal', {
         url: '/hris/leaves/requests/delete/' + id,
         type: 'POST',
         dataType: 'json',
@@ -796,30 +1087,22 @@ function deleteLeaveRequest(id) {
             csrf_token: $('#addLeaveRequestForm [name="csrf_token"]').val()
         },
         beforeSend: function () {
-            bootstrap.Modal.getInstance(document.getElementById('deleteLeaveRequestModal')).hide();
             showLoader("Deleting leave request...");
         },
         success: function (res) {
             hideLoader();
-            pendingRequestDeleteId = null;
             if (!res.success) {
                 showToast(res.message || 'Something went wrong.', 'error');
                 return;
             }
             showToast(res.message, 'success');
             getAllLeaveRequests(requestPage);
-        },
-        error: function (xhr) {
-            hideLoader();
-            pendingRequestDeleteId = null;
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
 
 function addLeaveType(form) {
-    $.ajax({
+    attendanceMutation('#addLeaveTypeModal', {
         url: '/hris/leaves/types/create',
         type: 'POST',
         data: $(form).serialize(),
@@ -838,11 +1121,6 @@ function addLeaveType(form) {
             bootstrap.Modal.getInstance(document.getElementById('addLeaveTypeModal')).hide();
             loadLeaveTypeOptions();
             getAllLeaveTypes(1);
-        },
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
@@ -850,7 +1128,7 @@ function addLeaveType(form) {
 function getLeaveType(id) {
     showLoader("Loading leave type...");
 
-    $.ajax({
+    attendanceRead('#editLeaveTypeModal', {
         url: '/hris/leaves/types/getbyid/' + id,
         type: 'GET',
         dataType: 'json',
@@ -871,7 +1149,6 @@ function getLeaveType(id) {
         },
         error: function (xhr) {
             hideLoader();
-            console.log(xhr.responseText);
             showToast('Unable to load leave type.', 'error');
         }
     });
@@ -880,7 +1157,7 @@ function getLeaveType(id) {
 function updateLeaveType(form) {
     let id = $(form).find('[name="id"]').val();
 
-    $.ajax({
+    attendanceMutation('#editLeaveTypeModal', {
         url: '/hris/leaves/types/update/' + id,
         type: 'POST',
         data: formDataWithoutId(form),
@@ -898,17 +1175,12 @@ function updateLeaveType(form) {
             bootstrap.Modal.getInstance(document.getElementById('editLeaveTypeModal')).hide();
             loadLeaveTypeOptions();
             getAllLeaveTypes(typePage);
-        },
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
 
 function deleteLeaveType(id) {
-    $.ajax({
+    attendanceMutation('#deleteLeaveTypeModal', {
         url: '/hris/leaves/types/delete/' + id,
         type: 'POST',
         dataType: 'json',
@@ -916,12 +1188,10 @@ function deleteLeaveType(id) {
             csrf_token: $('#addLeaveTypeForm [name="csrf_token"]').val()
         },
         beforeSend: function () {
-            bootstrap.Modal.getInstance(document.getElementById('deleteLeaveTypeModal')).hide();
             showLoader("Deleting leave type...");
         },
         success: function (res) {
             hideLoader();
-            pendingTypeDeleteId = null;
             if (!res.success) {
                 showToast(res.message || 'Something went wrong.', 'error');
                 return;
@@ -929,12 +1199,6 @@ function deleteLeaveType(id) {
             showToast(res.message, 'success');
             loadLeaveTypeOptions();
             getAllLeaveTypes(typePage);
-        },
-        error: function (xhr) {
-            hideLoader();
-            pendingTypeDeleteId = null;
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
         }
     });
 }
