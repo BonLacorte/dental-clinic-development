@@ -2022,3 +2022,226 @@
     display: none;
   }
 }
+
+/* MD-HRIS-ATT-UX-001: Attendance views only. Shared shell and payroll stay outside this scope. */
+@media screen {
+  .admin-shell .attendance-workspace {
+    min-width: 0;
+  }
+
+  .attendance-workspace .attendance-heading {
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+
+  .attendance-workspace .attendance-eyebrow {
+    margin-bottom: 8px;
+    color: var(--montero-primary);
+    font-size: .8125rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  .attendance-workspace .attendance-context,
+  .attendance-workspace .attendance-metric {
+    border-left: 4px solid var(--montero-primary);
+  }
+
+  .attendance-workspace .attendance-context:empty,
+  .attendance-workspace .attendance-list-status:empty {
+    display: none;
+  }
+
+  .attendance-workspace .attendance-context {
+    padding: 12px 16px;
+    background: var(--montero-primary-tint);
+    border-radius: var(--montero-control-radius);
+    overflow-wrap: anywhere;
+  }
+
+  .attendance-workspace .attendance-metric .card-body {
+    padding: 16px;
+  }
+
+  .attendance-workspace .attendance-metric .fs-4 {
+    margin-top: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .attendance-workspace .attendance-identity {
+    min-width: 12rem;
+    max-width: 28rem;
+    overflow-wrap: anywhere;
+  }
+
+  .attendance-workspace .attendance-secondary {
+    display: block;
+    color: var(--montero-muted);
+    font-size: .9375rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .attendance-workspace .attendance-schedule {
+    min-width: 18rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .attendance-workspace .hris-data-table > :is(thead, tbody) > tr > :is(th, td):not([colspan]) {
+    padding: 12px 16px;
+    vertical-align: middle;
+    text-align: left;
+  }
+
+  .admin-shell .attendance-workspace .hris-data-table > :is(thead, tbody) > tr > :is(th, td):is(.attendance-number, .text-end) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .attendance-workspace .hris-data-table th:has([data-sort="pay_multiplier"], [data-sort="required_hours"], [data-sort="break_minutes"]) {
+    text-align: right;
+  }
+
+  .admin-shell .attendance-workspace .attendance-created {
+    display: table-cell;
+    min-width: 10rem;
+    color: var(--montero-muted);
+    font-size: .9375rem;
+    font-weight: 400;
+  }
+
+  .admin-shell .attendance-workspace #shiftsTable {
+    min-width: 66rem;
+  }
+
+  .admin-shell .attendance-workspace #holidaysTable {
+    min-width: 54rem;
+  }
+
+  .attendance-workspace #holidaysTable > tbody > tr > td:nth-child(2) {
+    min-width: 7rem;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .attendance-workspace .attendance-empty {
+    padding: 48px 16px;
+    color: var(--montero-muted);
+    text-align: center;
+  }
+
+  .attendance-workspace .attendance-empty-icon {
+    color: var(--montero-primary);
+    font-size: 2rem;
+  }
+
+  .attendance-workspace .attendance-sort-control {
+    flex: 1 1 20rem;
+    max-width: 32rem;
+  }
+
+  .attendance-workspace .attendance-sort-control > .d-flex {
+    flex-wrap: wrap;
+  }
+
+  .attendance-workspace .attendance-sort-control select {
+    flex: 1 1 10rem;
+    min-width: 0;
+    max-width: 100%;
+    width: auto;
+  }
+
+  .attendance-workspace .attendance-context-actions {
+    flex-wrap: wrap;
+  }
+
+  .attendance-workspace .hris-scroll-hint {
+    display: block;
+    padding: 12px 16px;
+    margin-bottom: 0;
+    color: var(--montero-muted);
+    font-size: .875rem;
+  }
+
+  .attendance-dialog .modal-content > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .attendance-dialog .attendance-feedback,
+  .attendance-dialog .attendance-delete-record {
+    overflow-wrap: anywhere;
+  }
+
+  .attendance-dialog .attendance-form-section {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .attendance-dialog .attendance-form-section h6 {
+    margin-bottom: 0;
+    color: var(--montero-primary);
+    font-size: 1rem;
+  }
+
+  .attendance-dialog .attendance-discard button {
+    margin: 4px 4px 4px 0;
+  }
+
+  .attendance-dialog .modal-footer > .btn {
+    min-width: 88px;
+  }
+
+  .attendance-dialog :is(.form-control, .form-select) {
+    min-width: 0;
+  }
+
+  .attendance-workspace [hidden],
+  .attendance-dialog [hidden] {
+    display: none !important;
+  }
+
+  .attendance-workspace :is(button, select, input, a):focus-visible,
+  .attendance-dialog :is(button, select, input, textarea, [tabindex]):focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 575.98px) {
+    .attendance-workspace .card-header > .attendance-heading,
+    .attendance-workspace .attendance-context-actions,
+    .attendance-workspace .attendance-context-actions > button {
+      flex-basis: 100%;
+    }
+
+    .attendance-workspace .nav-tabs {
+      width: 100%;
+    }
+
+    .attendance-workspace .nav-tabs .nav-item {
+      flex: 1 1 8rem;
+    }
+
+    .attendance-workspace .nav-tabs .nav-link {
+      width: 100%;
+    }
+
+    .attendance-dialog .modal-content > form {
+      height: 100%;
+    }
+
+    .attendance-dialog .modal-header,
+    .attendance-dialog .modal-body,
+    .attendance-dialog .modal-footer {
+      padding: 16px;
+    }
+
+    .attendance-dialog .modal-footer > .btn {
+      flex: 1 1 auto;
+    }
+  }
+}
