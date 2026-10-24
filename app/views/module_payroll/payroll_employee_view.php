@@ -318,23 +318,23 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 </style>
 
 
-<div class="py-4">
+<div class="py-4 payruns-ui payruns-employee">
 
     <!-- ============================================================
          HEADER
     ============================================================= -->
 
-    <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+    <header class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4 payruns-header">
 
         <div>
 
+            <p class="payruns-eyebrow no-print">Employee Payroll Details</p>
             <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-
-                <h4 class="mb-0">
+                <h1 class="h4 mb-0" id="employeePayrollHeading">
                     <?= htmlspecialchars(
                         payrollEmployeeFullName($employee)
                     ); ?>
-                </h4>
+                </h1>
 
                 <?= payrollEmployeeStatusBadge($computationStatus); ?>
 
@@ -362,19 +362,19 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
         <div class="d-flex flex-wrap gap-2 align-items-start">
 
             <a href="/payroll/runs/view/<?= $runId; ?>" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
                 Back to Payroll Run
             </a>
 
 
             <button type="button" class="btn btn-outline-dark" onclick="printPayslip()">
-                <i class="bi bi-printer"></i>
+                <i class="bi bi-printer" aria-hidden="true"></i>
                 Print Payslip
             </button>
 
         </div>
 
-    </div>
+    </header>
 
 
     <!-- ============================================================
@@ -502,7 +502,7 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
             <div class="payroll-total-box">
 
                 <div class="label">
-                    Gross / Earnings
+                    Earnings
                 </div>
 
                 <div class="amount">
@@ -533,7 +533,7 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
         <div class="col-12 col-md-6 col-xl-3">
 
-            <div class="payroll-total-box">
+            <div class="payroll-total-box payruns-net-card">
 
                 <div class="label">
                     Net Pay
@@ -550,6 +550,8 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
     </div>
 
 
+    <div class="payruns-gross-context mb-4 no-print"><span>Gross Pay</span><strong>₱<?= payrollEmployeeMoney($grossPay); ?></strong></div>
+
     <!-- ============================================================
          TABS
     ============================================================= -->
@@ -560,31 +562,31 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
             <ul class="nav nav-tabs" id="employeePayrollTabs" role="tablist">
 
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
 
                     <button type="button" class="nav-link active" data-bs-toggle="tab"
-                        data-bs-target="#payrollDetailsTab">
-                        <i class="bi bi-receipt me-1"></i>
+                        data-bs-target="#payrollDetailsTab" id="payrollDetailsTabButton" role="tab" aria-controls="payrollDetailsTab" aria-selected="true">
+                        <i class="bi bi-receipt me-1" aria-hidden="true"></i>
                         Payroll Details
                     </button>
 
                 </li>
 
 
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
 
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#attendanceTab">
-                        <i class="bi bi-clock-history me-1"></i>
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#attendanceTab" id="attendanceTabButton" role="tab" aria-controls="attendanceTab" aria-selected="false">
+                        <i class="bi bi-clock-history me-1" aria-hidden="true"></i>
                         Attendance
                     </button>
 
                 </li>
 
 
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
 
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#payslipTab">
-                        <i class="bi bi-file-earmark-text me-1"></i>
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#payslipTab" id="payslipTabButton" role="tab" aria-controls="payslipTab" aria-selected="false">
+                        <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>
                         Payslip
                     </button>
 
@@ -604,7 +606,7 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
                      PAYROLL DETAILS
                 ===================================================== -->
 
-                <div class="tab-pane fade show active" id="payrollDetailsTab">
+                <div class="tab-pane fade show active" id="payrollDetailsTab" role="tabpanel" aria-labelledby="payrollDetailsTabButton" tabindex="0">
 
                     <div class="row g-4">
 
@@ -613,21 +615,22 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                         <div class="col-12 col-xl-6">
 
-                            <div class="payroll-section-title">
+                            <div class="payroll-section-title" role="heading" aria-level="2">
                                 Earnings
                             </div>
 
 
-                            <div class="table-responsive">
+                            <p class="payruns-scroll-help no-print">Scroll horizontally to see every column.</p>
+                            <div class="table-responsive payruns-table-region" tabindex="0" role="region" aria-label="Earnings items">
 
                                 <table class="table table-sm payroll-item-table">
 
                                     <thead class="table-light">
 
                                         <tr>
-                                            <th>Description</th>
-                                            <th>Source</th>
-                                            <th class="text-end">
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Source</th>
+                                            <th scope="col" class="text-end">
                                                 Amount
                                             </th>
                                         </tr>
@@ -709,11 +712,11 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                                         <tr>
 
-                                            <th colspan="2">
+                                            <th scope="col" colspan="2">
                                                 Total Earnings
                                             </th>
 
-                                            <th class="text-end">
+                                            <th scope="col" class="text-end">
                                                 ₱<?= payrollEmployeeMoney(
                                                     $totalEarnings
                                                 ); ?>
@@ -735,12 +738,13 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                         <div class="col-12 col-xl-6">
 
-                            <div class="payroll-section-title">
+                            <div class="payroll-section-title" role="heading" aria-level="2">
                                 Deductions
                             </div>
 
 
-                            <div class="table-responsive">
+                            <p class="payruns-scroll-help no-print">Scroll horizontally to see every column.</p>
+                            <div class="table-responsive payruns-table-region" tabindex="0" role="region" aria-label="Deduction items">
 
                                 <table class="table table-sm payroll-item-table">
 
@@ -748,11 +752,11 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                                         <tr>
 
-                                            <th>Description</th>
+                                            <th scope="col">Description</th>
 
-                                            <th>Source</th>
+                                            <th scope="col">Source</th>
 
-                                            <th class="text-end">
+                                            <th scope="col" class="text-end">
                                                 Amount
                                             </th>
 
@@ -839,11 +843,11 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                                         <tr>
 
-                                            <th colspan="2">
+                                            <th scope="col" colspan="2">
                                                 Total Deductions
                                             </th>
 
-                                            <th class="text-end">
+                                            <th scope="col" class="text-end">
 
                                                 ₱<?= payrollEmployeeMoney(
                                                     $totalDeductions
@@ -900,7 +904,7 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
                      ATTENDANCE
                 ===================================================== -->
 
-                <div class="tab-pane fade" id="attendanceTab">
+                <div class="tab-pane fade" id="attendanceTab" role="tabpanel" aria-labelledby="attendanceTabButton" tabindex="0">
 
                     <div class="row g-3 mb-4">
 
@@ -1020,7 +1024,8 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
                     </div>
 
 
-                    <div class="table-responsive">
+                    <p class="payruns-scroll-help no-print">Scroll horizontally to see every column.</p>
+                            <div class="table-responsive payruns-table-region" tabindex="0" role="region" aria-label="Attendance records">
 
                         <table class="table table-hover table-sm align-middle">
 
@@ -1028,29 +1033,29 @@ $netPay = (float) ($employee['net_pay'] ?? 0);
 
                                 <tr>
 
-                                    <th>Date</th>
+                                    <th scope="col">Date</th>
 
-                                    <th>Day Type</th>
+                                    <th scope="col">Day Type</th>
 
-                                    <th>Schedule</th>
+                                    <th scope="col">Schedule</th>
 
-                                    <th>Time In</th>
+                                    <th scope="col">Time In</th>
 
-                                    <th>Time Out</th>
+                                    <th scope="col">Time Out</th>
 
-                                    <th class="text-end">
-                                        Late
+                                    <th scope="col" class="text-end">
+                                        Late (min)
                                     </th>
 
-                                    <th class="text-end">
-                                        UT
+                                    <th scope="col" class="text-end">
+                                        Undertime (min)
                                     </th>
 
-                                    <th class="text-end">
-                                        OT
+                                    <th scope="col" class="text-end">
+                                        Overtime (min)
                                     </th>
 
-                                    <th class="text-center">
+                                    <th scope="col" class="text-center">
                                         Status
                                     </th>
 

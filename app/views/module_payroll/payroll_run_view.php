@@ -29,10 +29,11 @@ function payrollStatusBadge(string $status): string
         'CANCELLED' => 'text-bg-danger',
     ];
 
-    $class = $classes[$status] ?? 'text-bg-secondary';
+    $normalized = strtoupper($status);
+    $class = $classes[$normalized] ?? 'text-bg-secondary';
 
     return '<span class="badge ' . $class . '">' .
-        htmlspecialchars(ucwords(strtolower($status))) .
+        htmlspecialchars(isset($classes[$normalized]) ? ucwords(strtolower($normalized)) : $status) .
         '</span>';
 }
 
@@ -117,14 +118,15 @@ function employeeFullName(array $employee): string
     }
 </style>
 
-<div class="py-4">
-    <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+<div class="py-4 payruns-ui payruns-detail">
+    <header class="payruns-header">
         <div>
+            <p class="payruns-eyebrow">Payroll Run Details</p>
             <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                <h4 class="mb-0">
+                <h1 class="h3 mb-0" id="payrollRunHeading">
                     <?= htmlspecialchars($run['run_code'] ?? 'Payroll Run'); ?>
-                </h4>
-                <?= payrollStatusBadge($status); ?>
+                </h1>
+                <?= payrollStatusBadge((string) ($run['status'] ?? $status)); ?>
             </div>
 
             <div class="text-muted">
@@ -135,62 +137,63 @@ function employeeFullName(array $employee): string
             </div>
         </div>
 
-        <div class="d-flex flex-wrap gap-2 align-items-start">
+        <div class="payruns-operations" aria-label="Payroll run actions">
             <a href="/payroll/runs" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
                 Back to Payroll Runs
             </a>
 
             <?php if ($status === 'DRAFT'): ?>
                 <button type="button" class="btn btn-outline-primary" id="btnLoadEmployees">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people" aria-hidden="true"></i>
                     Load Employees
                 </button>
 
                 <button type="button" class="btn btn-primary" id="btnProcessPayroll">
-                    <i class="bi bi-calculator"></i>
+                    <i class="bi bi-calculator" aria-hidden="true"></i>
                     Process Payroll
                 </button>
 
                 <!-- <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
                     data-bs-target="#cancelPayrollRunModal">
-                    <i class="bi bi-x-circle"></i>
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
                     Cancel
                 </button> -->
 
 
             <?php elseif ($status === 'PROCESSED'): ?>
                 <button type="button" class="btn btn-success" id="btnFinalizePayroll">
-                    <i class="bi bi-lock"></i>
+                    <i class="bi bi-lock" aria-hidden="true"></i>
                     Finalize Payroll
                 </button>
 
                 <a href="/payroll/runs/print/<?= $runId; ?>" target="_blank" class="btn btn-outline-dark">
-                    <i class="bi bi-printer"></i>
+                    <i class="bi bi-printer" aria-hidden="true"></i>
                     Print Register
                 </a>
             <?php elseif ($status === 'FINALIZED'): ?>
                 <a href="/payroll/runs/print/<?= $runId; ?>" target="_blank" class="btn btn-outline-dark">
-                    <i class="bi bi-printer"></i>
+                    <i class="bi bi-printer" aria-hidden="true"></i>
                     Print Register
                 </a>
             <?php endif; ?>
 
             <?php if ($status === 'DRAFT' || $status === 'CANCELLED'): ?>
-
-                <button type="button" class="btn btn-outline-warning" id="btnResetPayrollRun">
-                    <i class="bi bi-arrow-counterclockwise"></i>
+                <div class="payruns-danger-actions" role="group" aria-label="High-consequence actions">
+                <button type="button" class="btn btn-outline-danger payruns-consequence" id="btnResetPayrollRun">
+                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                     Reset
                 </button>
 
-                <button type="button" class="btn btn-outline-danger" id="btnDeletePayrollRun">
-                    <i class="bi bi-trash"></i>
+                <button type="button" class="btn btn-outline-danger payruns-consequence" id="btnDeletePayrollRun">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
                     Delete
                 </button>
-
+                </div>
             <?php endif; ?>
         </div>
-    </div>
+    </header>
+    <div id="payrollRunOperationFeedback" class="payruns-feedback d-none" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <?php if ($status === 'PROCESSING'): ?>
         <div class="alert alert-warning d-flex align-items-center gap-2">
@@ -206,6 +209,7 @@ function employeeFullName(array $employee): string
         </div>
     <?php endif; ?>
 
+    <h2 class="payruns-section-title">Run Overview</h2>
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-6 col-xl-3">
             <div class="payroll-summary-card p-3">
@@ -245,6 +249,7 @@ function employeeFullName(array $employee): string
         </div>
     </div>
 
+    <h2 class="payruns-section-title">Financial Summary</h2>
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-6 col-xl-3">
             <div class="payroll-total-card p-3">
@@ -268,7 +273,7 @@ function employeeFullName(array $employee): string
         </div>
 
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="payroll-total-card p-3">
+            <div class="payroll-total-card payruns-net-card p-3">
                 <div class="label">Net Pay</div>
                 <div class="amount">₱<?= payrollMoney($totalNetPay); ?></div>
             </div>
@@ -279,41 +284,46 @@ function employeeFullName(array $employee): string
         <div class="card-header bg-white py-3">
             <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
                 <div>
-                    <h5 class="mb-1">Employee Payroll Results</h5>
+                    <h2 class="h5 mb-1" id="payrollResultsHeading">Employee Payroll Results</h2>
                     <small class="text-muted">
-                        Snapshot of employee payroll computations for this run.
+                        Search and filter the employees already loaded in this run. Totals below cover all loaded employees.
                     </small>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2">
+                <div class="payruns-filters">
+                    <div><label class="form-label" for="employeePayrollSearch">Employee in this run</label>
                     <input type="search" class="form-control form-control-sm" id="employeePayrollSearch"
-                        placeholder="Search employee..." style="min-width: 220px;">
+                        placeholder="Name or employee number">
+                    </div>
+                    <div><label class="form-label" for="employeeComputationStatusFilter">Computation Status</label>
 
-                    <select class="form-select form-select-sm" id="employeeComputationStatusFilter"
-                        style="min-width: 165px;">
-                        <option value="">All Computation Status</option>
+                    <select class="form-select form-select-sm" id="employeeComputationStatusFilter">
+                        <option value="">All Computation Statuses</option>
                         <option value="PENDING">Pending</option>
                         <option value="COMPUTED">Computed</option>
                         <option value="ERROR">Error</option>
-                    </select>
+                    </select></div>
                 </div>
             </div>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <p id="payrollResultsScrollHelp" class="payruns-scroll-help">Scroll horizontally to compare all financial columns. Amounts are in Philippine pesos (PHP).</p>
+            <p id="payrollEmployeeFilterInfo" class="payruns-feedback" role="status" aria-live="polite" aria-atomic="true">Showing all loaded employees.</p>
+            <div class="table-responsive payruns-table-region" tabindex="0" role="region" aria-labelledby="payrollResultsHeading" aria-describedby="payrollResultsScrollHelp">
                 <table class="table table-hover align-middle mb-0" id="payrollRunEmployeesTable">
+                    <caption class="visually-hidden">Employee payroll results in Philippine pesos. Totals cover the complete run, including filtered-out rows.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Employee</th>
-                            <th>Salary Type</th>
-                            <th class="text-end">Basic Pay</th>
-                            <th class="text-end">Gross Pay</th>
-                            <th class="text-end">Earnings</th>
-                            <th class="text-end">Deductions</th>
-                            <th class="text-end">Net Pay</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-end pe-4">Action</th>
+                            <th scope="col" class="ps-4">Employee</th>
+                            <th scope="col">Salary Type</th>
+                            <th scope="col" class="text-end">Basic Pay</th>
+                            <th scope="col" class="text-end">Gross Pay</th>
+                            <th scope="col" class="text-end">Earnings</th>
+                            <th scope="col" class="text-end">Deductions</th>
+                            <th scope="col" class="text-end">Net Pay</th>
+                            <th scope="col" class="text-center">Computation Status</th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
 
@@ -321,7 +331,7 @@ function employeeFullName(array $employee): string
                         <?php if (empty($employees)): ?>
                             <tr>
                                 <td colspan="9" class="text-center py-5 text-muted">
-                                    <i class="bi bi-people fs-3 d-block mb-2"></i>
+                                    <i class="bi bi-people fs-3 d-block mb-2" aria-hidden="true"></i>
                                     No employees have been loaded into this payroll run.
                                 </td>
                             </tr>
@@ -373,8 +383,8 @@ function employeeFullName(array $employee): string
 
                                     <td class="text-end pe-4">
                                         <a href="/payroll/runs/<?= $runId; ?>/employee/<?= (int) ($employee['id'] ?? 0); ?>"
-                                            class="btn btn-link btn-sm text-secondary" title="View payroll details">
-                                            <i class="bi bi-eye"></i>
+                                            class="btn btn-outline-primary btn-sm" aria-label="View payroll details for <?= htmlspecialchars(employeeFullName($employee)); ?>" title="View payroll details">
+                                            <i class="bi bi-eye" aria-hidden="true"></i> View Payroll Details
                                         </a>
                                     </td>
                                 </tr>
@@ -391,12 +401,12 @@ function employeeFullName(array $employee): string
                     <?php if (!empty($employees)): ?>
                         <tfoot class="table-light">
                             <tr>
-                                <th colspan="3" class="text-end">Totals</th>
-                                <th class="text-end"><?= payrollMoney($totalGrossPay); ?></th>
-                                <th class="text-end"><?= payrollMoney($totalEarnings); ?></th>
-                                <th class="text-end"><?= payrollMoney($totalDeductions); ?></th>
-                                <th class="text-end"><?= payrollMoney($totalNetPay); ?></th>
-                                <th colspan="2"></th>
+                                <th scope="col" colspan="3" class="text-end">All loaded employees</th>
+                                <th scope="col" class="text-end"><?= payrollMoney($totalGrossPay); ?></th>
+                                <th scope="col" class="text-end"><?= payrollMoney($totalEarnings); ?></th>
+                                <th scope="col" class="text-end"><?= payrollMoney($totalDeductions); ?></th>
+                                <th scope="col" class="text-end"><?= payrollMoney($totalNetPay); ?></th>
+                                <th scope="col" colspan="2"></th>
                             </tr>
                         </tfoot>
                     <?php endif; ?>
@@ -406,8 +416,8 @@ function employeeFullName(array $employee): string
     </div>
 </div>
 
-<div class="modal fade" id="cancelPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-hidden="true">
+<div class="modal fade payruns-ui payruns-dialog" id="cancelPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true" aria-labelledby="cancelPayrollRunTitle">
 
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -416,8 +426,8 @@ function employeeFullName(array $employee): string
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? ''); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Cancel Payroll Run</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h2 class="modal-title h5" id="cancelPayrollRunTitle">Cancel Payroll Run</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
@@ -450,6 +460,24 @@ function employeeFullName(array $employee): string
 <?php include '../app/views/partials/admin-footer.php'; ?>
 
 <script>
+    let payrollRunOperationInFlight = false;
+
+    function payrollRunPending(message) {
+        payrollRunOperationInFlight = true;
+        $('.payruns-operations').attr('aria-busy', 'true');
+        $('.payruns-operations button').prop('disabled', true);
+        $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', true).text(message);
+    }
+
+    function payrollRunPendingComplete() {
+        payrollRunOperationInFlight = false;
+        $('.payruns-operations button').prop('disabled', false);
+        $('.payruns-operations').attr('aria-busy', 'false');
+        const $feedback = $('#payrollRunOperationFeedback');
+        if ($feedback.data('pending')) {
+            $feedback.data('pending', false).text('Request finished. Review the stored run status and individual employee results.');
+        }
+    }
     $(document).ready(function () {
         $('#employeePayrollSearch, #employeeComputationStatusFilter').on(
             'input change',
@@ -500,12 +528,16 @@ function employeeFullName(array $employee): string
         });
 
         $('#noFilteredEmployeesRow').toggleClass('d-none', visibleRows !== 0);
+        $('#payrollEmployeeFilterInfo').text(visibleRows + ' of ' +
+            $('#payrollRunEmployeesTable tbody tr[data-search]').length +
+            ' loaded employees shown. Financial totals cover all loaded employees.');
     }
 
     function loadPayrollEmployees() {
+        if (payrollRunOperationInFlight) return;
 
         if (!confirm(
-            'Load all eligible employees into this payroll run?'
+            'Load eligible employees into ' + document.getElementById('payrollRunHeading').textContent.trim() + '? Review the Run Overview before continuing.'
         )) {
             return;
         }
@@ -519,6 +551,7 @@ function employeeFullName(array $employee): string
             },
 
             beforeSend: function () {
+                payrollRunPending('Loading employees…');
                 showLoader('Loading employees...');
                 $('#btnLoadEmployees').prop('disabled', true);
             },
@@ -537,24 +570,26 @@ function employeeFullName(array $employee): string
                 window.location.reload();
             },
 
+            complete: payrollRunPendingComplete,
             error: function (xhr) {
                 hideLoader();
+                $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
                 $('#btnLoadEmployees').prop('disabled', false);
 
-                console.log(xhr.responseText);
 
-                showToast('Something went wrong while loading employees.', 'error');
+                showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
             }
         });
     }
 
     
     function processPayrollRun() {
+        if (payrollRunOperationInFlight) return;
 
 
 
         if (!confirm(
-            'Process payroll? Payroll will be computed for all employees in this run.'
+            'Process payroll for ' + document.getElementById('payrollRunHeading').textContent.trim() + '? Payroll will be computed for employees in this run. Review individual results afterward.'
         )) {
             return;
         }
@@ -568,6 +603,7 @@ function employeeFullName(array $employee): string
                 csrf_token: '<?= htmlspecialchars($csrf_token ?? ''); ?>'
             },
             beforeSend: function () {
+                payrollRunPending('Processing payroll. Individual employee results may differ…');
                 showLoader('Processing payroll...');
             },
             success: function (res) {
@@ -578,13 +614,22 @@ function employeeFullName(array $employee): string
                     return;
                 }
 
-                showToast(res.message || 'Payroll processed successfully.', 'success');
+                if (res.success !== true) {
+                    showToast('Processing outcome could not be confirmed. Refresh and review the run before trying again.', 'error');
+                    return;
+                }
+                if (Number(res.data?.error_count) > 0) {
+                    showToast('Processing returned employee errors. Review each employee result and the stored run status.', 'warning');
+                } else {
+                    showToast('Processing request finished. Review employee results and the stored run status.', 'info');
+                }
                 window.location.reload();
             },
+            complete: payrollRunPendingComplete,
             error: function (xhr) {
                 hideLoader();
-                console.log(xhr.responseText);
-                showToast(xhr.responseJSON?.message || 'Something went wrong while processing payroll.', 'error');
+                $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
+                showToast(xhr.responseJSON?.message || 'The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
             }
         });
 
@@ -652,10 +697,16 @@ function employeeFullName(array $employee): string
             success: function (res) {
                 hideLoader();
 
-                if (res.error || res.success === false) {
+                if (res?.error || res?.success === false) {
                     showToast(res.error || res.message || 'Unable to cancel payroll run.', 'error');
                     return;
                 }
+                if (res?.success !== true) {
+                    $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
+                    showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
+                    return;
+                }
+
 
                 bootstrap.Modal.getInstance(
                     document.getElementById('cancelPayrollRunModal')
@@ -666,14 +717,15 @@ function employeeFullName(array $employee): string
             },
             error: function (xhr) {
                 hideLoader();
-                console.log(xhr.responseText);
-                showToast('Something went wrong while cancelling payroll.', 'error');
+                $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
+                showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
             }
         });
     }
 
 
     function resetPayrollRun() {
+        if (payrollRunOperationInFlight) return;
 
         if (!confirm(
             'Reset this payroll run? Loaded employees and computed payroll data will be removed.'
@@ -690,6 +742,7 @@ function employeeFullName(array $employee): string
             },
 
             beforeSend: function () {
+                payrollRunPending('Resetting payroll run…');
                 showLoader('Resetting payroll run...');
                 $('#btnResetPayrollRun').prop('disabled', true);
             },
@@ -698,13 +751,19 @@ function employeeFullName(array $employee): string
                 hideLoader();
                 $('#btnResetPayrollRun').prop('disabled', false);
 
-                if (res.error || res.success === false) {
+                if (res?.error || res?.success === false) {
                     showToast(
                         res.error || res.message || 'Unable to reset payroll run.',
                         'error'
                     );
                     return;
                 }
+                if (res?.success !== true) {
+                    $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
+                    showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
+                    return;
+                }
+
 
                 showToast(
                     res.message || 'Payroll run reset successfully.',
@@ -714,15 +773,16 @@ function employeeFullName(array $employee): string
                 window.location.reload();
             },
 
+            complete: payrollRunPendingComplete,
             error: function (xhr) {
                 hideLoader();
+                $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
                 $('#btnResetPayrollRun').prop('disabled', false);
 
-                console.log(xhr.responseText);
 
                 showToast(
                     xhr.responseJSON?.message
-                    || 'Something went wrong while resetting the payroll run.',
+                    || 'The outcome could not be confirmed. Refresh and review this run before trying again.',
                     'error'
                 );
             }
@@ -730,9 +790,10 @@ function employeeFullName(array $employee): string
     }
 
     function deletePayrollRun() {
+        if (payrollRunOperationInFlight) return;
 
         if (!confirm(
-            'Delete this payroll run permanently? This cannot be undone.'
+            'Delete payroll run ' + document.getElementById('payrollRunHeading').textContent.trim() + ' permanently? This cannot be undone.'
         )) {
             return;
         }
@@ -746,6 +807,7 @@ function employeeFullName(array $employee): string
             },
 
             beforeSend: function () {
+                payrollRunPending('Deleting payroll run…');
                 showLoader('Deleting payroll run...');
                 $('#btnDeletePayrollRun').prop('disabled', true);
             },
@@ -754,13 +816,19 @@ function employeeFullName(array $employee): string
                 hideLoader();
                 $('#btnDeletePayrollRun').prop('disabled', false);
 
-                if (res.error || res.success === false) {
+                if (res?.error || res?.success === false) {
                     showToast(
                         res.error || res.message || 'Unable to delete payroll run.',
                         'error'
                     );
                     return;
                 }
+                if (res?.success !== true) {
+                    $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
+                    showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
+                    return;
+                }
+
 
                 showToast(
                     res.message || 'Payroll run deleted successfully.',
@@ -770,15 +838,16 @@ function employeeFullName(array $employee): string
                 window.location.href = '/payroll/runs';
             },
 
+            complete: payrollRunPendingComplete,
             error: function (xhr) {
                 hideLoader();
+                $('#payrollRunOperationFeedback').removeClass('d-none').data('pending', false).text('The outcome could not be confirmed. Refresh and review this run before trying again.');
                 $('#btnDeletePayrollRun').prop('disabled', false);
 
-                console.log(xhr.responseText);
 
                 showToast(
                     xhr.responseJSON?.message
-                    || 'Something went wrong while deleting the payroll run.',
+                    || 'The outcome could not be confirmed. Refresh and review this run before trying again.',
                     'error'
                 );
             }
