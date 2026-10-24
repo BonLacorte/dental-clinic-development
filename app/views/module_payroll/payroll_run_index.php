@@ -3,19 +3,23 @@
 ?>
 
 
-<div class="py-4 management-page payroll-runs-page">
-    <div class="card shadow-sm management-card">
-        <div class="card-header bg-white py-3">
-            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 payroll-runs-toolbar">
-                <div class="payroll-runs-title">
-                    <h5 class="mb-1">Payroll Runs</h5>
-                    <small class="text-muted">
-                        Create and manage semi-monthly payroll processing runs.
-                    </small>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 payroll-runs-filters">
-                    <select class="form-select form-select-sm" id="payrollRunStatusFilter" style="min-width: 160px;">
+<div class="py-4 management-page payroll-runs-page payruns-ui">
+    <header class="payruns-header">
+        <div>
+            <p class="payruns-eyebrow">Payroll management</p>
+            <h1 id="payrollRunsHeading">Payroll Runs</h1>
+            <p class="text-muted mb-0">Create, review and manage payroll processing runs.</p>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPayrollRunModal">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> New Payroll Run
+        </button>
+    </header>
+    <div class="card management-card">
+        <div class="card-header bg-white">
+            <div class="payruns-filters">
+                <div>
+                    <label class="form-label" for="payrollRunStatusFilter">Status</label>
+                    <select class="form-select" id="payrollRunStatusFilter">
                         <option value="">All Statuses</option>
                         <option value="DRAFT">Draft</option>
                         <option value="PROCESSING">Processing</option>
@@ -23,71 +27,47 @@
                         <option value="FINALIZED">Finalized</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
-
-                    <input type="month" class="form-control form-control-sm" id="payrollRunMonthFilter"
-                        style="min-width: 155px;">
-
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRefreshPayrollRuns">
-                        <i class="bi bi-arrow-clockwise"></i>
-                        Refresh
-                    </button>
-
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#createPayrollRunModal">
-                        <i class="bi bi-plus-lg"></i>
-                        New Payroll Run
-                    </button>
                 </div>
+                <div>
+                    <label class="form-label" for="payrollRunMonthFilter">Pay Month</label>
+                    <input type="month" class="form-control" id="payrollRunMonthFilter" aria-describedby="payMonthHelp">
+                </div>
+                <button type="button" class="btn btn-outline-secondary" id="btnRefreshPayrollRuns">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
+                </button>
             </div>
+            <p class="small text-muted mt-2 mb-0" id="payMonthHelp">Pay Month filters by the run’s pay date.</p>
         </div>
-
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="payrollRunsTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Run Code</th>
-                            <th>Payroll Period</th>
-                            <th>Cutoff</th>
-                            <th>Pay Date</th>
-                            <th class="text-center">Employees</th>
-                            <th class="text-end">Gross Pay</th>
-                            <th class="text-end">Deductions</th>
-                            <th class="text-end">Net Pay</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="10" class="text-center py-5 text-muted">
-                                Loading payroll runs...
-                            </td>
-                        </tr>
-                    </tbody>
+            <p class="payruns-scroll-help" id="payrollRunsScrollHelp">Scroll horizontally to compare all payroll details and actions.</p>
+            <div id="payrollRunsFeedback" class="payruns-feedback" role="status" aria-live="polite" aria-atomic="true">Loading payroll runs…</div>
+            <div class="table-responsive payruns-table-region" tabindex="0" role="region" aria-labelledby="payrollRunsHeading" aria-describedby="payrollRunsScrollHelp">
+                <table class="table table-hover align-middle mb-0" id="payrollRunsTable" aria-busy="true">
+                    <caption class="visually-hidden">Payroll runs with stored financial summaries in Philippine pesos.</caption>
+                    <thead><tr>
+                        <th scope="col">Payroll Run</th>
+                        <th scope="col">Schedule</th>
+                        <th scope="col" class="text-center">Employees</th>
+                        <th scope="col" class="text-end">Financial Summary (PHP)</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr></thead>
+                    <tbody><tr><td colspan="6" class="text-center py-5 text-muted">Loading payroll runs…</td></tr></tbody>
                 </table>
             </div>
         </div>
-
-        <div class="card-footer bg-white py-3">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                <small class="text-muted" id="payrollRunResultInfo">
-                    Showing 0 payroll runs
-                </small>
-
-                <nav aria-label="Payroll run page navigation">
-                    <ul class="pagination justify-content-end mb-0" id="payrollRunsPagination">
-                    </ul>
-                </nav>
-            </div>
+        <div class="card-footer bg-white payruns-results-footer">
+            <small class="text-muted" id="payrollRunResultInfo">Loading results…</small>
+            <nav aria-label="Payroll run page navigation">
+                <ul class="pagination flex-wrap mb-0" id="payrollRunsPagination"></ul>
+            </nav>
         </div>
     </div>
 </div>
 
-
 <!-- Create Payroll Run Modal -->
-<div class="modal fade" id="createPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-hidden="true">
+<div class="modal fade payruns-ui payruns-dialog" id="createPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true" aria-labelledby="createPayrollRunTitle" aria-describedby="createPayrollRunHelp">
 
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -95,19 +75,15 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token ?? ''); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Create Payroll Run</h5>
+                    <h2 class="modal-title h5" id="createPayrollRunTitle">Create Payroll Run</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="alert alert-light border">
-                        <div class="fw-semibold mb-1">
-                            Semi-Monthly Payroll
-                        </div>
-
-                    </div>
-
+                    <p class="text-muted" id="createPayrollRunHelp">Choose a payroll month and semi-monthly period. Review the cutoff and pay date before creating the run.</p>
+                    <div id="createPayrollRunFeedback" class="alert d-none" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></div>
+                    <h3 class="payruns-section-title">Payroll Period</h3>
                     <div class="mb-3">
                         <label class="form-label" for="payrollRunMonth">
                             Payroll Month
@@ -128,7 +104,8 @@
                         </select>
                     </div>
 
-                    <div class="border rounded p-3 bg-light d-none" id="payrollPeriodPreview">
+                    <div class="payruns-preview border rounded p-3 d-none" id="payrollPeriodPreview" role="status" aria-live="polite" aria-atomic="true">
+                        <h3 class="payruns-section-title">Period Preview</h3>
                         <div class="row g-3">
                             <div class="col-12">
                                 <small class="text-muted d-block">
@@ -163,7 +140,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Close
+                        Cancel
                     </button>
 
                     <button type="submit" class="btn btn-primary" id="btnCreatePayrollRun">
@@ -176,8 +153,8 @@
 </div>
 
 <!-- Cancel Payroll Run Modal -->
-<div class="modal fade" id="cancelPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-hidden="true">
+<div class="modal fade payruns-ui payruns-dialog" id="cancelPayrollRunModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true" aria-labelledby="cancelPayrollRunTitle">
 
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -186,8 +163,8 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token ?? ''); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Cancel Payroll Run</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                    <h2 class="modal-title h5" id="cancelPayrollRunTitle">Cancel Payroll Run</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
 
@@ -225,6 +202,10 @@
 
 <script>
     let currentPayrollRunPage = 1;
+    let payrollRunsReadSequence = 0;
+    let payrollRunCreating = false;
+    let payrollRunCreateUncertain = false;
+    const payrollRunManagementPending = new Set();
 
     $(document).ready(function () {
         setDefaultPayrollMonth();
@@ -241,6 +222,14 @@
         );
 
         $('#payrollRunMonth, #payrollRunPeriodNo').on('change', renderPayrollPeriodPreview);
+
+        $('#createPayrollRunModal').on('shown.bs.modal', function () {
+            renderPayrollPeriodPreview();
+            document.getElementById('payrollRunMonth').focus();
+        }).on('hide.bs.modal', function (event) {
+            if (payrollRunCreating) event.preventDefault();
+        });
+
 
         $('#createPayrollRunForm').on('submit', function (event) {
             event.preventDefault();
@@ -361,154 +350,110 @@
         };
     }
 
+    function payrollRunsReadFailure(message) {
+        $('#payrollRunsTable').attr('aria-busy', 'false');
+        $('#payrollRunsTable tbody').html('<tr><td colspan="6" class="text-center py-5">Unable to load payroll runs. Use Refresh to retry.</td></tr>');
+        $('#payrollRunsFeedback').text(message).addClass('text-danger');
+        $('#payrollRunResultInfo').text('Results unavailable');
+        $('#payrollRunsPagination').empty();
+    }
+
     function getAllPayrollRuns(page) {
+        const sequence = ++payrollRunsReadSequence;
+        const reviewingUncertainCreate = payrollRunCreateUncertain;
+        const filters = {
+            page: page,
+            status: $('#payrollRunStatusFilter').val(),
+            payroll_month: $('#payrollRunMonthFilter').val()
+        };
         $.ajax({
             url: '/payroll/runs/getallruns',
             type: 'GET',
             dataType: 'json',
-            data: {
-                page: page,
-                status: $('#payrollRunStatusFilter').val(),
-                payroll_month: $('#payrollRunMonthFilter').val()
-            },
-
+            data: filters,
             beforeSend: function () {
-                showLoader('Loading payroll runs...');
+                $('#payrollRunsTable').attr('aria-busy', 'true');
+                $('#payrollRunsFeedback').text('Loading payroll runs…').removeClass('text-danger');
+                $('#payrollRunsTable tbody').html('<tr><td colspan="6" class="text-center py-5 text-muted">Loading payroll runs…</td></tr>');
+                $('#payrollRunResultInfo').text('Loading results…');
+                $('#payrollRunsPagination').empty();
             },
-
             success: function (res) {
-                hideLoader();
-
-                if (res.error || res.success === false) {
-                    showToast(
-                        res.error || res.message || 'Unable to load payroll runs.',
-                        'error'
-                    );
+                if (sequence !== payrollRunsReadSequence) return;
+                if (!res || res.success !== true || !Array.isArray(res.data)) {
+                    payrollRunsReadFailure(res?.error || res?.message || 'Unable to load payroll runs. Use Refresh to retry.');
                     return;
                 }
-
                 currentPayrollRunPage = Number(res.currentPage || page);
-
                 const totalPages = Number(res.totalPages || 1);
-                const totalRecords = Number(
-                    res.totalRecords ??
-                    res.total ??
-                    0
-                );
-
-                renderPayrollRunRows(res.data || []);
-                renderPayrollRunPagination(
-                    currentPayrollRunPage,
-                    totalPages
-                );
-
+                const totalRecords = Number(res.totalRecords ?? res.total ?? 0);
+                renderPayrollRunRows(res.data, Boolean(filters.status || filters.payroll_month));
+                renderPayrollRunPagination(currentPayrollRunPage, totalPages);
                 $('#payrollRunResultInfo').text(
-                    'Showing ' +
-                    totalRecords.toLocaleString() +
-                    ' payroll run' +
-                    (totalRecords === 1 ? '' : 's')
+                    res.data.length.toLocaleString() + ' on this page · ' +
+                    totalRecords.toLocaleString() + ' payroll run' + (totalRecords === 1 ? '' : 's') +
+                    ' total · Page ' + currentPayrollRunPage + ' of ' + totalPages
                 );
+                $('#payrollRunsTable').attr('aria-busy', 'false');
+                $('#payrollRunsFeedback').text(res.data.length ? 'Payroll runs loaded.' :
+                    (filters.status || filters.payroll_month ? 'No matching payroll runs. Change the filters to try again.' : 'No payroll runs yet.'));
+                // A completed list read lets the administrator inspect an uncertain create outcome.
+                if (payrollRunCreateUncertain && reviewingUncertainCreate) {
+                    payrollRunCreateUncertain = false;
+                    $('#btnCreatePayrollRun').prop('disabled', false);
+                    setPayrollRunCreateFeedback('Review the refreshed list for your run before attempting creation again.', 'warning');
+                }
             },
-
-            error: function (xhr) {
-                hideLoader();
-                console.log(xhr.responseText);
-
-                $('#payrollRunsTable tbody').html(`
-                    <tr>
-                        <td colspan="10" class="text-center py-5 text-danger">
-                            Unable to load payroll runs.
-                        </td>
-                    </tr>
-                `);
-
-                showToast('Unable to load payroll runs.', 'error');
+            error: function () {
+                if (sequence !== payrollRunsReadSequence) return;
+                payrollRunsReadFailure('Unable to load payroll runs. Use Refresh to retry.');
             }
         });
     }
 
-    function renderPayrollRunRows(runs) {
+    function renderPayrollRunRows(runs, filtered = false) {
         let rows = '';
-
         if (runs.length === 0) {
-            rows = `
-                <tr>
-                    <td colspan="10" class="text-center py-5 text-muted">
-                        <i class="bi bi-calendar2-x fs-3 d-block mb-2"></i>
-                        No payroll runs found.
-                    </td>
-                </tr>
-            `;
+            rows = `<tr><td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-calendar2-x fs-3 d-block mb-2" aria-hidden="true"></i>
+                ${filtered ? 'No payroll runs match these filters.' : 'No payroll runs yet. Create a new payroll run to get started.'}
+            </td></tr>`;
         } else {
             runs.forEach(function (run) {
                 const runId = Number(run.id);
-                const employeeCount = Number(
-                    run.employee_count ??
-                    run.total_employees ??
-                    0
-                );
-
-                rows += `
-                    <tr>
-                        <td class="ps-4">
-                            <a
-                                href="/payroll/runs/view/${runId}"
-                                class="fw-semibold text-decoration-none">
-                                ${esc(run.run_code)}
-                            </a>
-                            <div class="small text-muted">
-                                ${esc(run.payroll_name || '')}
-                            </div>
-                        </td>
-
-                        <td>
-                            ${renderPeriodLabel(run.period_no)}
-                        </td>
-
-                        <td>
-                            <div>
-                                ${esc(formatDateValue(run.cutoff_date_from))}
-                            </div>
-                            <small class="text-muted">
-                                to ${esc(formatDateValue(run.cutoff_date_to))}
-                            </small>
-                        </td>
-
-                        <td>
-                            ${esc(formatDateValue(run.pay_date))}
-                        </td>
-
-                        <td class="text-center">
-                            <span class="badge rounded-pill text-bg-light border">
-                                ${employeeCount.toLocaleString()}
-                            </span>
-                        </td>
-
-                        <td class="text-end">
-                            ${formatMoney(run.total_gross_pay ?? run.gross_pay)}
-                        </td>
-
-                        <td class="text-end">
-                            ${formatMoney(run.total_deductions)}
-                        </td>
-
-                        <td class="text-end fw-semibold">
-                            ${formatMoney(run.total_net_pay ?? run.net_pay)}
-                        </td>
-
-                        <td class="text-center">
-                            ${renderPayrollRunStatus(run.status)}
-                        </td>
-
-                        <td class="text-end pe-4">
-                            ${renderPayrollRunActions(run)}
-                        </td>
-                    </tr>
-                `;
+                const employeeCount = Number(run.employee_count ?? run.total_employees ?? 0);
+                rows += `<tr>
+                    <td class="payruns-identity">
+                        <a href="/payroll/runs/view/${runId}" class="fw-semibold">${esc(run.run_code)}</a>
+                        <div class="small text-muted">${esc(run.payroll_name || '')}</div>
+                        <div class="small mt-2">${renderPeriodLabel(run.period_no)}</div>
+                    </td>
+                    <td>
+                        <dl class="payruns-schedule mb-0">
+                            <div><dt>Cutoff From</dt><dd>${esc(formatDateValue(run.cutoff_date_from))}</dd></div>
+                            <div><dt>Cutoff To</dt><dd>${esc(formatDateValue(run.cutoff_date_to))}</dd></div>
+                            <div class="payruns-pay-date"><dt>Pay Date</dt><dd>${esc(formatDateValue(run.pay_date))}</dd></div>
+                        </dl>
+                    </td>
+                    <td class="text-center payruns-number">${employeeCount.toLocaleString()}</td>
+                    <td class="text-end">
+                        <dl class="payruns-money mb-0">
+                            <div><dt>Gross Pay</dt><dd>${displayPayrollRunMoney(run.total_gross_pay ?? run.gross_pay)}</dd></div>
+                            <div><dt>Total Deductions</dt><dd>${displayPayrollRunMoney(run.total_deductions)}</dd></div>
+                            <div class="payruns-net"><dt>Net Pay</dt><dd>${displayPayrollRunMoney(run.total_net_pay ?? run.net_pay)}</dd></div>
+                        </dl>
+                    </td>
+                    <td>${renderPayrollRunStatus(run.status)}</td>
+                    <td><div class="payruns-row-actions">${renderPayrollRunActions(run)}</div></td>
+                </tr>`;
             });
         }
-
         $('#payrollRunsTable tbody').html(rows);
+    }
+
+    function displayPayrollRunMoney(value) {
+        if (value === null || value === undefined || value === '') return '<span class="text-muted">Not available</span>';
+        return '₱' + esc(formatMoney(value));
     }
 
     function renderPayrollRunActions(run) {
@@ -518,9 +463,9 @@
         let actions = `
             <a
                 href="/payroll/runs/view/${runId}"
-                class="btn btn-link btn-sm text-secondary"
-                title="View payroll run">
-                <i class="bi bi-eye"></i>
+                class="btn btn-outline-primary btn-sm"
+                aria-label="View run ${esc(run.run_code)}" title="View payroll run">
+                <i class="bi bi-eye" aria-hidden="true"></i> View Run
             </a>
         `;
 
@@ -529,8 +474,8 @@
                 <a
                     href="/payroll/runs/edit/${runId}"
                     class="btn btn-link btn-sm text-primary"
-                    title="Edit payroll run">
-                    <i class="bi bi-pencil"></i>
+                    aria-label="Edit payroll run ${esc(run.run_code)}" title="Edit payroll run">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
                 </a>
 
 
@@ -543,8 +488,8 @@
                 class="btn btn-link btn-sm text-danger deletePayrollRunBtn"
                 data-id="${runId}"
                 data-code="${esc(run.run_code)}"
-                title="Delete payroll run">
-                <i class="bi bi-trash"></i>
+                aria-label="Delete payroll run ${esc(run.run_code)}" title="Delete payroll run">
+                <i class="bi bi-trash" aria-hidden="true"></i>
             </button>
         `;
 
@@ -554,8 +499,8 @@
                     class="btn btn-link btn-sm text-danger cancelPayrollRunBtn"
                     data-id="${runId}"
                     data-code="${esc(run.run_code)}"
-                    title="Cancel payroll run">
-                    <i class="bi bi-x-circle"></i>
+                    aria-label="Cancel payroll run ${esc(run.run_code)}" title="Cancel payroll run">
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
                 </button>
         `
 
@@ -567,8 +512,8 @@
                     href="/payroll/runs/print/${runId}"
                     target="_blank"
                     class="btn btn-link btn-sm text-dark"
-                    title="Print payroll register">
-                    <i class="bi bi-printer"></i>
+                    aria-label="Print payroll register ${esc(run.run_code)}" title="Print payroll register">
+                    <i class="bi bi-printer" aria-hidden="true"></i>
                 </a>
             `;
         }
@@ -577,7 +522,8 @@
     }
 
     function renderPayrollRunStatus(status) {
-        const normalized = String(status || 'DRAFT').toUpperCase();
+        const original = String(status ?? '');
+        const normalized = original.toUpperCase();
 
         const badges = {
             DRAFT: 'text-bg-secondary',
@@ -588,86 +534,90 @@
         };
 
         return `
-            <span class="badge ${badges[normalized] || 'text-bg-secondary'}">
-                ${esc(toTitleCase(normalized))}
+            <span class="badge payruns-status ${badges[normalized] || 'text-bg-secondary'}">
+                ${esc(badges[normalized] ? toTitleCase(normalized) : (original || 'Unknown'))}
             </span>
         `;
     }
 
     function renderPeriodLabel(periodNo) {
-        return Number(periodNo) === 1
-            ? `
-                <span class="fw-semibold">First Payroll</span>
-                <div class="small text-muted">Pay on the 15th</div>
-            `
-            : `
-                <span class="fw-semibold">Second Payroll</span>
-                <div class="small text-muted">Pay on the 30th</div>
-            `;
+        if (Number(periodNo) === 1) return 'First Payroll';
+        if (Number(periodNo) === 2) return 'Second Payroll';
+        return 'Period ' + esc(periodNo ?? 'not available');
+    }
+
+    function setPayrollRunCreateFeedback(message, tone) {
+        $('#createPayrollRunFeedback').removeClass('d-none alert-danger alert-warning alert-info')
+            .addClass('alert-' + tone).text(message);
     }
 
     function createPayrollRun(form) {
         const $form = $(form);
-
+        if (payrollRunCreating || payrollRunCreateUncertain || !form.reportValidity()) return;
+        payrollRunCreating = true;
         $.ajax({
             url: '/payroll/runs/create',
             type: 'POST',
             dataType: 'json',
-
             data: {
                 payroll_month: $form.find('[name="payroll_month"]').val(),
                 period_no: $form.find('[name="period_no"]').val(),
                 csrf_token: $form.find('[name="csrf_token"]').val()
             },
-
             beforeSend: function () {
-                $('#btnCreatePayrollRun').prop('disabled', true);
-                showLoader('Creating payroll run...');
+                $('#btnCreatePayrollRun').prop('disabled', true).text('Creating…');
+                $form.attr('aria-busy', 'true');
+                $form.find('[data-bs-dismiss], #payrollRunMonth, #payrollRunPeriodNo').prop('disabled', true);
+                setPayrollRunCreateFeedback('Creating payroll run. Please wait…', 'info');
             },
-
             success: function (res) {
-                hideLoader();
-                $('#btnCreatePayrollRun').prop('disabled', false);
-
-                if (res.error || res.success === false) {
-                    showToast(
-                        res.error || res.message || 'Unable to create payroll run.',
-                        'error'
-                    );
+                if (res?.error || res?.success === false) {
+                    setPayrollRunCreateFeedback(res.error || res.message || 'Unable to create payroll run.', 'danger');
+                    document.getElementById('createPayrollRunFeedback').focus();
                     return;
                 }
-
-                showToast(
-                    res.message || 'Payroll run created successfully.',
-                    'success'
-                );
-
-                bootstrap.Modal.getInstance(
-                    document.getElementById('createPayrollRunModal')
-                ).hide();
-
+                if (res?.success !== true) {
+                    uncertainPayrollRunCreate();
+                    return;
+                }
+                showToast(res.message || 'Payroll run created successfully.', 'success');
+                payrollRunCreating = false;
+                $('#createPayrollRunFeedback').addClass('d-none');
+                bootstrap.Modal.getInstance(document.getElementById('createPayrollRunModal')).hide();
                 const runId = Number(res.id ?? res.run_id ?? 0);
-
                 if (runId > 0) {
                     window.location.href = '/payroll/runs/view/' + runId;
                     return;
                 }
-
                 getAllPayrollRuns(1);
             },
-
             error: function (xhr) {
-                hideLoader();
-                $('#btnCreatePayrollRun').prop('disabled', false);
-                console.log(xhr.responseText);
-                showToast('Something went wrong while creating the payroll run.', 'error');
+                if (xhr.responseJSON?.success === false) {
+                    setPayrollRunCreateFeedback(xhr.responseJSON.error || xhr.responseJSON.message || 'Unable to create payroll run.', 'danger');
+                    document.getElementById('createPayrollRunFeedback').focus();
+                } else {
+                    uncertainPayrollRunCreate();
+                }
+            },
+            complete: function () {
+                payrollRunCreating = false;
+                $form.attr('aria-busy', 'false');
+                $form.find('[data-bs-dismiss], #payrollRunMonth, #payrollRunPeriodNo').prop('disabled', false);
+                $('#btnCreatePayrollRun').prop('disabled', payrollRunCreateUncertain).text('Create Payroll Run');
             }
         });
+    }
+
+    function uncertainPayrollRunCreate() {
+        payrollRunCreateUncertain = true;
+        setPayrollRunCreateFeedback('Creation could not be confirmed. Close this dialog and Refresh the payroll runs list. Check for your run before trying again.', 'warning');
+        document.getElementById('createPayrollRunFeedback').focus();
     }
 
     function cancelPayrollRun(form) {
         const $form = $(form);
         const runId = Number($form.find('[name="run_id"]').val());
+        if (payrollRunManagementPending.has(runId)) return;
 
         $.ajax({
             url: '/payroll/runs/cancel/' + runId,
@@ -680,19 +630,26 @@
             },
 
             beforeSend: function () {
+                payrollRunManagementPending.add(runId);
+                $('#payrollRunsTable button[data-id="' + runId + '"]').prop('disabled', true);
                 showLoader('Cancelling payroll run...');
             },
 
             success: function (res) {
                 hideLoader();
 
-                if (res.error || res.success === false) {
+                if (res?.error || res?.success === false) {
                     showToast(
                         res.error || res.message || 'Unable to cancel payroll run.',
                         'error'
                     );
                     return;
                 }
+                if (res?.success !== true) {
+                    showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
+                    return;
+                }
+
 
                 bootstrap.Modal.getInstance(
                     document.getElementById('cancelPayrollRunModal')
@@ -706,10 +663,13 @@
                 getAllPayrollRuns(currentPayrollRunPage);
             },
 
+            complete: function () {
+                payrollRunManagementPending.delete(runId);
+                $('#payrollRunsTable button[data-id="' + runId + '"]').prop('disabled', false);
+            },
             error: function (xhr) {
                 hideLoader();
-                console.log(xhr.responseText);
-                showToast('Something went wrong while cancelling the payroll run.', 'error');
+                showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
             }
         });
     }
@@ -721,6 +681,7 @@
 
         let html = '';
 
+        if (page === 1) html += '<li class="page-item disabled"><span class="page-link">Previous</span></li>';
         if (page > 1) {
             html += paginationItem(page - 1, '&laquo; Prev');
         }
@@ -742,6 +703,8 @@
                 <li class="page-item ${pageNumber === page ? 'active' : ''}">
                     <a
                         href="#"
+                        ${pageNumber === page ? 'aria-current="page"' : ''}
+                        aria-label="Page ${pageNumber}"
                         class="page-link payroll-run-page-btn"
                         data-page="${pageNumber}">
                         ${pageNumber}
@@ -766,6 +729,7 @@
             html += paginationItem(page + 1, 'Next &raquo;');
         }
 
+        if (page === totalPages) html += '<li class="page-item disabled"><span class="page-link">Next</span></li>';
         $('#payrollRunsPagination').html(html);
     }
 
@@ -787,7 +751,7 @@
 
         return amount.toLocaleString('en-PH', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 20
         });
     }
 
@@ -840,6 +804,7 @@
     }
 
     function deletePayrollRun(runId) {
+        if (payrollRunManagementPending.has(runId)) return;
 
         $.ajax({
             url: '/payroll/runs/delete/' + runId,
@@ -851,13 +816,15 @@
             },
 
             beforeSend: function () {
+                payrollRunManagementPending.add(runId);
+                $('#payrollRunsTable button[data-id="' + runId + '"]').prop('disabled', true);
                 showLoader('Deleting payroll run...');
             },
 
             success: function (res) {
                 hideLoader();
 
-                if (res.error || res.success === false) {
+                if (res?.error || res?.success === false) {
                     showToast(
                         res.error ||
                         res.message ||
@@ -866,6 +833,11 @@
                     );
                     return;
                 }
+                if (res?.success !== true) {
+                    showToast('The outcome could not be confirmed. Refresh and review this run before trying again.', 'error');
+                    return;
+                }
+
 
                 showToast(
                     res.message || 'Payroll run deleted successfully.',
@@ -875,14 +847,17 @@
                 getAllPayrollRuns(currentPayrollRunPage);
             },
 
+            complete: function () {
+                payrollRunManagementPending.delete(runId);
+                $('#payrollRunsTable button[data-id="' + runId + '"]').prop('disabled', false);
+            },
             error: function (xhr) {
                 hideLoader();
 
-                console.log(xhr.responseText);
 
                 showToast(
                     xhr.responseJSON?.message ||
-                    'Something went wrong while deleting the payroll run.',
+                    'The outcome could not be confirmed. Refresh and review this run before trying again.',
                     'error'
                 );
             }
