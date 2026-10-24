@@ -2022,3 +2022,265 @@
     display: none;
   }
 }
+
+/* HRIS Home: presentation only; keep shared screens and print independent. */
+@media screen {
+  .hris-home-page {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+    padding-block: 1.5rem;
+    color: var(--montero-text);
+    overflow-wrap: anywhere;
+  }
+
+  .hris-home-page h1 {
+    margin: 0 0 .5rem;
+    font-size: 1.5rem;
+    line-height: 1.3;
+    letter-spacing: -.025em;
+  }
+
+  .hris-home-page h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+
+  .hris-home-page h3 {
+    margin: 0 0 .25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .hris-home-page p {
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .hris-home-page .hris-home-header > p:last-child,
+  .hris-home-page .hris-home-muted,
+  .hris-home-page .hris-home-shortcut p,
+  .hris-home-page .hris-home-follow-up p,
+  .hris-home-page .hris-home-guidance p {
+    color: var(--montero-muted);
+  }
+
+  .hris-home-page .hris-home-eyebrow {
+    margin-bottom: .5rem;
+    color: var(--montero-primary);
+    font-size: .875rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .hris-home-page .hris-home-panel {
+    min-width: 0;
+    padding: 1.5rem;
+    background: var(--montero-surface);
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-card-radius);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .hris-home-page .hris-home-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    margin-bottom: .5rem;
+  }
+
+  .hris-home-page .hris-home-availability {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .5rem;
+    padding: .25rem .75rem;
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-control-radius);
+    color: var(--montero-muted);
+    background: var(--montero-canvas);
+    font-size: .875rem;
+  }
+
+  .hris-home-page .hris-home-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.25rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid var(--montero-divider);
+    list-style: none;
+  }
+
+  .hris-home-page .hris-home-summary li {
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+    font-size: .875rem;
+    font-weight: 600;
+  }
+
+  .hris-home-page .hris-home-summary .bi {
+    flex: 0 0 auto;
+    color: var(--montero-primary);
+    font-size: 1.125rem;
+  }
+
+  .hris-home-page .hris-home-follow-up {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .hris-home-page .hris-home-icon {
+    display: inline-flex;
+    flex: 0 0 2.75rem;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--montero-control-radius);
+    color: var(--montero-primary);
+    background: var(--montero-primary-tint);
+    font-size: 1.25rem;
+  }
+
+  .hris-home-page .hris-home-follow-up-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  .hris-home-page .hris-home-review-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .hris-home-page .hris-home-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .hris-home-page .hris-home-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-card-radius);
+    color: var(--montero-text);
+    background: var(--montero-surface);
+    text-decoration: none;
+    box-shadow: var(--montero-shadow);
+  }
+
+  .hris-home-page .hris-home-shortcut > div {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .hris-home-page .hris-home-shortcut p {
+    font-size: .875rem;
+  }
+
+  .hris-home-page .hris-home-arrow {
+    flex: 0 0 auto;
+    color: var(--montero-primary);
+  }
+
+  .hris-home-page .hris-home-shortcut:hover,
+  .hris-home-page .hris-home-shortcut:focus-visible {
+    border-color: var(--montero-primary);
+    background: var(--montero-primary-tint);
+  }
+
+  .hris-home-page .hris-home-shortcut:hover h3,
+  .hris-home-page .hris-home-shortcut:focus-visible h3 {
+    color: var(--montero-primary-hover);
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .hris-home-page a:focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--montero-surface);
+  }
+
+  .hris-home-page .hris-home-guidance {
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+    padding-inline: .25rem;
+  }
+
+  .hris-home-page .hris-home-guidance > .bi {
+    color: var(--montero-primary);
+  }
+
+  .hris-home-page .hris-home-guidance h2 {
+    margin-bottom: .25rem;
+    font-size: 1rem;
+  }
+
+  .hris-home-page .hris-home-guidance p {
+    font-size: .875rem;
+  }
+
+  @media (max-width: 1199.98px) {
+    .hris-home-page .hris-home-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .hris-home-page .hris-home-shortcuts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .hris-home-page .hris-home-panel,
+    .hris-home-page .hris-home-shortcut {
+      padding: 1rem;
+    }
+
+    .hris-home-page .hris-home-summary {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hris-home-page .hris-home-shortcut {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: .75rem;
+    }
+
+    .hris-home-page .hris-home-shortcut > div {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .hris-home-page .hris-home-arrow {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .hris-home-page .hris-home-review-link {
+      width: 100%;
+    }
+  }
+}
