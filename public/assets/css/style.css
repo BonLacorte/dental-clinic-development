@@ -2264,7 +2264,19 @@
     }
 
     .hris-home-page .hris-home-shortcut {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: .75rem;
+    }
+
+    .hris-home-page .hris-home-shortcut > div {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .hris-home-page .hris-home-arrow {
+      grid-column: 2;
+      grid-row: 1;
     }
 
     .hris-home-page .hris-home-review-link {

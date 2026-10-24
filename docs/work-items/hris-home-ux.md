@@ -11,7 +11,7 @@
 - Feature branch: `codex/md-hris-home-ux-001-build`.
 - Cloud checkout: `/workspace/dental-clinic-development`.
 - Application commit: `2ee91ca631bc2f9f38e3c44edc7c485972357cc0`.
-- The subsequent documentation commit contains this handoff. Use `git rev-parse HEAD` and the draft PR for its final SHA and publication state; the final task response records the verified local/remote HEAD.
+- Initial handoff commit: `1f9f8f7`. The final `fix(hris): improve mobile shortcut text reflow` commit adds the mobile correction and refreshes this handoff. The final task response and draft PR record its exact SHA and verified local/remote HEAD.
 - No local WSL worktree was created. All nine listed `~/projects/monterodental*` locations were absent in this cloud environment. Existing Git worktree inspection showed only this checkout; the requested branch was absent locally and remotely.
 - Publication authority, branch creation, staging, commits, push and one **draft** PR are explicit in the user's approved brief. Merge, deployment, production access and business mutations remain outside scope.
 
@@ -48,7 +48,7 @@ The frontend design Skill and its milestone/verification references were applied
 | File | Purpose and changes |
 | --- | --- |
 | `app/views/module_hris/hris_index.php` | Replace static placeholder with the five sections above. Preserve existing header, HRIS navigation and footer includes and shell closing markup. Only executable additions are presentation `if` blocks using existing flags. No models, queries, counts, data preparation, forms, API requests or JavaScript. Remove empty script element. |
-| `public/assets/css/style.css` | Append 250 lines: **35 CSS rule groups**, all rooted at `.hris-home-page`, exclusively within screen media, including three responsive media queries. Reuse checked-in Pearl & Teal properties, spacing, system fonts, radii and shadow. Baseline stylesheet is a byte-identical prefix. No shared/global selector, print declaration, animation or dependency. |
+| `public/assets/css/style.css` | Append 262 lines: **37 CSS rule groups**, all rooted at `.hris-home-page`, exclusively within screen media, including three responsive media queries. Reuse checked-in Pearl & Teal properties, spacing, system fonts, radii and shadow. Baseline stylesheet is a byte-identical prefix. No shared/global selector, print declaration, animation or dependency. |
 | `docs/work-items/hris-home-ux.md` | This task-specific implementation, verification, senior review and production-transfer handoff. |
 
 Existing flags are defined by the unchanged `app/views/partials/admin-header.php` and used by unchanged HRIS navigation:
@@ -83,7 +83,7 @@ Evidence is outside Git at `/workspace/hris-home-evidence`. It is cloud-local ve
 | Offline existing image: `docker run --rm --network none --read-only --entrypoint php montero-dental-dev-app:latest -r 'echo PHP_VERSION, " ", PHP_INT_SIZE * 8, "-bit\n";'` | PASS | PHP **8.3.35, 64-bit**; no image build, dependency install or network. Docker invocations select the managed local socket and clear inherited endpoint/TLS selectors. |
 | Read-only repository mount plus `php -l /app/app/views/module_hris/hris_index.php` in that image | PASS | “No syntax errors detected”. No application bootstrap. |
 | `php /evidence/render.php CASE` in that image, for 11 scenarios; baseline Home and Payroll Home renders | PASS — source fixtures | **13 native PHP renders** with strict PHP warning-to-exception handling. Full/Home-only/Employee-only/module-only/no-module/no-tenant/inactive-tenant/anonymous/Super Admin/null-permission/long-hostile-name contexts. These establish rendering only; impossible route contexts are defensive template tests. |
-| `node /workspace/hris-home-evidence/browser.cjs` | PASS — SIMULATED | **146 assertions**, Chromium **154.0.8037.57**; details below and `browser-results.json`. |
+| `node /workspace/hris-home-evidence/browser.cjs` | PASS — SIMULATED | **147 assertions**, Chromium **154.0.8037.57**; details below and `browser-results.json`. |
 | Full implementation diff; inline Python allowlist/executable-region/destination audit; `git diff --check`; staged diff review and `git diff --cached --check` | PASS | Exact allowlist; protected files unchanged; baseline CSS prefix unchanged; executable additions restricted to the existing flags; exact four destinations; no Home script. Complete application diff reviewed before application commit. |
 | Authenticated PHP application and role/tenant/branch integration | BLOCKED | No approved configured running authenticated fictional application/database context was established. The existing Docker images were used only for offline syntax/rendering. No database was started or seeded to clear this gate. |
 | Live dashboard loading/error/empty/network states | NOT RUN | No integration exists; no request is made. Only the truthful unavailable state applies. |
@@ -96,11 +96,11 @@ Chromium fixture coverage:
 - Viewports: 1440×1000, 1200×1000, 1199×1000, 992×1000, 991×1000, 768×1024, 767×1024, 576×812, 575×812, 375×812, 375×667 and 320×812.
 - Root overflow within 1px and no overflow in new panels/cards; one page heading, four metric categories, correct Home current state and 44px link targets at every size.
 - All 11 session render scenarios: exact visible shortcut counts and Employees/Leave visibility; escaped hostile fictional account name.
-- 200% CSS text enlargement at 375px, then long summary and shortcut descriptions without clipping.
+- 200% CSS text enlargement at 375px, then long summary and shortcut descriptions without clipping. Mobile shortcuts put icons/arrows above full-width copy; an explicit measurement verifies more than 200px copy width in the enlarged 375px fixture. This final visual-review correction prevents cramped word wrapping.
 - Mobile sidebar open, Escape and focus return; keyboard Tab order through all five new links; 3px visible focus; Enter follows DTR into an intercepted destination. This checks navigation mechanics, not the destination controller.
 - Hover tint and underline, reduced-motion behavior, hidden decorative icons, unique IDs and resolved region label/description references.
 - Eight sampled normal-text contrast pairs pass 4.5:1, including a hovered shortcut. No full accessibility certification.
-- All 35 appended CSS rule groups parsed via CSSOM and checked for Home root + screen scope.
+- All 37 appended CSS rule groups parsed via CSSOM and checked for Home root + screen scope.
 - Before/after computed geometry and styles of the unchanged HRIS placeholder, Payroll Home and shared shell match when switching baseline versus appended CSS; adjacent print-media comparisons match.
 - No browser JavaScript errors, business requests or dashboard data requests. No real API executed.
 
@@ -112,7 +112,7 @@ Actual screenshots generated and visually reviewed at desktop/mobile:
 - `/workspace/hris-home-evidence/hris-home-320.png`
 - `/workspace/hris-home-evidence/hris-home-text-enlarged.png`
 
-Verification harness corrections: an initial Enter-navigation assertion needed to await navigation, and the CSS rule-count assertion was corrected to the measured 35 groups. Both were evidence-harness issues; the final 146-assertion run passed. No product defect was masked by these corrections. A proposed optional `tinycss2` check could not run because that tool was absent; native Chromium CSSOM supplied the scope/parse evidence instead.
+Verification harness corrections: an initial Enter-navigation assertion needed to await navigation, and the CSS rule-count assertion was corrected to the initially measured 35 groups (37 after the final mobile refinement). Both were evidence-harness issues; the final 147-assertion run passed. No product defect was masked by these corrections. A proposed optional `tinycss2` check could not run because that tool was absent; native Chromium CSSOM supplied the scope/parse evidence instead.
 
 ## Deferred findings — FINDINGS_FOR_SENIOR_REVIEW
 
@@ -136,7 +136,7 @@ Future aggregate approval must establish exact counts and active definition; per
 ## Git publication and parallel work
 
 - Application commit: `2ee91ca631bc2f9f38e3c44edc7c485972357cc0`.
-- Handoff is the following documentation commit on the same branch. Final local/remote SHA, clean status and draft PR URL are recorded in the final task response and PR metadata after publication.
+- Initial handoff commit: `1f9f8f7`; final mobile correction and refreshed evidence are in the subsequent `fix(hris): improve mobile shortcut text reflow` commit. Exact final local/remote SHA, clean status and draft PR URL are recorded in the final task response and PR metadata after publication.
 - Target is development `main`; retain **draft** status pending senior review and authenticated acceptance. No merge or deployment.
 - GitHub metadata and all changed-file lists for open frontend PRs **#13–#19** were inspected. Each overlaps `public/assets/css/style.css`; none changes `hris_index.php`. PR #13 also contains backend/route/export changes and is not an accepted dependency. PR #8 remains separate and untouched.
 - No draft implementation was merged, rebased, cherry-picked or imported. Resolve shared CSS append conflicts carefully when independently approved changes are combined; retain each narrow page root and existing shared design tokens.
