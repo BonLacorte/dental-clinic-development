@@ -9,7 +9,7 @@ $employeeActions = [
     'delete' => $navCanPermission('hris.employee.delete'),
 ];
 ?>
-<main class="employee-page container-fluid py-4 management-page hris-page hris-consistency-page" aria-labelledby="employeesHeading">
+<main class="employee-page container-fluid py-4 management-page hris-page hris-consistency-page employee-layout-restored" aria-labelledby="employeesHeading">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white employee-header">
             <div class="employee-heading">
@@ -43,23 +43,34 @@ $employeeActions = [
                 <button type="button" class="btn btn-outline-danger" id="retryEmployeeList">Retry employee list</button>
             </div>
         </div>
+        <form id="employeeMobileSortForm" class="employee-mobile-sort d-print-none" aria-label="Sort employees">
+            <div><label class="form-label" for="employeeMobileSortBy">Sort employees by</label><select class="form-select" id="employeeMobileSortBy"><option value="created_at">Date added (default)</option><option value="employee_no">Employee No</option><option value="name">Employee</option><option value="branch_name">Branch</option><option value="employment_type">Employment Type</option><option value="date_hired">Date Hired</option><option value="employment_status">Employment Status</option></select></div>
+            <div><label class="form-label" for="employeeMobileSortDir">Direction</label><select class="form-select" id="employeeMobileSortDir"><option value="ASC">Ascending</option><option value="DESC" selected>Descending</option></select></div>
+            <button type="submit" class="btn btn-outline-primary">Apply order</button>
+        </form>
         <div class="table-responsive employee-table-region" tabindex="0" role="region" aria-label="Employee records" aria-describedby="employeeScrollHelp" aria-busy="true">
             <table class="table table-hover align-middle mb-0 hris-data-table" id="employeesTable">
                 <caption class="visually-hidden">Employee records. Sort using the column buttons; Actions apply to the named employee.</caption>
                 <thead class="table-light"><tr>
-                    <?php foreach (['employee_no' => 'Employee No', 'name' => 'Name', 'branch_name' => 'Branch', 'date_hired' => 'Date Hired', 'employment_status' => 'Status'] as $key => $label): ?>
-                    <th scope="col"><button type="button" class="btn btn-link employee-sort" data-sort="<?= e($key) ?>" data-label="<?= e($label) ?>"><?= e($label) ?><span aria-hidden="true" class="employee-sort-mark"></span></button></th>
+                    <th scope="col" class="d-none d-print-table-cell">Employee No</th>
+                    <th scope="col"><button type="button" class="btn btn-link employee-sort" data-sort="name" data-label="Employee">Employee<span aria-hidden="true" class="employee-sort-mark"></span></button></th>
+                    <th scope="col" class="d-print-none">Position</th>
+                    <?php foreach (['branch_name' => 'Branch', 'employment_type' => 'Employment Type', 'date_hired' => 'Date Hired', 'employment_status' => 'Employment Status'] as $key => $label): ?>
+                    <?php $columnClass = $key === 'date_hired' ? 'd-none d-print-table-cell' : ($key === 'employment_type' ? 'd-print-none' : ''); ?>
+                    <th scope="col" class="<?= e($columnClass) ?>"><button type="button" class="btn btn-link employee-sort" data-sort="<?= e($key) ?>" data-label="<?= e($label) ?>"><?= e($label) ?><span aria-hidden="true" class="employee-sort-mark"></span></button></th>
                     <?php endforeach; ?>
                     <th scope="col" class="text-end">Actions</th>
                 </tr></thead>
                 <tbody></tbody>
             </table>
         </div>
+        <ul class="employee-cards d-print-none" id="employeeCards" aria-label="Employee records" aria-busy="true"></ul>
         <div class="card-footer bg-white employee-pagination">
-            <p id="employeePageSummary" class="mb-0">Waiting for employee records.</p>
             <nav aria-label="Employee pages"><ul class="pagination mb-0" id="employeesPagination"></ul></nav>
         </div>
     </div>
+
+    <div id="employeeMenuHost" hidden><div id="employeeActionMenu" class="employee-action-menu dropdown-menu d-print-none" role="menu" aria-label="Employee actions"></div></div>
 
     <?php
     // Existing field names, select IDs and request contracts are retained.
@@ -96,7 +107,7 @@ $employeeActions = [
                     <?php if ($mode === 'edit'): ?><input type="hidden" name="id"><?php endif; ?>
                     <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
                     <div class="modal-header">
-                        <h2 class="modal-title fs-5" id="<?= $mode ?>EmployeeTitle" tabindex="-1"><?= $verb ?> Employee</h2>
+                        <div><h2 class="modal-title fs-5" id="<?= $mode ?>EmployeeTitle" tabindex="-1"><?= $verb ?> Employee</h2><p id="<?= $mode ?>EmployeeIdentity" class="employee-dialog-identity mb-0"><?= $mode === 'add' ? 'Create an employee record.' : '' ?></p></div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close <?= $verb ?> Employee"></button>
                     </div>
                     <div class="modal-body">
@@ -121,13 +132,14 @@ $employeeActions = [
                                         [$name, $label, $type, $required] = $field;
                                         $id = $type === 'select' ? $field[$mode === 'add' ? 4 : 5] : $mode . '_' . $name;
                                     ?>
-                                    <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label" for="<?= e($id) ?>"><?= e($label) ?><?php if ($required): ?> <span aria-hidden="true">*</span><?php endif; ?></label>
                                         <?php if ($type === 'select'): ?>
                                         <select class="form-select" name="<?= e($name) ?>" id="<?= e($id) ?>"<?= $required ? ' required' : '' ?>><option value="">Select <?= e($label) ?></option></select>
                                         <?php else: ?>
                                         <input type="<?= e($type) ?>" class="form-control" name="<?= e($name) ?>" id="<?= e($id) ?>"<?= $required ? ' required' : '' ?><?= $name === 'employee_no' ? ' readonly' : '' ?><?= $name === 'employee_no' && $mode === 'add' ? ' placeholder="Auto-generated on save"' : '' ?>>
                                         <?php endif; ?>
+                                        <?php if ($name === 'employee_no'): ?><p class="form-text mb-0">System-assigned employee number.</p><?php endif; ?>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -137,7 +149,7 @@ $employeeActions = [
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                        <button class="btn btn-primary" type="submit"><?= $mode === 'add' ? 'Save' : 'Update' ?> employee</button>
+                        <button class="btn btn-primary" type="submit"><?= $mode === 'add' ? 'Save employee' : 'Save changes' ?></button>
                     </div>
                 </form>
             </div>
@@ -165,12 +177,14 @@ $employeeActions = [
     <div class="modal fade employee-dialog" id="deleteEmployeeModal" tabindex="-1" aria-labelledby="deleteEmployeeTitle" aria-describedby="deleteEmployeeDescription" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
             <div class="modal-content">
-                <div class="modal-header"><h2 class="modal-title fs-5" id="deleteEmployeeTitle">Delete Employee</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Delete Employee"></button></div>
+                <div class="modal-header"><h2 class="modal-title fs-5" id="deleteEmployeeTitle">Remove employee?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Remove Employee"></button></div>
                 <div class="modal-body">
-                    <p id="deleteEmployeeDescription">Delete <strong id="deleteEmployeeName"></strong> from the employee list?</p>
+                    <h3 class="h6" id="deleteEmployeeName"></h3>
+                    <dl class="employee-summary-meta mb-3"><div><dt>Employee Number</dt><dd id="deleteEmployeeNumber">—</dd></div><div><dt>Branch</dt><dd id="deleteEmployeeBranch">—</dd></div></dl>
+                    <p id="deleteEmployeeDescription">This action will remove the employee from the current directory. Check the employee record before continuing.</p>
                     <div class="employee-mutation-feedback alert alert-warning" hidden><p role="alert" class="mb-0"></p></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary employee-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteEmployeeBtn">Delete employee</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary employee-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" id="confirmDeleteEmployeeBtn">Remove employee</button></div>
             </div>
         </div>
     </div>
@@ -182,17 +196,24 @@ $employeeActions = [
                     <div class="modal-header"><h2 class="modal-title fs-5" id="compensationModalLabel" tabindex="-1">Employee Compensation</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Employee Compensation"></button></div>
                     <div class="modal-body">
                         <p id="compensationEmployeeName" class="fw-semibold"></p>
+                        <p id="compensationEmployeeNumber" class="employee-dialog-identity"></p>
                         <div class="employee-read-feedback" hidden><p role="status" class="mb-2"></p><button type="button" class="btn btn-outline-danger employee-retry" hidden>Retry employee compensation</button></div>
                         <div class="employee-mutation-feedback alert alert-warning" hidden><p role="alert" class="mb-0"></p></div>
                         <input type="hidden" name="id" id="compensation_id">
                         <input type="hidden" name="employee_id" id="compensation_employee_id">
-                        <fieldset class="employee-fields"><legend class="visually-hidden">Compensation fields</legend><div class="row g-3">
+                        <fieldset class="employee-fields"><legend class="visually-hidden">Compensation fields</legend>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Pay Arrangement</legend><div class="row g-3">
                             <div class="col-12 col-md-6"><label class="form-label" for="salary_type">Salary Type</label><select class="form-select" name="salary_type" id="salary_type" required><option value="">Select</option><option value="MONTHLY">Monthly</option><option value="DAILY">Daily</option><option value="HOURLY">Hourly</option></select></div>
                             <div class="col-12 col-md-6"><label class="form-label" for="payroll_frequency">Payroll Frequency</label><select class="form-select" name="payroll_frequency" id="payroll_frequency" required><option value="">Select</option><option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="BI_WEEKLY">Bi-Weekly</option><option value="SEMI_MONTHLY">Semi-Monthly</option><option value="MONTHLY">Monthly</option></select></div>
-                            <div class="col-12 col-md-6"><label class="form-label" for="salary_rate">Salary Rate</label><div class="input-group"><span class="input-group-text">₱</span><input type="number" step="0.01" min="0" class="form-control text-end" id="salary_rate" name="salary_rate" required></div></div>
+                            </div></fieldset>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Salary Rate</legend>
+                            <label class="form-label" for="salary_rate" id="salaryRateLabel">Salary rate (₱)</label><div class="input-group"><span class="input-group-text" aria-hidden="true">₱</span><input type="number" step="0.01" min="0" class="form-control text-end" id="salary_rate" name="salary_rate" aria-describedby="salaryRateHelp" required></div><p class="form-text mb-0" id="salaryRateHelp">The rate is separate from payroll frequency. No conversion is performed here.</p>
+                            </fieldset>
+                            <fieldset class="employee-field-group"><legend class="fs-6 fw-semibold">Effective Period</legend><div class="row g-3">
                             <div class="col-12 col-md-6"><label class="form-label" for="effective_from">Effective From</label><input type="date" class="form-control" id="effective_from" name="effective_from" required></div>
                             <div class="col-12 col-md-6"><label class="form-label" for="effective_to">Effective To</label><input type="date" class="form-control" id="effective_to" name="effective_to"></div>
-                        </div></fieldset>
+                            </div></fieldset>
+                        </fieldset>
                     </div>
                     <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="submit" class="btn btn-primary"><span id="compensationSpinner" class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>Save compensation</button></div>
                 </form>
@@ -212,6 +233,8 @@ $employeeActions = [
     let requestedPage = 1;
     let loadedList = null;
     let pendingDeleteId = null;
+    let employeeMenu = null;
+    let employeeRecords = new Map();
     const employeeDialogs = {};
     const lookupDefinitions = {
         branch_id: {url: '/hris/branches/getallbranches', label: 'Branch'},
@@ -230,17 +253,134 @@ $employeeActions = [
     }
 
     function listDescription(context) {
-        const labels = {employee_no: 'Employee No', name: 'Name', branch_name: 'Branch', date_hired: 'Date Hired', employment_status: 'Status'};
-        return context.sortBy === 'created_at' ? 'Sorted by newest added.' : `Sorted by ${labels[context.sortBy]}, ${context.sortDir === 'ASC' ? 'ascending' : 'descending'}.`;
+        const labels = {employee_no: 'Employee No', name: 'Employee', branch_name: 'Branch', employment_type: 'Employment Type', date_hired: 'Date Hired', employment_status: 'Employment Status'};
+        return context.sortBy === 'created_at' ? `Sorted by ${context.sortDir === 'ASC' ? 'oldest' : 'newest'} added.` : `Sorted by ${labels[context.sortBy]}, ${context.sortDir === 'ASC' ? 'ascending' : 'descending'}.`;
+    }
+
+    // Both representations use these same escaped values and permission decisions.
+    function employeePresentation(emp, index = 0) {
+        const name = employeeName(emp);
+        const identity = `data-id="${esc(emp.id)}" data-name="${esc(name)}" data-number="${esc(emp.employee_no)}" data-branch="${esc(emp.branch_name)}"`;
+        const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="dropdown-item ${className}${color === 'danger' ? ' text-danger' : ''}" role="menuitem" tabindex="-1" data-employee-action="${className}" ${identity}><i class="bi bi-${icon}" aria-hidden="true"></i><span>${label}</span></button>` : '';
+        // Legacy compensation visibility is unchanged; policy review stays separate.
+        const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View details', 'eye', 'primary')
+            + action(employeeActions.edit, 'editEmployeeBtn', 'Edit employee', 'pencil-square', 'primary')
+            + action(true, 'editCompensationBtn', 'Manage compensation', 'cash-stack', 'primary')
+            + (employeeActions.delete ? '<div class="dropdown-divider" role="separator"></div>' : '')
+            + action(employeeActions.delete, 'deleteEmployeeBtn', 'Remove employee', 'trash', 'danger');
+        return {
+            id: String(emp.id), attributes: identity, index,
+            name: esc(name), number: esc(emp.employee_no) || '—', branch: esc(emp.branch_name) || '—',
+            identity: employeeActions.view ? `<button type="button" class="employee-name viewEmployeeBtn" data-employee-action="viewEmployeeBtn" ${identity}>${esc(name)}</button>` : `<span class="employee-name">${esc(name)}</span>`,
+            position: !Object.hasOwn(emp, 'position') || (emp.position !== null && typeof emp.position !== 'string') ? 'Position unavailable' : (esc(emp.position?.trim()) || 'Not assigned'),
+            employmentType: esc(emp.employment_type) || '—',
+            dateHired: esc(emp.date_hired) || '—', actions,
+            status: `<span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span>`
+        };
+    }
+
+    function employeeTableRow(record) {
+        // Keep the original print fields while restoring the six screen columns.
+        return `<tr><td class="d-none d-print-table-cell">${record.number}</td><td class="employee-identity-cell"><div class="employee-identity"><span class="d-print-none">${record.identity}</span><span class="d-none d-print-inline">${record.name}</span><span class="employee-number d-print-none">${record.number}</span></div></td><td class="employee-position-cell d-print-none">${record.position}</td><td>${record.branch}</td><td class="d-print-none">${record.employmentType}</td><td class="d-none d-print-table-cell">${record.dateHired}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions d-print-none">${employeeMenuTrigger(record, 'table')}</div></td></tr>`;
+    }
+
+    function employeeCard(record) {
+        return `<li><article class="employee-card" aria-label="Employee: ${record.name}"><header class="employee-card-header"><div><h2 class="h6 mb-1">${record.identity}</h2><p class="employee-card-number mb-0"><span class="visually-hidden">Employee No: </span>${record.number}</p></div>${record.status}</header><dl class="employee-card-details"><div><dt>Position</dt><dd>${record.position}</dd></div><div><dt>Branch</dt><dd>${record.branch}</dd></div><div><dt>Employment Type</dt><dd>${record.employmentType}</dd></div><div><dt>Date Hired</dt><dd>${record.dateHired}</dd></div></dl><div class="employee-row-actions">${employeeMenuTrigger(record, 'card')}</div></article></li>`;
+    }
+
+    function employeeMenuTrigger(record, representation) {
+        if (!record.actions) return '<span class="text-body-secondary">No available actions</span>';
+        return `<button type="button" class="btn btn-outline-secondary employee-menu-trigger" id="employeeActions-${representation}-${record.index}" data-employee-menu ${record.attributes} aria-label="Actions for ${record.name}" aria-haspopup="menu" aria-expanded="false" aria-controls="employeeActionMenu"><i class="bi bi-three-dots" aria-hidden="true"></i></button>`;
+    }
+
+    function closeEmployeeMenu(restoreFocus = false) {
+        const active = employeeMenu;
+        if (!active) return;
+        employeeMenu = null;
+        active.instance?.hide();
+        active.instance?.dispose();
+        active.menu.classList.remove('show');
+        active.menu.classList.add('dropdown-menu');
+        active.trigger.setAttribute('aria-expanded', 'false');
+        document.getElementById('employeeMenuHost').appendChild(active.menu);
+        if (restoreFocus) focusEmployeeAction(active.trigger, active.trigger.dataset.id);
+    }
+
+    function openEmployeeMenu(trigger, last = false) {
+        if (employeeMenu?.trigger === trigger) { closeEmployeeMenu(true); return; }
+        closeEmployeeMenu(false);
+        const record = employeeRecords.get(trigger.dataset.id);
+        if (!record?.actions) return;
+        const menu = document.getElementById('employeeActionMenu');
+        menu.innerHTML = record.actions;
+        menu.setAttribute('aria-labelledby', trigger.id);
+        // Bootstrap resolves its menu sibling at construction. Then portal it out of
+        // overflow containers; the existing bundled Popper anchors it to the trigger.
+        trigger.parentElement.appendChild(menu);
+        menu.classList.add('dropdown-menu');
+        employeeMenu = {trigger, menu, instance: null};
+        try {
+            employeeMenu.instance = new bootstrap.Dropdown(trigger, {
+                autoClose: false,
+                reference: trigger,
+                popperConfig(config) {
+                    return {...config, placement: 'bottom-end', strategy: 'fixed', modifiers: [
+                        ...(config.modifiers || []),
+                        {name: 'preventOverflow', options: {boundary: 'clippingParents', rootBoundary: 'viewport', padding: 12, altAxis: true}},
+                        {name: 'flip', options: {rootBoundary: 'viewport', padding: 12, fallbackPlacements: ['top-end', 'bottom-start', 'top-start']}}
+                    ]};
+                }
+            });
+            // Bootstrap's delegated keyboard API assumes a sibling toggle. While
+            // portaled, use our own scoped menu class and complete keyboard model.
+            menu.classList.remove('dropdown-menu');
+            document.body.appendChild(menu);
+            employeeMenu.instance.show();
+            const items = menu.querySelectorAll('[role="menuitem"]:not(:disabled)');
+            items[last ? items.length - 1 : 0]?.focus();
+        } catch (error) {
+            closeEmployeeMenu(true);
+            $('#employeeListStatus').text('Employee actions are unavailable. Refresh the page and try again.');
+        }
+    }
+
+    function employeeMenuKeydown(event) {
+        if (!employeeMenu) return;
+        if (event.key === 'Escape' || event.key === 'Tab') {
+            if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); }
+            // Tab continues naturally from the row trigger, not from the body portal.
+            closeEmployeeMenu(true);
+            return;
+        }
+        if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const items = [...employeeMenu.menu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
+        const current = items.indexOf(document.activeElement);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+            : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+        items[next]?.focus();
+    }
+
+    function focusEmployeeAction(trigger, employeeId) {
+        if (trigger && document.contains(trigger) && $(trigger).is(':visible')) {
+            trigger.focus();
+            return;
+        }
+        const replacement = employeeId && $('#employeesTable button, #employeeCards button').filter(':visible').toArray().find(button =>
+            button.dataset.id === String(employeeId) && (trigger?.hasAttribute('data-employee-menu')
+                ? button.hasAttribute('data-employee-menu') : button.dataset.employeeAction === trigger?.dataset.employeeAction));
+        (replacement || document.getElementById('employeesHeading')).focus();
     }
 
     function getAllEmployees(page) {
+        closeEmployeeMenu(false);
         const sequence = ++listSequence;
         if (listRequest) listRequest.abort();
         requestedPage = page;
         const context = {page, search: currentSearch, sortBy: currentSortBy, sortDir: currentSortDir};
-        $('.employee-table-region').attr('aria-busy', 'true');
-        if ($('#employeeListError').has(document.activeElement).length) $('.employee-table-region').trigger('focus');
+        $('.employee-table-region, #employeeCards').attr('aria-busy', 'true');
+        if ($('#employeeListError').has(document.activeElement).length) $('#employeesHeading').trigger('focus');
         $('#employeeListError').prop('hidden', true);
         $('#employeeListStatus').text(loadedList ? 'Refreshing employees. Previously loaded rows remain below.' : 'Loading employees…');
         listRequest = $.ajax({
@@ -254,20 +394,15 @@ $employeeActions = [
             }
             currentPage = res.currentPage;
             loadedList = {...context, page: currentPage, pages: res.totalPages, count: res.data.length};
-            const rows = res.data.map(emp => {
-                const name = employeeName(emp);
-                const action = (allowed, className, label, icon, color) => allowed ? `<button type="button" class="btn btn-outline-${color} hris-action ${className}" data-id="${esc(emp.id)}" data-name="${esc(name)}" aria-label="${label}: ${esc(name)}" title="${label}: ${esc(name)}"><i class="bi bi-${icon}" aria-hidden="true"></i></button>` : '';
-                // Existing compensation access/visibility is deliberately unchanged.
-                const actions = action(employeeActions.view, 'viewEmployeeBtn', 'View', 'eye', 'primary')
-                    + action(employeeActions.edit, 'editEmployeeBtn', 'Edit', 'pencil-square', 'primary')
-                    + action(true, 'editCompensationBtn', 'Compensation', 'cash-stack', 'primary')
-                    + action(employeeActions.delete, 'deleteEmployeeBtn', 'Delete', 'trash', 'danger');
-                return `<tr><td>${esc(emp.employee_no) || '—'}</td><td>${esc(name)}</td><td>${esc(emp.branch_name) || '—'}</td><td>${esc(emp.date_hired) || '—'}</td><td><span class="badge hris-status ${MonteroHris.statusClass(emp.employment_status, 'employment')} ${emp.employment_status ? 'text-bg-info' : 'text-bg-secondary'}" title="Employment status" aria-label="Employment status: ${esc(emp.employment_status) || '—'}">${esc(emp.employment_status) || '—'}</span></td><td class="text-end"><div class="employee-row-actions">${actions || 'No available actions'}</div></td></tr>`;
-            }).join('');
-            $('#employeesTable tbody').html(rows || `<tr><td colspan="6" class="text-center py-4">${context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.'}</td></tr>`);
+            const records = res.data.map(employeePresentation);
+            employeeRecords = new Map(records.map(record => [record.id, record]));
+            const empty = context.search ? `No employees match “${esc(context.search)}”. Clear or change your search.` : 'No employees found.';
+            $('#employeesTable tbody').html(records.map(employeeTableRow).join('') || `<tr><td colspan="8" class="text-center py-4">${empty}</td></tr>`);
+            $('#employeeCards').html(records.map(employeeCard).join('') || `<li class="employee-card-empty">${empty}</li>`);
+            $('#employeeMobileSortBy').val(context.sortBy);
+            $('#employeeMobileSortDir').val(context.sortDir);
             const count = `${res.data.length} employee${res.data.length === 1 ? '' : 's'} loaded on this page`;
             $('#employeeListStatus').text(`${count}${context.search ? ` for “${context.search}”` : ''}.`);
-            $('#employeePageSummary').text(`Page ${currentPage} of ${res.totalPages}`);
             $('#employeeSortSummary').text(listDescription(context));
             $('.employee-sort').each(function () {
                 const active = $(this).data('sort') === context.sortBy;
@@ -282,7 +417,7 @@ $employeeActions = [
         }).always(function () {
             if (sequence === listSequence) {
                 listRequest = null;
-                $('.employee-table-region').attr('aria-busy', 'false');
+                $('.employee-table-region, #employeeCards').attr('aria-busy', 'false');
             }
         });
     }
@@ -398,6 +533,7 @@ $employeeActions = [
             }
             const emp = res.data;
             if ($dialog.is('#editEmployeeModal')) {
+                $('#editEmployeeIdentity').text(`${employeeName(emp)}${emp.employee_no ? ` · ${emp.employee_no}` : ''}`);
                 $dialog.find('input[name], select[name]').each(function () {
                     if (this.name === 'csrf_token') return;
                     const value = String(emp[this.name] ?? '');
@@ -416,6 +552,7 @@ $employeeActions = [
                     Object.entries(fields).forEach(([id, value]) => $(`#${id}`).val(value));
                 }
                 $('#compensationModalLabel').text(emp ? 'Edit Employee Compensation' : 'Add Employee Compensation');
+                updateSalaryRateCopy();
             }
             state.ready = true;
             dialogReadStatus($dialog);
@@ -425,6 +562,18 @@ $employeeActions = [
         }).always(function () {
             if (employeeDialogs[$dialog.attr('id')] === state && state.sequence === sequence) { state.xhr = null; dialogReadStatus($dialog); }
         });
+    }
+
+    function salaryRateCopy(type) {
+        const units = {DAILY: ['Daily rate (₱)', 'per day'], HOURLY: ['Hourly rate (₱)', 'per hour'], MONTHLY: ['Monthly rate (₱)', 'per month']};
+        const selected = Object.hasOwn(units, type) ? units[type] : null;
+        return {label: selected?.[0] || 'Salary rate (₱)', help: selected ? `Stored amount ${selected[1]}. Payroll frequency is configured separately; no conversion is performed here.` : 'The rate is separate from payroll frequency. No conversion is performed here.'};
+    }
+
+    function updateSalaryRateCopy() {
+        const copy = salaryRateCopy($('#salary_type').val());
+        $('#salaryRateLabel').text(copy.label);
+        $('#salaryRateHelp').text(copy.help);
     }
 
     function focusDialog($dialog) {
@@ -492,9 +641,41 @@ $employeeActions = [
         $('#retryEmployeeList').on('click', function () { getAllEmployees(requestedPage); });
         $('.employee-sort').on('click', function () { const key = $(this).data('sort'); currentSortDir = currentSortBy === key && currentSortDir === 'ASC' ? 'DESC' : 'ASC'; currentSortBy = key; getAllEmployees(1); });
         $('#employeesPagination').on('click', '.page-btn', function () { getAllEmployees($(this).data('page')); });
-        $('#employeesTable').on('click', '.viewEmployeeBtn, .editEmployeeBtn, .deleteEmployeeBtn, .editCompensationBtn', function () {
+        $('#employeeMobileSortForm').on('submit', function (event) {
+            event.preventDefault();
+            currentSortBy = $('#employeeMobileSortBy').val();
+            currentSortDir = $('#employeeMobileSortDir').val();
+            getAllEmployees(1);
+        });
+        $(document).on('click.employeeActions', '.employee-page [data-employee-action], #employeeActionMenu [data-employee-action]', function () {
             const id = $(this).hasClass('viewEmployeeBtn') ? '#viewEmployeeModal' : $(this).hasClass('editEmployeeBtn') ? '#editEmployeeModal' : $(this).hasClass('deleteEmployeeBtn') ? '#deleteEmployeeModal' : '#compensationModal';
-            openEmployeeDialog(id, this);
+            const returnTrigger = employeeMenu?.trigger || this;
+            closeEmployeeMenu(false);
+            openEmployeeDialog(id, returnTrigger);
+        });
+        $('.employee-page').on('click', '.employee-menu-trigger', function () { openEmployeeMenu(this); });
+        $('.employee-page').on('keydown', '.employee-menu-trigger', function (event) {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); openEmployeeMenu(this, event.key === 'ArrowUp'); }
+        });
+        $('#employeeActionMenu').on('keydown', employeeMenuKeydown);
+        $(document).on('pointerdown.employeeMenu focusin.employeeMenu', function (event) {
+            if (employeeMenu && !employeeMenu.menu.contains(event.target) && !employeeMenu.trigger.contains(event.target)) closeEmployeeMenu(false);
+        });
+        $('.employee-table-region').on('scroll.employeeMenu', function () { employeeMenu?.instance?.update(); });
+        $(window).on('resize.employeeMenu', function () { closeEmployeeMenu(true); });
+        const mobileCards = window.matchMedia('(max-width: 767.98px)');
+        let employeeListFocus = null;
+        $(document).on('focusin.employeeResponsive', function (event) {
+            employeeListFocus = $(event.target).closest('.employee-table-region, .employee-mobile-sort, #employeeCards').length ? event.target : null;
+        });
+        mobileCards.addEventListener('change', function () {
+            closeEmployeeMenu(true);
+            // A display:none transition may move native focus to body before this event.
+            const active = document.activeElement === document.body && employeeListFocus && !$(employeeListFocus).is(':visible') ? employeeListFocus : document.activeElement;
+            if ($(active).is('[data-employee-action], [data-employee-menu]')) focusEmployeeAction(active, active.dataset.id);
+            else if ($(active).closest('.employee-table-region, .employee-mobile-sort').length && !$(active).is(':visible')) {
+                (mobileCards.matches ? document.getElementById('employeeMobileSortBy') : document.querySelector('.employee-sort')).focus();
+            }
         });
 
         $('.employee-dialog').on('keydown', function (event) {
@@ -514,8 +695,9 @@ $employeeActions = [
             const state = employeeDialogs[this.id] = {trigger, employeeId: trigger?.dataset.id, baseline: {}, ready: $dialog.is('#addEmployeeModal, #deleteEmployeeModal'), lookups: {}, pending: false, discard: false};
             $dialog.find('.employee-discard, .employee-mutation-feedback').prop('hidden', true);
             $dialog.find('.employee-details dd').text('—');
-            if ($dialog.is('#compensationModal')) { $('#compensation_id, #compensation_employee_id').val(''); $('#compensationModalLabel').text('Employee Compensation'); $('#compensationEmployeeName').text(trigger?.dataset.name || ''); }
-            if ($dialog.is('#deleteEmployeeModal')) { pendingDeleteId = state.employeeId; $('#deleteEmployeeName').text(trigger?.dataset.name || 'this employee'); }
+            if ($dialog.is('#editEmployeeModal')) $('#editEmployeeIdentity').text(`${trigger?.dataset.name || 'Loading employee…'}${trigger?.dataset.number ? ` · ${trigger.dataset.number}` : ''}`);
+            if ($dialog.is('#compensationModal')) { $('#compensation_id, #compensation_employee_id').val(''); $('#compensationModalLabel').text('Employee Compensation'); $('#compensationEmployeeName').text(trigger?.dataset.name || ''); $('#compensationEmployeeNumber').text(trigger?.dataset.number || ''); updateSalaryRateCopy(); }
+            if ($dialog.is('#deleteEmployeeModal')) { pendingDeleteId = state.employeeId; $('#deleteEmployeeName').text(trigger?.dataset.name || 'this employee'); $('#deleteEmployeeNumber').text(trigger?.dataset.number || '—'); $('#deleteEmployeeBranch').text(trigger?.dataset.branch || '—'); }
             if ($dialog.is('#addEmployeeModal, #editEmployeeModal')) {
                 // Reset choices for a new dialog session; retries in this session keep values.
                 $dialog.find('select[name]').each(function () {
@@ -544,12 +726,7 @@ $employeeActions = [
             if (state.xhr) state.xhr.abort();
             Object.values(state.lookups).forEach(entry => { ++entry.sequence; if (entry.xhr) entry.xhr.abort(); });
             if ($dialog.is('#deleteEmployeeModal')) pendingDeleteId = null;
-            const trigger = state.trigger;
-            if (trigger && document.contains(trigger)) trigger.focus();
-            else {
-                const replacement = state.employeeId && $('#employeesTable button').toArray().find(button => button.dataset.id === String(state.employeeId) && trigger && button.className === trigger.className);
-                (replacement || document.getElementById('employeesHeading')).focus();
-            }
+            focusEmployeeAction(state.trigger, state.employeeId);
         });
         $('.employee-stay').on('click', function () {
             const $dialog = $(this).closest('.modal'), state = employeeDialogs[$dialog.attr('id')];
@@ -562,7 +739,7 @@ $employeeActions = [
             if (!state.ready && !state.xhr) loadDialogRecord($dialog);
             Object.keys(state.lookups).forEach(name => { if (!state.lookups[name].xhr) loadDialogLookup($dialog, name); });
         });
-        $('.employee-dialog select').on('change', function () { dialogReadStatus($(this).closest('.modal')); });
+        $('.employee-dialog select').on('change', function () { if (this.id === 'salary_type') updateSalaryRateCopy(); dialogReadStatus($(this).closest('.modal')); });
         $('#addEmployeeForm, #editEmployeeForm').on('submit', function (event) { event.preventDefault(); submitEmployee(this); });
         $('#confirmDeleteEmployeeBtn').on('click', function () {
             if (pendingDeleteId) employeeMutation($('#deleteEmployeeModal'), '/hris/employees/deleteemployee/' + pendingDeleteId, {csrf_token: $('#addEmployeeForm [name="csrf_token"]').val()}, function () { getAllEmployees(currentPage); });

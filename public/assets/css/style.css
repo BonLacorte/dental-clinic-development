@@ -2387,3 +2387,285 @@
     }
   }
 }
+
+/* Owner-requested Employee layout restoration. The accepted prefix stays intact. */
+@media screen {
+  .admin-shell .employee-page.employee-layout-restored #employeesTable {
+    min-width: 58rem;
+    table-layout: auto;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored #employeesTable :is(th, td):not([colspan]) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: none;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored #employeesTable > thead > tr > th:not([colspan]) {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored #employeesTable .employee-identity-cell {
+    min-width: 14rem;
+    color: var(--montero-text);
+    font-size: .9375rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored #employeesTable .employee-position-cell {
+    min-width: 10rem;
+    font-weight: 400;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-name {
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--montero-text);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored button.employee-name {
+    min-height: 44px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--montero-control-border);
+  }
+
+  .admin-shell .employee-page.employee-layout-restored button.employee-name:hover {
+    color: var(--montero-primary-hover);
+  }
+
+  .admin-shell .employee-page.employee-layout-restored :is(.employee-number, .employee-card-number) {
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-pagination {
+    justify-content: flex-end;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored :is(.employee-cards, .employee-mobile-sort) {
+    display: none;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  /* The menu is portaled to body so the table's scroll container cannot clip it. */
+  .admin-shell #employeeActionMenu.employee-action-menu {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    margin: 0;
+    padding: 8px 0;
+    width: min(19rem, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--montero-control-border);
+    border-radius: var(--montero-control-radius);
+    background: var(--montero-surface);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell #employeeActionMenu.employee-action-menu.show {
+    display: block;
+  }
+
+  .admin-shell #employeeActionMenu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 16px;
+    white-space: normal;
+    color: var(--montero-text);
+    font-size: .9375rem;
+    background: transparent;
+  }
+
+  .admin-shell #employeeActionMenu .dropdown-item:is(:hover, :focus) {
+    color: var(--montero-primary-hover);
+    background: var(--montero-primary-tint);
+  }
+
+  .admin-shell #employeeActionMenu .dropdown-item:focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: -3px;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored :is(#addEmployeeModal, #editEmployeeModal, #compensationModal) .modal-dialog {
+    --bs-modal-width: 640px;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored #deleteEmployeeModal .modal-dialog {
+    --bs-modal-width: 400px;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-dialog .modal-header > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-dialog-identity {
+    margin-top: 8px;
+    color: var(--montero-muted);
+    font-size: .9375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-field-group {
+    margin: 0;
+    padding: 16px 0;
+    border: 0;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-field-group > legend {
+    float: none;
+    width: auto;
+    margin: 0 0 12px;
+    padding-right: 12px;
+    color: var(--montero-text);
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-summary-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin: 16px 0 0;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-summary-meta > div {
+    flex: 1 1 8rem;
+    min-width: 0;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-summary-meta dt {
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-weight: 400;
+  }
+
+  .admin-shell .employee-page.employee-layout-restored .employee-summary-meta dd {
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 767.98px) {
+    .admin-shell .employee-page.employee-layout-restored .employee-table-region {
+      display: none;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-mobile-sort {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--montero-divider);
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-mobile-sort > div {
+      min-width: 0;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-mobile-sort > button {
+      grid-column: 1 / -1;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-cards {
+      display: grid;
+      gap: 16px;
+      margin: 0;
+      padding: 16px;
+      list-style: none;
+      background: var(--montero-canvas);
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-cards > li {
+      min-width: 0;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card {
+      padding: 16px;
+      border: 1px solid var(--montero-divider);
+      border-radius: var(--montero-card-radius);
+      color: var(--montero-text);
+      background: var(--montero-surface);
+      box-shadow: var(--montero-shadow);
+      overflow-wrap: anywhere;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-header > div {
+      flex: 1 1 10rem;
+      min-width: 0;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-header :is(h2, .badge) {
+      white-space: normal;
+      line-height: 1.5;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-details {
+      margin: 16px 0;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-details > div {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      gap: 12px;
+      padding-block: 12px;
+      border-top: 1px solid var(--montero-divider);
+      font-size: .9375rem;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-details dt {
+      color: var(--montero-muted);
+      font-weight: 400;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-details dd {
+      min-width: 0;
+      margin: 0;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card .employee-row-actions {
+      justify-content: flex-end;
+    }
+
+    .admin-shell .employee-page.employee-layout-restored .employee-card-empty {
+      padding: 24px 16px;
+      color: var(--montero-muted);
+      text-align: center;
+    }
+  }
+}
