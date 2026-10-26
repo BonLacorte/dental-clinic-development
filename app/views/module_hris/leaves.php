@@ -1,10 +1,14 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page attendance-workspace hris-consistency-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="leavesHeading">Manage Leaves</h1>
+            <div class="attendance-heading">
+                <p class="attendance-eyebrow d-print-none">HRIS · Attendance</p>
+                <h1 class="h5 mb-0" id="leavesHeading">Leave Management</h1>
+                <p class="hris-page-description d-print-none">Review leave periods, request statuses and paid or unpaid leave types.</p>
+            </div>
 
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeaveTypeModal">

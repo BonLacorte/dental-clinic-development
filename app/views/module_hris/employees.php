@@ -9,11 +9,12 @@ $employeeActions = [
     'delete' => $navCanPermission('hris.employee.delete'),
 ];
 ?>
-<main class="employee-page container-fluid py-4 management-page hris-page" aria-labelledby="employeesHeading">
+<main class="employee-page container-fluid py-4 management-page hris-page hris-consistency-page" aria-labelledby="employeesHeading">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white employee-header">
-            <div>
-                <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Manage Employees</h1>
+            <div class="employee-heading">
+                <p class="hris-page-eyebrow d-print-none">HRIS · Employees</p>
+                <h1 class="h4 mb-1" id="employeesHeading" tabindex="-1">Employees</h1>
                 <p class="mb-0 text-body-secondary">Employee records and employment details</p>
             </div>
             <?php if ($navCanPermission('hris.employee.create')): ?>
@@ -31,10 +32,11 @@ $employeeActions = [
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
                 <button class="btn btn-outline-secondary" type="button" id="clearEmployeeSearchBtn">Clear</button>
             </form>
+            <p class="employee-search-help mb-0 d-print-none">Search by name, employee number or branch. Select Search to apply.</p>
         </div>
         <div class="employee-list-feedback">
-        <p id="employeeListStatus" role="status" class="visually-hidden">Loading employees…</p>
-        <p id="employeeSortSummary" class="visually-hidden">Sorted by newest added.</p>
+        <p id="employeeListStatus" role="status" class="employee-result-context mb-0 d-print-none">Loading employees…</p>
+        <p id="employeeSortSummary" class="employee-order-summary mb-0 d-print-none">Sorted by newest added.</p>
         <p id="employeeScrollHelp" class="visually-hidden">Scroll the table horizontally to reach every column and action. Keyboard: focus the table region and use the arrow keys.</p>
             <div id="employeeListError" class="alert alert-danger m-3" hidden>
                 <p role="alert" class="mb-2"></p>

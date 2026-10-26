@@ -2022,3 +2022,368 @@
     display: none;
   }
 }
+
+/* MD-HRIS-CONSISTENCY-STAGE2: selected presentation from #20 / #14 / #15 / #13.
+   Keep the accepted prefix and print rules intact. These opt-in screen rules
+   describe the retained baseline tables, not the drafts' generated layouts. */
+@media screen {
+  .admin-shell .hris-consistency-page {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 24px !important;
+  }
+
+  /* Shared header: reconcile #14/#15 intros and #13 header spacing.
+     Scoped importance is needed for the baseline header and Bootstrap utilities. */
+  .admin-shell .hris-consistency-page .management-card > .card-header,
+  .admin-shell .hris-consistency-page > .hris-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start !important;
+    justify-content: space-between;
+    gap: 16px 24px;
+  }
+
+  .admin-shell .hris-consistency-page .management-card > .card-header {
+    padding: 24px !important;
+  }
+
+  .admin-shell .hris-consistency-page :is(.org-page-intro, .attendance-heading, .employee-heading) {
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+
+  .admin-shell .hris-consistency-page .management-card > .card-header h1,
+  .admin-shell .hris-consistency-page > .hris-page-header h1,
+  .admin-shell .hris-consistency-page.hris-home-page h1 {
+    margin: 0;
+    color: var(--montero-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.025em;
+  }
+
+  .admin-shell .hris-consistency-page :is(.org-eyebrow, .attendance-eyebrow, .hris-page-eyebrow, .hris-home-eyebrow) {
+    margin: 0 0 8px;
+    color: var(--montero-primary);
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .admin-shell .hris-consistency-page :is(.org-page-description, .hris-page-description),
+  .admin-shell .hris-consistency-page .employee-heading > p:last-child,
+  .admin-shell .hris-consistency-page .hris-page-header .text-muted {
+    margin: 8px 0 0;
+    color: var(--montero-muted);
+    line-height: 1.5;
+  }
+
+  /* Existing table schema, sort controls, empty colspans and actions are retained. */
+  .admin-shell .hris-consistency-page .management-card {
+    border-color: var(--montero-divider);
+  }
+
+  .admin-shell .hris-consistency-page .hris-data-table > thead > tr > th {
+    padding: 12px 16px;
+    color: var(--montero-text);
+    font-size: .875rem;
+    line-height: 1.5;
+    vertical-align: middle;
+  }
+
+  .admin-shell .hris-consistency-page .hris-data-table > tbody > tr > td:not([colspan]) {
+    padding: 12px 16px;
+    font-size: .9375rem;
+    line-height: 1.5;
+    vertical-align: middle;
+  }
+
+  .admin-shell .hris-consistency-page.organization-page #branchesTable > tbody > tr > td:nth-child(2),
+  .admin-shell .hris-consistency-page.organization-page #positionsTable > tbody > tr > td:nth-child(3),
+  .admin-shell .hris-consistency-page.organization-page #appointmentsTable > tbody > tr > td:first-child {
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* #15's numeric rules use its regrouped columns. Target the baseline fields:
+     Holidays 4/5 = multiplier/work allowed; Shifts 7/8 = hours/break minutes. */
+  .admin-shell .hris-consistency-page.attendance-workspace #holidaysTable > :is(thead, tbody) > tr > :is(th, td):not([colspan]):is(:nth-child(4), :nth-child(5)),
+  .admin-shell .hris-consistency-page.attendance-workspace #shiftsTable > :is(thead, tbody) > tr > :is(th, td):not([colspan]):is(:nth-child(7), :nth-child(8)) {
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .hris-consistency-page .hris-table-region,
+  .admin-shell .hris-consistency-page .employee-table-region {
+    overscroll-behavior-x: contain;
+    scroll-margin-block: calc(var(--admin-header-height) + 16px);
+  }
+
+  .admin-shell .hris-consistency-page :is(.hris-table-region, .employee-table-region):focus-visible {
+    outline: 3px solid var(--montero-focus);
+    outline-offset: -3px;
+  }
+
+  .admin-shell .hris-consistency-page :is(.card-footer, .employee-pagination) .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* #14 hierarchy spacing adapted to the existing tree, without new node markup. */
+  .admin-shell .hris-consistency-page.organization-page #orgUnitsTree {
+    padding: 16px;
+  }
+
+  .admin-shell .hris-consistency-page.organization-page .org-children {
+    margin-left: 20px;
+    padding-left: 12px;
+    border-left: 2px solid var(--montero-divider);
+  }
+
+  .admin-shell .hris-consistency-page.organization-page #orgUnitsTree .flex-grow-1 {
+    min-width: 0;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* #15 screen hierarchy only. No new context script, counters or left stripe. */
+  .admin-shell .hris-consistency-page.attendance-page > .row.g-3.mb-3 > .col-md-3 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+
+  /* #13 independent search/feedback/type refinements; no Position/card/menu rules. */
+  .admin-shell .hris-consistency-page.employee-page .employee-toolbar {
+    gap: 12px;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-search-field {
+    min-width: 0;
+    max-width: 36rem;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-search-help {
+    margin-top: 8px;
+    color: var(--montero-muted);
+    font-size: .875rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-list-feedback {
+    padding: 16px;
+    color: var(--montero-muted);
+    font-size: .875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-result-context {
+    color: var(--montero-text);
+    font-weight: 500;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-order-summary {
+    margin-top: 4px;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    color: var(--montero-text);
+    font-size: inherit;
+    text-decoration: none;
+  }
+
+  .admin-shell .hris-consistency-page.employee-page th[aria-sort] .employee-sort {
+    color: var(--montero-primary);
+  }
+
+  .admin-shell .hris-consistency-page.employee-page .employee-field-group {
+    margin: 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  /* #20 static overview panels; conditional destinations remain in existing nav. */
+  .admin-shell .hris-consistency-page.hris-home-page {
+    display: grid;
+    gap: 24px;
+    color: var(--montero-text);
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page p {
+    line-height: 1.6;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-header > p:last-child {
+    margin: 8px 0 0;
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page :is(.hris-home-muted, .hris-home-follow-up p, .hris-home-guidance p) {
+    margin: 0;
+    color: var(--montero-muted);
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-panel {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-card-radius);
+    background: var(--montero-surface);
+    box-shadow: var(--montero-shadow);
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 8px;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-availability {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 12px;
+    border: 1px solid var(--montero-divider);
+    border-radius: var(--montero-control-radius);
+    color: var(--montero-muted);
+    background: var(--montero-canvas);
+    font-size: .875rem;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 24px 0 0;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--montero-divider);
+    list-style: none;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-summary li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: .875rem;
+    font-weight: 600;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-summary .bi {
+    flex: 0 0 auto;
+    color: var(--montero-primary);
+    font-size: 1.125rem;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-follow-up {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-icon {
+    display: inline-flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--montero-control-radius);
+    color: var(--montero-primary);
+    background: var(--montero-primary-tint);
+    font-size: 1.25rem;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-follow-up-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-guidance {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-inline: 4px;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-guidance > .bi {
+    color: var(--montero-primary);
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-guidance h2 {
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+
+  .admin-shell .hris-consistency-page.hris-home-page .hris-home-guidance p {
+    font-size: .875rem;
+  }
+
+  @media (min-width: 1200px) {
+    .admin-shell .hris-consistency-page.attendance-page > .row.g-3.mb-3 > .col-md-3 {
+      width: 25%;
+    }
+  }
+
+  @media (max-width: 1199.98px) {
+    .admin-shell .hris-consistency-page.hris-home-page .hris-home-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .admin-shell .hris-consistency-page.organization-page .org-children {
+      margin-left: 8px;
+      padding-left: 8px;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .hris-consistency-page .management-card > .card-header {
+      padding: 16px !important;
+    }
+
+    .admin-shell .hris-consistency-page.organization-page #orgUnitsTree {
+      padding: 8px;
+    }
+
+    .admin-shell .hris-consistency-page.employee-page .employee-search-field {
+      flex-basis: 100%;
+      max-width: none;
+    }
+
+    .admin-shell .hris-consistency-page.hris-home-page .hris-home-panel {
+      padding: 16px;
+    }
+
+    .admin-shell .hris-consistency-page.hris-home-page .hris-home-summary {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

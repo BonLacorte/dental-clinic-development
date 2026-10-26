@@ -3,10 +3,14 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="employmentTypesHeading">Employment Types</h1>
+            <div class="org-page-intro">
+                <p class="org-eyebrow d-print-none">HRIS · Organization</p>
+                <h1 class="h5 mb-0" id="employmentTypesHeading">Employment Types</h1>
+                <p class="org-page-description d-print-none">Manage employment types, descriptions and their active status.</p>
+            </div>
 
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
                 <i class="bi bi-plus-lg"></i> Add Employment Type

@@ -4,10 +4,14 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page">
+<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h1 class="h5 mb-0" id="officesHeading">Manage Offices</h1>
+            <div class="org-page-intro">
+                <p class="org-eyebrow d-print-none">HRIS · Organization</p>
+                <h1 class="h5 mb-0" id="officesHeading">Offices</h1>
+                <p class="org-page-description d-print-none">Organize departments, teams, sections and units across your clinic.</p>
+            </div>
 
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-outline-secondary btn-sm" id="expandAllBtn">

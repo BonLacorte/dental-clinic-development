@@ -1,13 +1,14 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-3 management-page attendance-page hris-page">
+<div class="container-fluid py-3 management-page attendance-page hris-page attendance-workspace hris-consistency-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
+    <div class="d-flex justify-content-between align-items-center mb-3 hris-page-header">
+        <div class="attendance-heading">
+            <p class="attendance-eyebrow d-print-none">HRIS · Attendance</p>
             <h1 class="h4 mb-1" id="dtrHeading">Daily Time Record</h1>
             <div class="text-muted">
-                Employee attendance and time records
+                Review daily attendance and the existing monthly time summaries.
             </div>
         </div>
     </div>
@@ -17,6 +18,8 @@
     <div class="card shadow-sm mb-3">
         <div class="card-body">
 
+            <h2 class="h6 d-print-none">Choose employee and reporting month</h2>
+            <p class="text-muted small d-print-none">Select the reporting period, then view the available records.</p>
             <form method="GET" action="#">
 
                 <div class="row g-3 align-items-end">
