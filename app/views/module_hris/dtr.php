@@ -1,8 +1,9 @@
 <?php include '../app/views/partials/admin-header.php'; ?>
 <?php include '../app/views/module_hris/partials/hris_nav.php'; ?>
 
-<div class="container-fluid py-3 management-page attendance-page hris-page attendance-workspace hris-consistency-page">
+<div class="container-fluid py-3 management-page attendance-page hris-page attendance-workspace hris-consistency-page dtr-owner-page">
 
+    <section class="card shadow-sm mb-3 dtr-context-card" aria-labelledby="dtrHeading">
     <div class="d-flex justify-content-between align-items-center mb-3 hris-page-header">
         <div class="attendance-heading">
             <p class="attendance-eyebrow d-print-none">HRIS · Attendance</p>
@@ -15,11 +16,9 @@
 
 
     <!-- Filters -->
-    <div class="card shadow-sm mb-3">
+    <div class="card shadow-sm mb-3 dtr-filter-card">
         <div class="card-body">
 
-            <h2 class="h6 d-print-none">Choose employee and reporting month</h2>
-            <p class="text-muted small d-print-none">Select the reporting period, then view the available records.</p>
             <form method="GET" action="#">
 
                 <div class="row g-3 align-items-end">
@@ -81,6 +80,8 @@
         </div>
     </div>
 
+
+    </section>
 
     <!-- Summary -->
     <?php if ($employeeId > 0): ?>
@@ -271,6 +272,16 @@
             </div>
 
         </div>
+
+    <?php else: ?>
+
+        <section class="card shadow-sm dtr-empty-state d-print-none" aria-labelledby="dtrEmptyHeading">
+            <div class="card-body">
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                <h2 class="h5" id="dtrEmptyHeading">Choose an employee to view records</h2>
+                <p class="text-muted mb-0">Monthly attendance and time summaries will appear here.</p>
+            </div>
+        </section>
 
     <?php endif; ?>
 

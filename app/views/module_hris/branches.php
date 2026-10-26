@@ -42,7 +42,7 @@
 </div>
 
 <!-- Add Branch -->
-<div class="modal fade hris-dialog" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalTitle">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="addBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="addBranchForm">
@@ -56,17 +56,17 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="addBranchForm_name" class="form-label">Branch Name</label>
-                        <input id="addBranchForm_name" type="text" class="form-control" name="name">
+                        <input id="addBranchForm_name" type="text" class="form-control" name="name" placeholder="e.g. Makati Clinic">
                     </div>
 
                     <div class="mb-3">
                         <label for="addBranchForm_code" class="form-label">Branch Code</label>
-                        <input id="addBranchForm_code" type="text" class="form-control" name="code">
+                        <input id="addBranchForm_code" type="text" class="form-control" name="code" placeholder="e.g. MKT">
                     </div>
 
                     <div class="mb-3">
                         <label for="addBranchForm_address" class="form-label">Address</label>
-                        <textarea id="addBranchForm_address" class="form-control" name="address" rows="3"></textarea>
+                        <textarea id="addBranchForm_address" class="form-control" name="address" rows="3" placeholder="Street, city and postal code"></textarea>
                     </div>
                 </div>
 
@@ -129,7 +129,7 @@
 </div>
 
 <!-- Delete confirmation modal (replaces window.confirm) -->
-<div class="modal fade hris-dialog" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteBranchModalTitle">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="deleteBranchModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteBranchModalTitle" aria-describedby="deleteBranchDescription">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -139,12 +139,12 @@
             </div>
 
             <div class="modal-body">
-                Are you sure you want to delete this branch? This action cannot be undone.
+                <p class="mb-0" id="deleteBranchDescription">Delete <strong id="deleteBranchIdentity"></strong>? This action cannot be undone.</p>
             </div>
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-danger" type="button" id="confirmDeleteBranchBtn">Delete</button>
+                <button class="btn btn-danger" type="button" id="confirmDeleteBranchBtn" disabled>Delete</button>
             </div>
 
         </div>
@@ -156,6 +156,9 @@
 <script>
 let currentPage = 1;
 let pendingDeleteId = null;
+let pendingBranchSelection = null;
+let branchDeleteTrigger = null;
+let branchDeleteInFlight = false;
 
 /* =========================
    ESCAPE HELPER (XSS guard for html() interpolation)
@@ -189,16 +192,69 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '.deleteBranchBtn', function () {
-        pendingDeleteId = $(this).data('id');
+        if (branchDeleteInFlight) return;
+        pendingDeleteId = null;
+        pendingBranchSelection = null;
+        branchDeleteTrigger = this;
+        const selected = resolveBranchDeleteSelection(this);
+        if (!selected) {
+            $('#confirmDeleteBranchBtn').prop('disabled', true);
+            bootstrap.Modal.getInstance(document.getElementById('deleteBranchModal'))?.hide();
+            showToast('Unable to identify the selected branch. Refresh the list and try again.', 'error');
+            return;
+        }
+        pendingBranchSelection = selected;
+        pendingDeleteId = selected.id;
+        $('#deleteBranchIdentity').text(selected.name + (selected.code ? ` (${selected.code})` : ''));
+        $('#confirmDeleteBranchBtn').prop('disabled', false);
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById('deleteBranchModal')
-        ).show();
+        ).show(this);
     });
 
     $('#confirmDeleteBranchBtn').on('click', function () {
-        if (pendingDeleteId) {
-            deleteBranch(pendingDeleteId);
+        if (branchDeleteInFlight || !pendingDeleteId || !$('#deleteBranchModal').hasClass('show')) return;
+        const selected = resolveBranchDeleteSelection(branchDeleteTrigger);
+        if (!selected || selected.id !== pendingDeleteId || selected.name !== pendingBranchSelection?.name || selected.code !== pendingBranchSelection?.code) {
+            pendingDeleteId = null;
+            pendingBranchSelection = null;
+            $(this).prop('disabled', true);
+            bootstrap.Modal.getInstance(document.getElementById('deleteBranchModal')).hide();
+            showToast('The selected branch is no longer available. Refresh the list and try again.', 'error');
+            return;
         }
+        const id = pendingDeleteId;
+        pendingDeleteId = null;
+        pendingBranchSelection = null;
+        branchDeleteInFlight = true;
+        branchDeleteTrigger = null;
+        $(this).prop('disabled', true);
+        deleteBranch(id).always(function () { branchDeleteInFlight = false; });
+    });
+
+    $('#deleteBranchModal').on('shown.bs.modal', function () {
+        $(this).find('.modal-footer [data-bs-dismiss="modal"]').trigger('focus');
+    }).on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const controls = $(this).find('button:visible:not(:disabled)').get();
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === this)) {
+            event.preventDefault();
+            last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+        }
+    }).on('hide.bs.modal', function () {
+        pendingDeleteId = null;
+        pendingBranchSelection = null;
+        $('#confirmDeleteBranchBtn').prop('disabled', true);
+    }).on('hidden.bs.modal', function () {
+        $('#deleteBranchIdentity').text('');
+        const trigger = branchDeleteTrigger;
+        branchDeleteTrigger = null;
+        const fallback = document.querySelector('[data-bs-target="#addBranchModal"]');
+        (trigger && document.contains(trigger) && $(trigger).is(':visible') ? trigger : fallback)?.focus();
     });
 
     $(document).on('click', '.page-btn', function (e) {
@@ -211,6 +267,17 @@ $(document).ready(function () {
 /* =========================
    GET ALL BRANCHES (server-side paginated)
 ========================= */
+function resolveBranchDeleteSelection(trigger) {
+    if (!trigger || !document.contains(trigger)) return null;
+    const id = trigger.getAttribute('data-id');
+    const $row = $(trigger).closest('#branchesTable tbody tr');
+    const $name = $row.children('td.branch-name');
+    const $code = $row.children('td.branch-code');
+    if (!/^[1-9]\d*$/.test(id || '') || $row.attr('data-branch-id') !== id || $name.length !== 1 || $code.length !== 1) return null;
+    const name = $name.text().trim();
+    return name ? {id, name, code: $code.text().trim()} : null;
+}
+
 function getAllBranches(page) {
     showLoader("Loading branches...");
 
@@ -251,9 +318,9 @@ function getAllBranches(page) {
 
                 branches.forEach((b) => {
                     rows += `
-                        <tr>
-                            <td class="ps-4">${esc(b.name)}</td>
-                            <td>${esc(b.code)}</td>
+                        <tr data-branch-id="${esc(b.id)}">
+                            <td class="ps-4 branch-name">${esc(b.name)}</td>
+                            <td class="branch-code">${esc(b.code)}</td>
                             <td>${esc(b.address) || '-'}</td>
                             <td class="text-end pe-4">
 
@@ -508,7 +575,7 @@ function deleteBranch(id) {
 
     let csrfToken = $('#addBranchForm [name="csrf_token"]').val();
 
-    $.ajax({
+    return $.ajax({
         url: '/hris/branches/deletebranch/' + id,
         type: 'POST',
         dataType: 'json',

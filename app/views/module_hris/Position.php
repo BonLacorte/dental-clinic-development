@@ -3,7 +3,7 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page">
+<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page positions-owner-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div class="org-page-intro">
@@ -24,8 +24,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     <caption class="visually-hidden">Positions and their existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" width="80" class="ps-4">#</th>
-                            <th scope="col">Position Name</th>
+                            <th scope="col" class="ps-4">Position Name</th>
                             <th scope="col" width="180">Created At</th>
                             <th scope="col" width="120" class="text-end pe-4">Actions</th>
                         </tr>
@@ -33,7 +32,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
                     <tbody id="positionsTableBody">
                         <tr>
-                            <td colspan="4" class="text-center">
+                            <td colspan="3" class="text-center">
                                 Loading...
                             </td>
                         </tr>
@@ -45,8 +44,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Position -->
-<div class="modal fade hris-dialog" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addPositionModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="addPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addPositionModalTitle">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <form id="addPositionForm">
@@ -67,7 +66,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             type="text"
                             class="form-control"
                             name="name"
-                            placeholder="Software Engineer">
+                            placeholder="e.g. Dental Assistant" aria-describedby="addPositionNameHelp">
+                        <p class="form-text mb-0" id="addPositionNameHelp">Enter the position name used by your clinic, such as Dentist or Receptionist.</p>
                     </div>
 
                 </div>
@@ -89,8 +89,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Position -->
-<div class="modal fade hris-dialog" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editPositionModalTitle">
-    <div class="modal-dialog">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="editPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editPositionModalTitle">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <form id="editPositionForm">
@@ -111,7 +111,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                         <input id="editPositionForm_name"
                             type="text"
                             class="form-control"
-                            name="name">
+                            name="name" aria-describedby="editPositionNameHelp">
+                        <p class="form-text mb-0" id="editPositionNameHelp">Enter the position name used by your clinic, such as Dentist or Receptionist.</p>
                     </div>
 
                 </div>
@@ -133,7 +134,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Delete Position Confirmation -->
-<div class="modal fade hris-dialog" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletePositionModalTitle">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="deletePositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletePositionModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -191,7 +192,7 @@ $(document).ready(function () {
 
     $(document).on('click', '.deletePositionBtn', function () {
         positionIdToDelete = $(this).data('id');
-        let name = $(this).closest('tr').find('td:nth-child(2)').text();
+        let name = $(this).closest('tr').find('td.position-name').text();
 
         $('#deletePositionName').text(name);
 
@@ -225,7 +226,7 @@ function getAllPositions() {
             if (!res.data || res.data.length === 0) {
                 rows = `
                     <tr>
-                        <td colspan="4" class="text-center">
+                        <td colspan="3" class="text-center">
                             No positions found
                         </td>
                     </tr>
@@ -233,13 +234,12 @@ function getAllPositions() {
 
             } else {
 
-                res.data.forEach((position, index) => {
+                res.data.forEach((position) => {
                     rows += `
                         <tr>
-                            <td class="ps-4">${index + 1}</td>
-                            <td>${position.name}</td>
-                            <td>${position.created_at ?? '-'}</td>
-                            <td class="text-end pe-4">
+                            <td class="ps-4 position-name">${position.name}</td>
+                            <td class="position-created-at">${position.created_at ?? '-'}</td>
+                            <td class="text-end pe-4 position-actions">
 
                                 <button class="btn btn-sm editPositionBtn hris-action"
                                     data-id="${position.id}" aria-label="Edit position" title="Edit position">

@@ -33,7 +33,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Add Office -->
-<div class="modal fade hris-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="addOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addOfficeForm">
@@ -65,12 +65,12 @@ include '../app/views/module_hris/partials/hris_nav.php';
 
                         <div class="col-md-8">
                             <label for="addOfficeForm_name" class="form-label">Name</label>
-                            <input id="addOfficeForm_name" type="text" class="form-control" name="name">
+                            <input id="addOfficeForm_name" type="text" class="form-control" name="name" placeholder="e.g. Clinical Operations">
                         </div>
 
                         <div class="col-md-4">
                             <label for="addOfficeForm_code" class="form-label">Code</label>
-                            <input id="addOfficeForm_code" type="text" class="form-control" name="code">
+                            <input id="addOfficeForm_code" type="text" class="form-control" name="code" placeholder="e.g. CLINICAL">
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
 </div>
 
 <!-- Edit Office -->
-<div class="modal fade hris-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="editOfficeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editOfficeModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editOfficeForm">
@@ -176,9 +176,31 @@ include '../app/views/module_hris/partials/hris_nav.php';
     </div>
 </div>
 
+<!-- Selected-unit confirmation; deletion dispatch stays in the existing workflow. -->
+<div class="modal fade hris-dialog organization-page org-owner-dialog" id="deleteOfficeModal" tabindex="-1" aria-labelledby="deleteOfficeModalTitle" aria-describedby="deleteOfficeDescription">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteOfficeModalTitle">Delete Unit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close Delete Unit"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" id="deleteOfficeDescription">Delete <strong id="deleteOfficeName"></strong>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteOfficeBtn" disabled>Delete Unit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentPage = 1;
 let orgUnitsFlat = [];
+let pendingOfficeDelete = null;
+let officeDeleteTrigger = null;
+let officeDeleteInFlight = false;
 
 $(document).ready(function () {
     getAllOrgUnits();
@@ -209,8 +231,85 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteOfficeBtn', function (e) {
         e.stopPropagation();
-        deleteOffice($(this).data('id'));
+        deleteOffice($(this).data('id'), this);
     });
+
+    $('#confirmDeleteOfficeBtn').on('click', function () {
+        if (officeDeleteInFlight || !pendingOfficeDelete || !$('#deleteOfficeModal').hasClass('show')) return;
+        const selected = resolveOfficeDeleteSelection(pendingOfficeDelete.id);
+        if (!selected || selected.name !== pendingOfficeDelete.name) {
+            pendingOfficeDelete = null;
+            $(this).prop('disabled', true);
+            bootstrap.Modal.getInstance(document.getElementById('deleteOfficeModal')).hide();
+            showToast('The selected unit is no longer available. Refresh the tree and try again.', 'error');
+            return;
+        }
+        const id = selected.id;
+        pendingOfficeDelete = null;
+        officeDeleteInFlight = true;
+        officeDeleteTrigger = null;
+        $(this).prop('disabled', true);
+        bootstrap.Modal.getInstance(document.getElementById('deleteOfficeModal')).hide();
+        performConfirmedOfficeDelete(id).always(function () { officeDeleteInFlight = false; });
+    });
+
+    $('#deleteOfficeModal').on('shown.bs.modal', function () {
+        $(this).find('.modal-footer [data-bs-dismiss="modal"]').trigger('focus');
+    }).on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const controls = $(this).find('button:visible:not(:disabled)').get();
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === this)) {
+            event.preventDefault();
+            last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+        }
+    }).on('hide.bs.modal', function () {
+        pendingOfficeDelete = null;
+        $('#confirmDeleteOfficeBtn').prop('disabled', true);
+    }).on('hidden.bs.modal', function () {
+        $('#deleteOfficeName').text('');
+        const trigger = officeDeleteTrigger;
+        officeDeleteTrigger = null;
+        const fallback = document.querySelector('[data-bs-target="#addOfficeModal"]');
+        (trigger && document.contains(trigger) && $(trigger).is(':visible') ? trigger : fallback)?.focus();
+    });
+
+    // Private to this ready callback: only the consuming confirmation handler calls it.
+    function performConfirmedOfficeDelete(id) {
+        return $.ajax({
+            url: '/hris/offices/deleteunit/' + id,
+            type: 'POST',
+            data: {
+                csrf_token: $('input[name="csrf_token"]').first().val()
+            },
+            dataType: 'json',
+
+            beforeSend: function () {
+                showLoader("Deleting office...");
+            },
+
+            success: function (res) {
+                hideLoader();
+
+                if (!res.success) {
+                    showToast(res.message || 'Something went wrong.', 'error');
+                    return;
+                }
+
+                showToast(res.message, 'success');
+                getAllOrgUnits();
+            },
+
+            error: function (xhr) {
+                hideLoader();
+                console.log(xhr.responseText);
+                showToast('Something went wrong.', 'error');
+            }
+        });
+    }
 
     $(document).on('click', '.org-toggle', function () {
         let id = $(this).data('id');
@@ -550,41 +649,30 @@ function updateOffice(form) {
     });
 }
 
-function deleteOffice(id) {
-    if (!confirm('Are you sure you want to delete this office?')) {
+function resolveOfficeDeleteSelection(id) {
+    const key = String(id ?? '');
+    if (!/^[1-9]\d*$/.test(key) || !Array.isArray(orgUnitsFlat)) return null;
+    const matches = orgUnitsFlat.filter(unit => unit && String(unit.id) === key);
+    if (matches.length !== 1 || typeof matches[0].name !== 'string' || !matches[0].name.trim()) return null;
+    return {id: key, name: matches[0].name.trim()};
+}
+
+// Every existing caller enters here and must go through the Bootstrap confirmation.
+function deleteOffice(id, trigger = null) {
+    if (officeDeleteInFlight) return;
+    pendingOfficeDelete = null;
+    officeDeleteTrigger = trigger;
+    const selected = resolveOfficeDeleteSelection(id);
+    if (!selected) {
+        $('#confirmDeleteOfficeBtn').prop('disabled', true);
+        bootstrap.Modal.getInstance(document.getElementById('deleteOfficeModal'))?.hide();
+        showToast('Unable to identify the selected unit. Refresh the tree and try again.', 'error');
         return;
     }
-
-    $.ajax({
-        url: '/hris/offices/deleteunit/' + id,
-        type: 'POST',
-        data: {
-            csrf_token: $('input[name="csrf_token"]').first().val()
-        },
-        dataType: 'json',
-
-        beforeSend: function () {
-            showLoader("Deleting office...");
-        },
-
-        success: function (res) {
-            hideLoader();
-
-            if (!res.success) {
-                showToast(res.message || 'Something went wrong.', 'error');
-                return;
-            }
-
-            showToast(res.message, 'success');
-            getAllOrgUnits();
-        },
-
-        error: function (xhr) {
-            hideLoader();
-            console.log(xhr.responseText);
-            showToast('Something went wrong.', 'error');
-        }
-    });
+    pendingOfficeDelete = selected;
+    $('#deleteOfficeName').text(selected.name);
+    $('#confirmDeleteOfficeBtn').prop('disabled', false);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteOfficeModal')).show(trigger);
 }
 </script>
 </body>

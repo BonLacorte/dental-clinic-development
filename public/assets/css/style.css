@@ -2669,3 +2669,106 @@
     }
   }
 }
+
+/* Owner Organization/DTR corrections: opt-in dialogs and retained table schemas. */
+@media screen {
+  .admin-shell .organization-page.org-owner-dialog .modal-content {
+    border-radius: var(--montero-card-radius);
+  }
+
+  .admin-shell .organization-page.org-owner-dialog :is(.modal-header, .modal-footer) {
+    padding: 16px 24px;
+    gap: 8px;
+  }
+
+  .admin-shell .organization-page.org-owner-dialog .modal-body {
+    padding: 24px;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .organization-page.org-owner-dialog .modal-footer {
+    justify-content: flex-end;
+    background: var(--montero-canvas);
+  }
+
+  /* Stable field classes supersede the old four-column positional styling. */
+  .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-name,
+  .admin-shell .organization-page.employment-types-owner-page #appointmentsTable > tbody > tr > td.appointment-name {
+    color: var(--montero-text);
+    font-size: .9375rem;
+    font-weight: 600;
+    font-variant-numeric: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-created-at,
+  .admin-shell .organization-page.employment-types-owner-page #appointmentsTable > tbody > tr > td.appointment-code {
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-actions {
+    color: var(--montero-text);
+    font-size: .9375rem;
+    font-weight: 400;
+    font-variant-numeric: normal;
+  }
+
+  .admin-shell .dtr-owner-page > .dtr-context-card > .hris-page-header {
+    margin: 0 !important;
+    padding: 24px;
+    border-bottom: 1px solid var(--montero-divider);
+  }
+
+  .admin-shell .dtr-owner-page .dtr-context-card h1 {
+    color: var(--montero-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.025em;
+  }
+
+  .admin-shell .dtr-owner-page .dtr-context-card > .dtr-filter-card {
+    margin: 0 !important;
+    border: 0;
+    box-shadow: none !important;
+  }
+
+  .admin-shell .dtr-owner-page .dtr-empty-state .card-body {
+    padding: 48px 24px;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-shell .dtr-owner-page .dtr-empty-state .bi {
+    display: block;
+    margin-bottom: 24px;
+    color: var(--montero-primary);
+    font-size: 2rem;
+  }
+
+  .admin-shell .dtr-owner-page .dtr-empty-state h2 {
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 575.98px) {
+    .admin-shell .organization-page.org-owner-dialog :is(.modal-header, .modal-body, .modal-footer),
+    .admin-shell .dtr-owner-page > .dtr-context-card > .hris-page-header {
+      padding-inline: 16px;
+    }
+
+    .admin-shell .dtr-owner-page .dtr-empty-state .card-body {
+      padding: 32px 16px;
+    }
+  }
+}
+
+/* Remove only the new visual grouping box in print; retain the original
+   heading/filter-card layout and all existing attendance/financial output. */
+@media print {
+  .admin-shell .dtr-owner-page > .dtr-context-card {
+    display: contents;
+  }
+}

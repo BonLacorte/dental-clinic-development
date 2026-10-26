@@ -3,7 +3,7 @@ include '../app/views/partials/admin-header.php';
 include '../app/views/module_hris/partials/hris_nav.php';
 ?>
 
-<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page">
+<div class="container-fluid py-4 management-page hris-page organization-page hris-consistency-page employment-types-owner-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div class="org-page-intro">
@@ -24,8 +24,8 @@ include '../app/views/module_hris/partials/hris_nav.php';
                     <caption class="visually-hidden">Employment types, descriptions and activity status with existing record actions.</caption>
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" width="120" class="ps-4">Code</th>
-                            <th scope="col">Employment Type Name</th>
+                            <th scope="col" class="ps-4">Employment Type Name</th>
+                            <th scope="col" width="120">Code</th>
                             <th scope="col">Description</th>
                             <th scope="col" width="100">Status</th>
                             <th scope="col" width="140" class="text-end pe-4">Actions</th>
@@ -99,6 +99,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             value="1"
                             checked>
                         <label class="form-check-label" for="addAppointmentIsActive">Active</label>
+                        <p class="form-text mb-0">Switch off to mark this employment type Inactive. Inactive records remain in this catalog; this does not delete the record.</p>
                     </div>
 
                 </div>
@@ -170,6 +171,7 @@ include '../app/views/module_hris/partials/hris_nav.php';
                             id="editAppointmentIsActive"
                             value="1">
                         <label class="form-check-label" for="editAppointmentIsActive">Active</label>
+                        <p class="form-text mb-0">Switch off to mark this employment type Inactive. Inactive records remain in this catalog; this does not delete the record.</p>
                     </div>
 
                 </div>
@@ -326,8 +328,8 @@ function getAllAppointments() {
 
                     rows += `
                         <tr>
-                            <td class="ps-4">${appointment.code ?? '-'}</td>
-                            <td class="appointment-name">${appointment.name}</td>
+                            <td class="ps-4 appointment-name">${appointment.name}</td>
+                            <td class="appointment-code">${appointment.code ?? '-'}</td>
                             <td>${appointment.description ?? '-'}</td>
                             <td>${statusBadge}</td>
                             <td class="text-end pe-4">
