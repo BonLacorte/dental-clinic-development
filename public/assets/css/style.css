@@ -2701,12 +2701,23 @@
     overflow-wrap: anywhere;
   }
 
-  .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-created-at,
-  .admin-shell .organization-page.employment-types-owner-page #appointmentsTable > tbody > tr > td.appointment-code {
+  .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-created-at {
     color: var(--montero-muted);
     font-size: .875rem;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
+  }
+
+  .admin-shell .organization-page.employment-types-owner-page #appointmentsTable > tbody > tr > td.appointment-code {
+    width: 20rem;
+    min-width: 20rem;
+    color: var(--montero-muted);
+    font-size: .875rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   .admin-shell .organization-page.positions-owner-page #positionsTable > tbody > tr > td.position-actions {
@@ -2770,5 +2781,20 @@
 @media print {
   .admin-shell .dtr-owner-page > .dtr-context-card {
     display: contents;
+  }
+}
+
+/* Office hierarchy: separate bordered rows at every level. */
+@media screen {
+  .admin-shell .hris-consistency-page.organization-page #orgUnitsTree .org-unit-node {
+    margin-block: 8px;
+    min-width: 0;
+  }
+
+  .admin-shell .hris-consistency-page.organization-page #orgUnitsTree .org-unit-row {
+    min-width: 0;
+    border: 1px solid var(--montero-divider);
+    border-radius: 8px;
+    background-color: var(--montero-surface);
   }
 }

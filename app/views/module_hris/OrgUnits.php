@@ -488,8 +488,8 @@ function buildTreeHTML(byParent, parentKey, depth) {
         let indentClass = depth > 0 ? `ps-${Math.min(depth * 4, 5)}` : '';
 
         html += `
-            <div class="border-bottom">
-                <div class="d-flex align-items-center px-3 py-2 ${indentClass}">
+           <div class="org-unit-node">
+                <div class="org-unit-row d-flex align-items-center px-3 py-2 ${indentClass}">
                     ${hasChildren
                         ? `<button type="button" class="org-toggle btn btn-outline-secondary me-2" data-id="${unit.id}" aria-controls="children-${unit.id}" aria-expanded="false" aria-label="Toggle ${MonteroHris.escape(unit.name)}" title="Toggle ${MonteroHris.escape(unit.name)}">
                                 <i class="bi bi-chevron-right" aria-hidden="true"></i>
