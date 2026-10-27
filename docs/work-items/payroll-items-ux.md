@@ -8,8 +8,30 @@
 - **Verified development main / source baseline:** `b5526bb4a7999bbd3c253fcdda1c8419a171314d`. Live `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` confirmed this baseline. The original checkout started on `work` at the same SHA with a clean tracked tree/index. Downloaded request attachments were moved outside the checkout.
 - **Other work:** Employees PR #13, Organization PR #14 and Attendance PR #15 were open and separate at preflight. No merge/cherry-pick/import from those branches or Draft PR #8.
 - **Status:** `PARTIALLY_IMPLEMENTED` — frontend build is implemented on all six pages; native PHP lint and authenticated application acceptance remain BLOCKED. This is a development draft, not merge or production acceptance.
-- **Last reviewed:** 23 October 2026, Manila.
+- **Last reviewed:** 27 October 2026, Manila.
 - **Implementation commits:** `c3a3398` (scoped CSS) and `e9a3728` (six views). The handoff commit follows them; final HEAD, remote verification and draft PR are recorded in the final chat/PR. No merge or deployment.
+
+## Header and search refinement — 27 October 2026
+
+Owner follow-up requests the supplied Payroll Items tables with the Leave Management header and Search section format. Refinement baseline: `8c671adca2b48574cd3423bb1011e632fecf6dfe`; same approved topic branch and existing draft PR #16, initially clean. The seven-file application allowlist and this handoff remain the scope. No separate module branch was imported.
+
+**Presentation contract / implementation:** all six pages now show `Payroll · Items`, the existing page title and unchanged description. Title size/weight and eyebrow spacing follow the supplied Leave Management reference. Records and Types use visible “Search” labels, retaining page-specific accessible text. Search field, Search, Clear and the compact current-sort button share a desktop row and wrap on smaller screens. The button initially reads “Date added: newest first” and opens the existing field/direction selectors in a Bootstrap dropdown. All original supported keys/defaults/ASC-DESC values remain available. Selectors retain their IDs, events and placement outside the search form; opening the menu sends no request. The only executable change is five display/accessibility lines in `syncSort` per view to keep the button truthful after selector/header sorting. This is the owner-requested sort-button presentation under the existing narrow frontend authorization; no request, response or business behavior change.
+
+**Exact files:** the same six Payroll Items views, existing Payroll Items screen-scoped rules in `public/assets/css/style.css`, and this handoff. PHP tag sequences/configuration, dialog markup, row generation, financial formatting, search/pagination/request/CRUD functions and all other JavaScript compare identically with this refinement baseline. CSS preceding the existing Payroll Items block is byte-identical. HRIS Leave Management was inspected as a reference only and is unchanged.
+
+| Fresh check | Result | Evidence / limits |
+| --- | --- | --- |
+| Six extracted JavaScript scripts | PASS | `node --check` for every view |
+| PHP/executable/request/form scope | PASS | Ordered PHP tag sequence equality, unchanged config and complete dialog markup; removing only the five authorized sort-label lines makes each script byte-identical to baseline |
+| Full diff, whitespace and protected trees | PASS | Exact seven application files plus this handoff; protected-tree diff empty and `git diff --check` clean |
+| Browser fixture refinement checks | PASS — SIMULATED | **774/774** checks across six record and four Type workspaces: original sort keys/both directions, summary/header synchronization, menu open without requests, Escape/focus return, keyboard activation, Enter search/Clear, exact business-form metadata, desktop row alignment, targets, menu access, root overflow at 1440/1200/1199/992/991/768/767/576/575/375/320px and 200% CSS text enlargement. An initial harness expectation used the Type display title instead of the existing “Name” sort option; expectation corrected and final suite rerun. |
+| Visual review | PASS — SIMULATED | Desktop/mobile source-derived screenshots inspected; reference header and compact toolbar hierarchy reproduced |
+| Native PHP lint | BLOCKED | No PHP executable available; no runtime/dependency installed. Unchanged PHP source tokens are preservation evidence, not native lint. |
+| Authenticated WSL/application/DB/permissions, screen reader, physical devices/other browsers, native zoom, payroll/print integration | NOT RUN | This cloud checkout cannot access the user's laptop. No database, real CRUD, payroll processing or production operation executed. |
+
+Fresh fixtures/scripts/results/screenshots: `/tmp/payroll-items-refinement/` (ephemeral, fictional, outside Git). PHP is not executed by these fixtures; shared includes are omitted and shell geometry emulated. Actual jQuery/Bootstrap run with in-memory GET responses; no application or SQL endpoint executes. Historical build evidence below remains the 23 October record, not fresh integration evidence.
+
+**Local review:** in the clean `~/projects/monterodental-payroll-items-review` checkout, fast-forward from `origin/codex/md-pay-items-ux-001-build` and refresh `http://payroll.localhost:8104/payroll/allowances` (then the other five pages and four Type tabs). Docker bind-mounts source, so no image rebuild or database reset is required. Keep the draft until authenticated acceptance and the existing senior-owned financial/security gates are addressed.
 
 ## Goal and acceptance criteria
 

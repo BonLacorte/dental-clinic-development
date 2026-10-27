@@ -2040,18 +2040,18 @@
   }
 
   .admin-shell .payroll-items-page .payroll-eyebrow {
-    margin: 0 0 4px;
+    margin: 0 0 12px;
     color: var(--montero-primary);
     font-size: .875rem;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .admin-shell .payroll-items-page .payroll-items-header h1 {
     margin: 0 0 8px;
     color: var(--montero-text);
-    font-size: 1.75rem;
-    line-height: 1.25;
-    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 500;
   }
 
   .admin-shell .payroll-items-page .payroll-description {
@@ -2085,18 +2085,22 @@
     border-bottom: 3px solid var(--montero-primary);
   }
 
-  .admin-shell .payroll-items-page .payroll-search-toolbar,
-  .admin-shell .payroll-items-page .payroll-sort-toolbar {
+  .admin-shell .payroll-items-page .payroll-search-controls,
+  .admin-shell .payroll-items-page .payroll-search-toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: end;
-    gap: 12px;
+    gap: 8px;
     min-width: 0;
+  }
+
+  .admin-shell .payroll-items-page .payroll-search-toolbar {
+    flex: 0 1 43rem;
   }
 
   .admin-shell .payroll-items-page .payroll-search-field {
     flex: 1 1 20rem;
-    max-width: 36rem;
+    max-width: 31.5rem;
     min-width: 0;
   }
 
@@ -2104,10 +2108,30 @@
     padding: 0;
   }
 
+  .admin-shell .payroll-items-page .payroll-order-control {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-shell .payroll-items-page .payroll-order-control > .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .admin-shell .payroll-items-page .payroll-sort-menu {
+    --bs-dropdown-min-width: 0;
+    width: min(20rem, calc(100vw - 64px));
+    padding: 16px;
+    border-color: var(--montero-control-border);
+    border-radius: 8px;
+    background: var(--montero-surface);
+  }
+
   .admin-shell .payroll-items-page .payroll-sort-toolbar {
-    align-items: center;
+    display: grid;
     gap: 8px;
-    margin-top: 16px;
+    margin: 0;
   }
 
   .admin-shell .payroll-items-page .payroll-sort-toolbar label {
@@ -2116,9 +2140,9 @@
   }
 
   .admin-shell .payroll-items-page .payroll-sort-toolbar .form-select {
-    width: auto;
+    width: 100%;
     max-width: 100%;
-    min-width: 10rem;
+    min-width: 0;
   }
 
   .admin-shell .payroll-items-page .payroll-list-feedback {

@@ -105,7 +105,7 @@ $hasTypes = !empty($pageConfig['hasTypes']);
 <div class="container-fluid py-4 management-page payroll-config-page payroll-items-page">
     <div class="card shadow-sm management-card">
         <div class="card-header bg-white payroll-items-header">
-            <div><p class="payroll-eyebrow">Payroll items</p><h1 id="payrollItemsTitle"><?= e($pageConfig['title']); ?></h1><p class="payroll-description">Manage employee commissions and commission types.</p></div>
+            <div><p class="payroll-eyebrow">Payroll · Items</p><h1 id="payrollItemsTitle"><?= e($pageConfig['title']); ?></h1><p class="payroll-description">Manage employee commissions and commission types.</p></div>
             <div class="payroll-header-actions">
                 <?php if ($hasTypes): ?>
                     <button id="addTypeAction" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#addTypeModal">
@@ -134,25 +134,34 @@ $hasTypes = !empty($pageConfig['hasTypes']);
         <div class="tab-content">
             <div class="tab-pane fade show active" id="recordsPane" role="tabpanel" aria-labelledby="records-tab">
                 <div class="card-body border-bottom">
-                    <form id="recordSearchForm" class="payroll-search-toolbar">
-                        <div class="payroll-search-field">
-                            <label class="form-label" for="recordSearchInput">Search <?= e($pageConfig['title']); ?></label>
-                            <input type="text" class="form-control" id="recordSearchInput" placeholder="Search <?= e(strtolower($pageConfig['title'])); ?>">
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-outline-primary" type="submit">
-                                <i class="bi bi-search" aria-hidden="true"></i> Search
+                    <div class="payroll-search-controls">
+                        <form id="recordSearchForm" class="payroll-search-toolbar">
+                            <div class="payroll-search-field">
+                                <label class="form-label" for="recordSearchInput">Search<span class="visually-hidden"> <?= e($pageConfig['title']); ?></span></label>
+                                <input type="text" class="form-control" id="recordSearchInput" placeholder="Search <?= e(strtolower($pageConfig['title'])); ?>">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-outline-primary" type="submit">
+                                    <i class="bi bi-search" aria-hidden="true"></i> Search
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-outline-secondary" type="button" id="clearRecordSearchBtn">Clear</button>
+                            </div>
+                        </form>
+                        <div class="dropdown payroll-order-control">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" id="recordSortToggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-controls="recordSortOptions">
+                                <span class="payroll-sort-label">Date added: newest first</span>
                             </button>
+                            <div class="dropdown-menu payroll-sort-menu" id="recordSortOptions" aria-labelledby="recordSortToggle">
+                                <div class="payroll-sort-toolbar">
+                                    <label for="recordSortBy">Sort by</label>
+                                    <select class="form-select" id="recordSortBy"></select>
+                                    <label for="recordSortDirection">Sort direction</label>
+                                    <select class="form-select" id="recordSortDirection"><option value="DESC">Descending</option><option value="ASC">Ascending</option></select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-auto">
-                            <button class="btn btn-outline-secondary" type="button" id="clearRecordSearchBtn">Clear</button>
-                        </div>
-                    </form>
-                    <div class="payroll-sort-toolbar" aria-label="Records ordering">
-                        <label for="recordSortBy">Sort by</label>
-                        <select class="form-select" id="recordSortBy"></select>
-                        <label class="visually-hidden" for="recordSortDirection">Sort direction</label>
-                        <select class="form-select" id="recordSortDirection"><option value="DESC">Descending</option><option value="ASC">Ascending</option></select>
                     </div>
                     <p class="payroll-list-feedback" id="recordListFeedback" role="status" aria-live="polite"></p>
                 </div>
@@ -184,25 +193,34 @@ $hasTypes = !empty($pageConfig['hasTypes']);
             <?php if ($hasTypes): ?>
                 <div class="tab-pane fade" id="typesPane" role="tabpanel" aria-labelledby="types-tab">
                     <div class="card-body border-bottom">
-                        <form id="typeSearchForm" class="payroll-search-toolbar">
-                            <div class="payroll-search-field">
-                                <label class="form-label" for="typeSearchInput">Search <?= e($pageConfig['typeLabel']); ?>s</label>
-                                <input type="text" class="form-control" id="typeSearchInput" placeholder="Search <?= e(strtolower($pageConfig['typeLabel'])); ?>s">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-outline-primary" type="submit">
-                                    <i class="bi bi-search" aria-hidden="true"></i> Search
+                        <div class="payroll-search-controls">
+                            <form id="typeSearchForm" class="payroll-search-toolbar">
+                                <div class="payroll-search-field">
+                                    <label class="form-label" for="typeSearchInput">Search<span class="visually-hidden"> <?= e($pageConfig['typeLabel']); ?>s</span></label>
+                                    <input type="text" class="form-control" id="typeSearchInput" placeholder="Search <?= e(strtolower($pageConfig['typeLabel'])); ?>s">
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-primary" type="submit">
+                                        <i class="bi bi-search" aria-hidden="true"></i> Search
+                                    </button>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary" type="button" id="clearTypeSearchBtn">Clear</button>
+                                </div>
+                            </form>
+                            <div class="dropdown payroll-order-control">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" id="typeSortToggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-controls="typeSortOptions">
+                                    <span class="payroll-sort-label">Date added: newest first</span>
                                 </button>
+                                <div class="dropdown-menu payroll-sort-menu" id="typeSortOptions" aria-labelledby="typeSortToggle">
+                                    <div class="payroll-sort-toolbar">
+                                        <label for="typeSortBy">Sort by</label>
+                                        <select class="form-select" id="typeSortBy"></select>
+                                        <label for="typeSortDirection">Sort direction</label>
+                                        <select class="form-select" id="typeSortDirection"><option value="DESC">Descending</option><option value="ASC">Ascending</option></select>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-auto">
-                                <button class="btn btn-outline-secondary" type="button" id="clearTypeSearchBtn">Clear</button>
-                            </div>
-                        </form>
-                        <div class="payroll-sort-toolbar" aria-label="Types ordering">
-                            <label for="typeSortBy">Sort by</label>
-                            <select class="form-select" id="typeSortBy"></select>
-                            <label class="visually-hidden" for="typeSortDirection">Sort direction</label>
-                            <select class="form-select" id="typeSortDirection"><option value="DESC">Descending</option><option value="ASC">Ascending</option></select>
                         </div>
                         <p class="payroll-list-feedback" id="typeListFeedback" role="status" aria-live="polite"></p>
                     </div>
@@ -543,6 +561,11 @@ function syncSort(mode) {
     const state = mode === 'record' ? recordState : typeState;
     $('#' + mode + 'SortBy').val(state.sortBy);
     $('#' + mode + 'SortDirection').val(state.sortDir);
+    const sortLabel = state.sortBy === 'created_at'
+        ? 'Date added: ' + (state.sortDir === 'DESC' ? 'newest first' : 'oldest first')
+        : $('#' + mode + 'SortBy option:selected').text() + ': ' + (state.sortDir === 'ASC' ? 'ascending' : 'descending');
+    $('#' + mode + 'SortToggle .payroll-sort-label').text(sortLabel);
+    $('#' + mode + 'SortToggle').attr('aria-label', 'Sort options. Current order: ' + sortLabel);
     const $headers = $(mode === 'record' ? '#recordsTable th' : '#typesTable th');
     $headers.removeAttr('aria-sort');
     $headers.find('.payroll-sort-indicator').text('↕');
