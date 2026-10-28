@@ -132,53 +132,66 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveRequestModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="addLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveRequestModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addLeaveRequestForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addLeaveRequestModalTitle">Add Leave Request</h5>
+                    <h2 class="modal-title" id="addLeaveRequestModalTitle">Add Leave Request</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="addLeaveRequestForm_employee_id" class="form-label">Employee</label>
-                            <select id="addLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="addLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
-                            <select id="addLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addLeaveRequestForm_date_from" class="form-label">Date From</label>
-                            <input id="addLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addLeaveRequestForm_date_to" class="form-label">Date To</label>
-                            <input id="addLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addLeaveRequestForm_status" class="form-label">Status</label>
-                            <select id="addLeaveRequestForm_status" class="form-select" name="status">
-                                <option value="PENDING">PENDING</option>
-                                <option value="APPROVED">APPROVED</option>
-                                <option value="REJECTED">REJECTED</option>
-                                <option value="CANCELLED">CANCELLED</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label for="addLeaveRequestForm_reason" class="form-label">Reason</label>
-                            <textarea id="addLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
-                        </div>
+                    <p class="payroll-dialog-context">Add a new leave request.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Employee and leave</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="addLeaveRequestForm_employee_id" class="form-label payroll-field"><span>Employee</span>
+                                                        <select id="addLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="addLeaveRequestForm_leave_type_id" class="form-label payroll-field"><span>Leave Type</span>
+                                                        <select id="addLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Leave period</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="addLeaveRequestForm_date_from" class="form-label payroll-field"><span>Date From</span>
+                                                        <input id="addLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addLeaveRequestForm_date_to" class="form-label payroll-field"><span>Date To</span>
+                                                        <input id="addLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addLeaveRequestForm_status" class="form-label payroll-field"><span>Status</span>
+                                                        <select id="addLeaveRequestForm_status" class="form-select" name="status">
+                                                            <option value="PENDING">PENDING</option>
+                                                            <option value="APPROVED">APPROVED</option>
+                                                            <option value="REJECTED">REJECTED</option>
+                                                            <option value="CANCELLED">CANCELLED</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Additional details</legend><div class="row g-3">
+                            <div class="col-12">
+                                                        <label for="addLeaveRequestForm_reason" class="form-label payroll-field"><span>Reason</span>
+                                                        <textarea id="addLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
@@ -186,7 +199,7 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveRequestModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="editLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveRequestModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editLeaveRequestForm">
@@ -194,46 +207,59 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editLeaveRequestModalTitle">Edit Leave Request</h5>
+                    <h2 class="modal-title" id="editLeaveRequestModalTitle">Edit Leave Request</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="editLeaveRequestForm_employee_id" class="form-label">Employee</label>
-                            <select id="editLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editLeaveRequestForm_leave_type_id" class="form-label">Leave Type</label>
-                            <select id="editLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editLeaveRequestForm_date_from" class="form-label">Date From</label>
-                            <input id="editLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editLeaveRequestForm_date_to" class="form-label">Date To</label>
-                            <input id="editLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editLeaveRequestForm_status" class="form-label">Status</label>
-                            <select id="editLeaveRequestForm_status" class="form-select" name="status">
-                                <option value="PENDING">PENDING</option>
-                                <option value="APPROVED">APPROVED</option>
-                                <option value="REJECTED">REJECTED</option>
-                                <option value="CANCELLED">CANCELLED</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label for="editLeaveRequestForm_reason" class="form-label">Reason</label>
-                            <textarea id="editLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
-                        </div>
+                    <p class="payroll-dialog-context">Review and update this leave request.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Employee and leave</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="editLeaveRequestForm_employee_id" class="form-label payroll-field"><span>Employee</span>
+                                                        <select id="editLeaveRequestForm_employee_id" class="form-select employeeSelect" name="employee_id"></select>
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="editLeaveRequestForm_leave_type_id" class="form-label payroll-field"><span>Leave Type</span>
+                                                        <select id="editLeaveRequestForm_leave_type_id" class="form-select leaveTypeSelect" name="leave_type_id"></select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Leave period</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="editLeaveRequestForm_date_from" class="form-label payroll-field"><span>Date From</span>
+                                                        <input id="editLeaveRequestForm_date_from" type="date" class="form-control" name="date_from">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editLeaveRequestForm_date_to" class="form-label payroll-field"><span>Date To</span>
+                                                        <input id="editLeaveRequestForm_date_to" type="date" class="form-control" name="date_to">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editLeaveRequestForm_status" class="form-label payroll-field"><span>Status</span>
+                                                        <select id="editLeaveRequestForm_status" class="form-select" name="status">
+                                                            <option value="PENDING">PENDING</option>
+                                                            <option value="APPROVED">APPROVED</option>
+                                                            <option value="REJECTED">REJECTED</option>
+                                                            <option value="CANCELLED">CANCELLED</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Additional details</legend><div class="row g-3">
+                            <div class="col-12">
+                                                        <label for="editLeaveRequestForm_reason" class="form-label payroll-field"><span>Reason</span>
+                                                        <textarea id="editLeaveRequestForm_reason" class="form-control" name="reason" rows="3"></textarea>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
@@ -241,33 +267,40 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveTypeModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="addLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="addLeaveTypeForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addLeaveTypeModalTitle">Add Leave Type</h5>
+                    <h2 class="modal-title" id="addLeaveTypeModalTitle">Add Leave Type</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="addLeaveTypeForm_name" class="form-label">Name</label>
-                        <input id="addLeaveTypeForm_name" type="text" class="form-control" name="name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="addLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
-                        <select id="addLeaveTypeForm_is_paid" class="form-select" name="is_paid">
-                            <option value="1">YES</option>
-                            <option value="0">NO</option>
-                        </select>
+                    <p class="payroll-dialog-context">Add a new leave type.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Leave type</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                    <label for="addLeaveTypeForm_name" class="form-label payroll-field"><span>Name</span>
+                                                    <input id="addLeaveTypeForm_name" type="text" class="form-control" name="name">
+                                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                                    <label for="addLeaveTypeForm_is_paid" class="form-label payroll-field"><span>Is Paid</span>
+                                                    <select id="addLeaveTypeForm_is_paid" class="form-select" name="is_paid">
+                                                        <option value="1">YES</option>
+                                                        <option value="0">NO</option>
+                                                    </select>
+                                                </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
@@ -275,7 +308,7 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveTypeModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="editLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="editLeaveTypeForm">
@@ -283,26 +316,33 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editLeaveTypeModalTitle">Edit Leave Type</h5>
+                    <h2 class="modal-title" id="editLeaveTypeModalTitle">Edit Leave Type</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="editLeaveTypeForm_name" class="form-label">Name</label>
-                        <input id="editLeaveTypeForm_name" type="text" class="form-control" name="name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLeaveTypeForm_is_paid" class="form-label">Is Paid</label>
-                        <select id="editLeaveTypeForm_is_paid" class="form-select" name="is_paid">
-                            <option value="1">YES</option>
-                            <option value="0">NO</option>
-                        </select>
+                    <p class="payroll-dialog-context">Review and update this leave type.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Leave type</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                    <label for="editLeaveTypeForm_name" class="form-label payroll-field"><span>Name</span>
+                                                    <input id="editLeaveTypeForm_name" type="text" class="form-control" name="name">
+                                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                                    <label for="editLeaveTypeForm_is_paid" class="form-label payroll-field"><span>Is Paid</span>
+                                                    <select id="editLeaveTypeForm_is_paid" class="form-select" name="is_paid">
+                                                        <option value="1">YES</option>
+                                                        <option value="0">NO</option>
+                                                    </select>
+                                                </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
@@ -310,36 +350,40 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveRequestModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="deleteLeaveRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveRequestModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteLeaveRequestModalTitle">Delete Leave Request</h5>
+                <h2 class="modal-title" id="deleteLeaveRequestModalTitle">Delete Leave Request</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this leave request? This action cannot be undone.
+                <p class="mb-3">Are you sure you want to delete this leave request? This action cannot be undone.</p>
+                <p class="payroll-delete-context" id="deleteLeaveRequestModalContext"></p>
+                <p class="payroll-field-help mb-0" id="deleteLeaveRequestModalDetail"></p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-danger" type="button" id="confirmDeleteRequestBtn">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveTypeModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="deleteLeaveTypeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteLeaveTypeModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteLeaveTypeModalTitle">Delete Leave Type</h5>
+                <h2 class="modal-title" id="deleteLeaveTypeModalTitle">Delete Leave Type</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this leave type? This action cannot be undone.
+                <p class="mb-3">Are you sure you want to delete this leave type? This action cannot be undone.</p>
+                <p class="payroll-delete-context" id="deleteLeaveTypeModalContext"></p>
+                <p class="payroll-field-help mb-0" id="deleteLeaveTypeModalDetail"></p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-danger" type="button" id="confirmDeleteTypeBtn">Delete</button>
             </div>
         </div>
@@ -374,7 +418,31 @@ function formDataWithoutId(form) {
     return $.param($(form).serializeArray().filter(item => item.name !== 'id'));
 }
 
+function formatAttendanceDialogs() {
+    $('.hris-payroll-dialog').on('show.bs.modal', function (event) {
+        $(this).data('format-origin', event.relatedTarget || document.activeElement);
+    }).on('shown.bs.modal', function () {
+        const $modal = $(this);
+        const $initial = $modal.find('form').length
+            ? $modal.find('input:not([type="hidden"]), select, textarea').filter(':visible:enabled').first()
+            : $modal.find('.modal-footer [data-bs-dismiss="modal"]').first();
+        $initial.trigger('focus');
+    }).on('hidden.bs.modal', function () {
+        const origin = $(this).data('format-origin');
+        if (origin && origin.isConnected && typeof origin.focus === 'function') origin.focus();
+    }).on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const focusable = $(this).find('button, a[href], input:not([type="hidden"]), select, textarea, [tabindex="0"]').filter(':visible:enabled').toArray();
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+}
+
 $(document).ready(function () {
+    formatAttendanceDialogs();
     loadEmployees();
     loadLeaveTypeOptions();
     getAllLeaveRequests(1);
@@ -460,6 +528,9 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteLeaveRequestBtn', function () {
         pendingRequestDeleteId = $(this).data('id');
+        const $cells = $(this).closest('tr').children('td');
+        $('#deleteLeaveRequestModalContext').text($cells.eq(0).text().trim());
+        $('#deleteLeaveRequestModalDetail').text([$cells.eq(1).text().trim(), $cells.eq(2).text().trim() + ' – ' + $cells.eq(3).text().trim()].join(' · '));
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteLeaveRequestModal')).show();
     });
 
@@ -469,6 +540,9 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteLeaveTypeBtn', function () {
         pendingTypeDeleteId = $(this).data('id');
+        const $cells = $(this).closest('tr').children('td');
+        $('#deleteLeaveTypeModalContext').text($cells.eq(0).text().trim());
+        $('#deleteLeaveTypeModalDetail').text($cells.eq(1).text().trim());
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteLeaveTypeModal')).show();
     });
 

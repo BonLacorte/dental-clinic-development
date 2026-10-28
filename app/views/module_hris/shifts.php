@@ -68,67 +68,83 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addShiftModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="addShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addShiftModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addShiftForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addShiftModalTitle">Add Shift</h5>
+                    <h2 class="modal-title" id="addShiftModalTitle">Add Shift</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="addShiftForm_name" class="form-label">Name</label>
-                            <input id="addShiftForm_name" type="text" class="form-control" name="name">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="addShiftForm_shift_type" class="form-label">Shift Type</label>
-                            <select id="addShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
-                                <option value="FIXED">FIXED</option>
-                                <option value="FLEX_WINDOW">FLEX_WINDOW</option>
-                                <option value="FLEX_HOURS">FLEX_HOURS</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="addShiftForm_start_time" class="form-label">Start Time</label>
-                            <input id="addShiftForm_start_time" type="time" class="form-control" name="start_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="addShiftForm_end_time" class="form-label">End Time</label>
-                            <input id="addShiftForm_end_time" type="time" class="form-control" name="end_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="addShiftForm_flex_start_time" class="form-label">Flex Start</label>
-                            <input id="addShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="addShiftForm_flex_end_time" class="form-label">Flex End</label>
-                            <input id="addShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addShiftForm_required_hours" class="form-label">Required Hours</label>
-                            <input id="addShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours" value="8.00">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addShiftForm_break_minutes" class="form-label">Break Minutes</label>
-                            <input id="addShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes" value="60">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addShiftForm_allow_overtime" class="form-label">Allow Overtime</label>
-                            <select id="addShiftForm_allow_overtime" class="form-select" name="allow_overtime">
-                                <option value="1">YES</option>
-                                <option value="0">NO</option>
-                            </select>
-                        </div>
+                    <p class="payroll-dialog-context">Add a new shift.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Shift details</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="addShiftForm_name" class="form-label payroll-field"><span>Name</span>
+                                                        <input id="addShiftForm_name" type="text" class="form-control" name="name">
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="addShiftForm_shift_type" class="form-label payroll-field"><span>Shift Type</span>
+                                                        <select id="addShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
+                                                            <option value="FIXED">FIXED</option>
+                                                            <option value="FLEX_WINDOW">FLEX_WINDOW</option>
+                                                            <option value="FLEX_HOURS">FLEX_HOURS</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Schedule</legend><div class="row g-3">
+                            <div class="col-md-3">
+                                                        <label for="addShiftForm_start_time" class="form-label payroll-field"><span>Start Time</span>
+                                                        <input id="addShiftForm_start_time" type="time" class="form-control" name="start_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="addShiftForm_end_time" class="form-label payroll-field"><span>End Time</span>
+                                                        <input id="addShiftForm_end_time" type="time" class="form-control" name="end_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="addShiftForm_flex_start_time" class="form-label payroll-field"><span>Flex Start</span>
+                                                        <input id="addShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="addShiftForm_flex_end_time" class="form-label payroll-field"><span>Flex End</span>
+                                                        <input id="addShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Work settings</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="addShiftForm_required_hours" class="form-label payroll-field"><span>Required Hours</span>
+                                                        <input id="addShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours" value="8.00">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addShiftForm_break_minutes" class="form-label payroll-field"><span>Break Minutes</span>
+                                                        <input id="addShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes" value="60">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addShiftForm_allow_overtime" class="form-label payroll-field"><span>Allow Overtime</span>
+                                                        <select id="addShiftForm_allow_overtime" class="form-select" name="allow_overtime">
+                                                            <option value="1">YES</option>
+                                                            <option value="0">NO</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
@@ -136,7 +152,7 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editShiftModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="editShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editShiftModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editShiftForm">
@@ -144,60 +160,76 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editShiftModalTitle">Edit Shift</h5>
+                    <h2 class="modal-title" id="editShiftModalTitle">Edit Shift</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="editShiftForm_name" class="form-label">Name</label>
-                            <input id="editShiftForm_name" type="text" class="form-control" name="name">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editShiftForm_shift_type" class="form-label">Shift Type</label>
-                            <select id="editShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
-                                <option value="FIXED">FIXED</option>
-                                <option value="FLEX_WINDOW">FLEX_WINDOW</option>
-                                <option value="FLEX_HOURS">FLEX_HOURS</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="editShiftForm_start_time" class="form-label">Start Time</label>
-                            <input id="editShiftForm_start_time" type="time" class="form-control" name="start_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="editShiftForm_end_time" class="form-label">End Time</label>
-                            <input id="editShiftForm_end_time" type="time" class="form-control" name="end_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="editShiftForm_flex_start_time" class="form-label">Flex Start</label>
-                            <input id="editShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="editShiftForm_flex_end_time" class="form-label">Flex End</label>
-                            <input id="editShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editShiftForm_required_hours" class="form-label">Required Hours</label>
-                            <input id="editShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editShiftForm_break_minutes" class="form-label">Break Minutes</label>
-                            <input id="editShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editShiftForm_allow_overtime" class="form-label">Allow Overtime</label>
-                            <select id="editShiftForm_allow_overtime" class="form-select" name="allow_overtime">
-                                <option value="1">YES</option>
-                                <option value="0">NO</option>
-                            </select>
-                        </div>
+                    <p class="payroll-dialog-context">Review and update this shift.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Shift details</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="editShiftForm_name" class="form-label payroll-field"><span>Name</span>
+                                                        <input id="editShiftForm_name" type="text" class="form-control" name="name">
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="editShiftForm_shift_type" class="form-label payroll-field"><span>Shift Type</span>
+                                                        <select id="editShiftForm_shift_type" class="form-select shiftTypeSelect" name="shift_type">
+                                                            <option value="FIXED">FIXED</option>
+                                                            <option value="FLEX_WINDOW">FLEX_WINDOW</option>
+                                                            <option value="FLEX_HOURS">FLEX_HOURS</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Schedule</legend><div class="row g-3">
+                            <div class="col-md-3">
+                                                        <label for="editShiftForm_start_time" class="form-label payroll-field"><span>Start Time</span>
+                                                        <input id="editShiftForm_start_time" type="time" class="form-control" name="start_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="editShiftForm_end_time" class="form-label payroll-field"><span>End Time</span>
+                                                        <input id="editShiftForm_end_time" type="time" class="form-control" name="end_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="editShiftForm_flex_start_time" class="form-label payroll-field"><span>Flex Start</span>
+                                                        <input id="editShiftForm_flex_start_time" type="time" class="form-control" name="flex_start_time">
+                                                    </label>
+                            </div>
+                            <div class="col-md-3">
+                                                        <label for="editShiftForm_flex_end_time" class="form-label payroll-field"><span>Flex End</span>
+                                                        <input id="editShiftForm_flex_end_time" type="time" class="form-control" name="flex_end_time">
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Work settings</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="editShiftForm_required_hours" class="form-label payroll-field"><span>Required Hours</span>
+                                                        <input id="editShiftForm_required_hours" type="number" step="0.01" min="0" class="form-control" name="required_hours">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editShiftForm_break_minutes" class="form-label payroll-field"><span>Break Minutes</span>
+                                                        <input id="editShiftForm_break_minutes" type="number" min="0" class="form-control" name="break_minutes">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editShiftForm_allow_overtime" class="form-label payroll-field"><span>Allow Overtime</span>
+                                                        <select id="editShiftForm_allow_overtime" class="form-select" name="allow_overtime">
+                                                            <option value="1">YES</option>
+                                                            <option value="0">NO</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
@@ -205,18 +237,20 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteShiftModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="deleteShiftModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteShiftModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteShiftModalTitle">Delete Shift</h5>
+                <h2 class="modal-title" id="deleteShiftModalTitle">Delete Shift</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this shift? This action cannot be undone.
+                <p class="mb-3">Are you sure you want to delete this shift? This action cannot be undone.</p>
+                <p class="payroll-delete-context" id="deleteShiftModalContext"></p>
+                <p class="payroll-field-help mb-0" id="deleteShiftModalDetail"></p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-danger" type="button" id="confirmDeleteShiftBtn">Delete</button>
             </div>
         </div>
@@ -246,7 +280,31 @@ function formDataWithoutId(form) {
     return $.param($(form).serializeArray().filter(item => item.name !== 'id'));
 }
 
+function formatAttendanceDialogs() {
+    $('.hris-payroll-dialog').on('show.bs.modal', function (event) {
+        $(this).data('format-origin', event.relatedTarget || document.activeElement);
+    }).on('shown.bs.modal', function () {
+        const $modal = $(this);
+        const $initial = $modal.find('form').length
+            ? $modal.find('input:not([type="hidden"]), select, textarea').filter(':visible:enabled').first()
+            : $modal.find('.modal-footer [data-bs-dismiss="modal"]').first();
+        $initial.trigger('focus');
+    }).on('hidden.bs.modal', function () {
+        const origin = $(this).data('format-origin');
+        if (origin && origin.isConnected && typeof origin.focus === 'function') origin.focus();
+    }).on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const focusable = $(this).find('button, a[href], input:not([type="hidden"]), select, textarea, [tabindex="0"]').filter(':visible:enabled').toArray();
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+}
+
 $(document).ready(function () {
+    formatAttendanceDialogs();
     getAllShifts(1);
     updateShiftFields('#addShiftForm');
     updateShiftFields('#editShiftForm');
@@ -299,6 +357,9 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteShiftBtn', function () {
         pendingDeleteId = $(this).data('id');
+        const $cells = $(this).closest('tr').children('td');
+        $('#deleteShiftModalContext').text($cells.eq(0).text().trim());
+        $('#deleteShiftModalDetail').text($cells.eq(1).text().trim());
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteShiftModal')).show();
     });
 

@@ -64,51 +64,61 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="addHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addHolidayModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="addHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addHolidayModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="addHolidayForm">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addHolidayModalTitle">Add Holiday</h5>
+                    <h2 class="modal-title" id="addHolidayModalTitle">Add Holiday</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="addHolidayForm_holiday_date" class="form-label">Holiday Date</label>
-                            <input id="addHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="addHolidayForm_name" class="form-label">Name</label>
-                            <input id="addHolidayForm_name" type="text" class="form-control" name="name">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addHolidayForm_holiday_type" class="form-label">Type</label>
-                            <select id="addHolidayForm_holiday_type" class="form-select" name="holiday_type">
-                                <option value="REGULAR">REGULAR</option>
-                                <option value="SPECIAL">SPECIAL</option>
-                                <option value="COMPANY">COMPANY</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addHolidayForm_pay_multiplier" class="form-label">Pay Multiplier</label>
-                            <input id="addHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier" value="1.00">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="addHolidayForm_allow_work" class="form-label">Allow Work</label>
-                            <select id="addHolidayForm_allow_work" class="form-select" name="allow_work">
-                                <option value="1">YES</option>
-                                <option value="0">NO</option>
-                            </select>
-                        </div>
+                    <p class="payroll-dialog-context">Add a new holiday.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Holiday details</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="addHolidayForm_holiday_date" class="form-label payroll-field"><span>Holiday Date</span>
+                                                        <input id="addHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="addHolidayForm_name" class="form-label payroll-field"><span>Name</span>
+                                                        <input id="addHolidayForm_name" type="text" class="form-control" name="name">
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Work and pay settings</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="addHolidayForm_holiday_type" class="form-label payroll-field"><span>Type</span>
+                                                        <select id="addHolidayForm_holiday_type" class="form-select" name="holiday_type">
+                                                            <option value="REGULAR">REGULAR</option>
+                                                            <option value="SPECIAL">SPECIAL</option>
+                                                            <option value="COMPANY">COMPANY</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addHolidayForm_pay_multiplier" class="form-label payroll-field"><span>Pay Multiplier</span>
+                                                        <input id="addHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier" value="1.00">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="addHolidayForm_allow_work" class="form-label payroll-field"><span>Allow Work</span>
+                                                        <select id="addHolidayForm_allow_work" class="form-select" name="allow_work">
+                                                            <option value="1">YES</option>
+                                                            <option value="0">NO</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
@@ -116,7 +126,7 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="editHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editHolidayModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="editHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editHolidayModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editHolidayForm">
@@ -124,44 +134,54 @@
                 <input type="hidden" name="csrf_token" value="<?= e($csrf_token); ?>">
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editHolidayModalTitle">Edit Holiday</h5>
+                    <h2 class="modal-title" id="editHolidayModalTitle">Edit Holiday</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="editHolidayForm_holiday_date" class="form-label">Holiday Date</label>
-                            <input id="editHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editHolidayForm_name" class="form-label">Name</label>
-                            <input id="editHolidayForm_name" type="text" class="form-control" name="name">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editHolidayForm_holiday_type" class="form-label">Type</label>
-                            <select id="editHolidayForm_holiday_type" class="form-select" name="holiday_type">
-                                <option value="REGULAR">REGULAR</option>
-                                <option value="SPECIAL">SPECIAL</option>
-                                <option value="COMPANY">COMPANY</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editHolidayForm_pay_multiplier" class="form-label">Pay Multiplier</label>
-                            <input id="editHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="editHolidayForm_allow_work" class="form-label">Allow Work</label>
-                            <select id="editHolidayForm_allow_work" class="form-select" name="allow_work">
-                                <option value="1">YES</option>
-                                <option value="0">NO</option>
-                            </select>
-                        </div>
+                    <p class="payroll-dialog-context">Review and update this holiday.</p>
+                    <div class="payroll-form-fields">
+                        <fieldset class="payroll-form-section"><legend>Holiday details</legend><div class="row g-3">
+                            <div class="col-md-6">
+                                                        <label for="editHolidayForm_holiday_date" class="form-label payroll-field"><span>Holiday Date</span>
+                                                        <input id="editHolidayForm_holiday_date" type="date" class="form-control" name="holiday_date">
+                                                    </label>
+                            </div>
+                            <div class="col-md-6">
+                                                        <label for="editHolidayForm_name" class="form-label payroll-field"><span>Name</span>
+                                                        <input id="editHolidayForm_name" type="text" class="form-control" name="name">
+                                                    </label>
+                            </div>
+                        </div></fieldset>
+                        <fieldset class="payroll-form-section"><legend>Work and pay settings</legend><div class="row g-3">
+                            <div class="col-md-4">
+                                                        <label for="editHolidayForm_holiday_type" class="form-label payroll-field"><span>Type</span>
+                                                        <select id="editHolidayForm_holiday_type" class="form-select" name="holiday_type">
+                                                            <option value="REGULAR">REGULAR</option>
+                                                            <option value="SPECIAL">SPECIAL</option>
+                                                            <option value="COMPANY">COMPANY</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editHolidayForm_pay_multiplier" class="form-label payroll-field"><span>Pay Multiplier</span>
+                                                        <input id="editHolidayForm_pay_multiplier" type="number" step="0.01" min="0" class="form-control" name="pay_multiplier">
+                                                    </label>
+                            </div>
+                            <div class="col-md-4">
+                                                        <label for="editHolidayForm_allow_work" class="form-label payroll-field"><span>Allow Work</span>
+                                                        <select id="editHolidayForm_allow_work" class="form-select" name="allow_work">
+                                                            <option value="1">YES</option>
+                                                            <option value="0">NO</option>
+                                                        </select>
+                                                    </label>
+                            </div>
+                        </div></fieldset>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
@@ -169,18 +189,20 @@
     </div>
 </div>
 
-<div class="modal fade hris-dialog" id="deleteHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteHolidayModalTitle">
+<div class="modal fade hris-dialog payroll-items-dialog hris-payroll-dialog" id="deleteHolidayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteHolidayModalTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteHolidayModalTitle">Delete Holiday</h5>
+                <h2 class="modal-title" id="deleteHolidayModalTitle">Delete Holiday</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close dialog"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this holiday? This action cannot be undone.
+                <p class="mb-3">Are you sure you want to delete this holiday? This action cannot be undone.</p>
+                <p class="payroll-delete-context" id="deleteHolidayModalContext"></p>
+                <p class="payroll-field-help mb-0" id="deleteHolidayModalDetail"></p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-danger" type="button" id="confirmDeleteHolidayBtn">Delete</button>
             </div>
         </div>
@@ -210,7 +232,31 @@ function formDataWithoutId(form) {
     return $.param($(form).serializeArray().filter(item => item.name !== 'id'));
 }
 
+function formatAttendanceDialogs() {
+    $('.hris-payroll-dialog').on('show.bs.modal', function (event) {
+        $(this).data('format-origin', event.relatedTarget || document.activeElement);
+    }).on('shown.bs.modal', function () {
+        const $modal = $(this);
+        const $initial = $modal.find('form').length
+            ? $modal.find('input:not([type="hidden"]), select, textarea').filter(':visible:enabled').first()
+            : $modal.find('.modal-footer [data-bs-dismiss="modal"]').first();
+        $initial.trigger('focus');
+    }).on('hidden.bs.modal', function () {
+        const origin = $(this).data('format-origin');
+        if (origin && origin.isConnected && typeof origin.focus === 'function') origin.focus();
+    }).on('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        const focusable = $(this).find('button, a[href], input:not([type="hidden"]), select, textarea, [tabindex="0"]').filter(':visible:enabled').toArray();
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+}
+
 $(document).ready(function () {
+    formatAttendanceDialogs();
     getAllHolidays(1);
 
     $('#holidaySearchForm').on('submit', function (e) {
@@ -253,6 +299,9 @@ $(document).ready(function () {
 
     $(document).on('click', '.deleteHolidayBtn', function () {
         pendingDeleteId = $(this).data('id');
+        const $cells = $(this).closest('tr').children('td');
+        $('#deleteHolidayModalContext').text($cells.eq(1).text().trim());
+        $('#deleteHolidayModalDetail').text($cells.eq(0).text().trim());
         bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteHolidayModal')).show();
     });
 
