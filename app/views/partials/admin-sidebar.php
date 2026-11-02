@@ -51,8 +51,6 @@ $isOpen = $navIsSection('/hris') || $navIsSection('/payroll');
                     <span class="sidebar-module-label">Payroll</span>
                     <a class="sidebar-module-link <?= $navIsSection('/payroll/allowances') ? 'active' : '' ?>" href="/payroll/allowances"<?= $navCurrentAttribute('/payroll/allowances') ?>>Payroll Items</a>
                     <?php endif; ?>
-                    <a class="sidebar-module-link <?= $navIsSection('/payroll/runs') ? 'active' : '' ?>" href="/payroll/runs"<?= $navCurrentAttribute('/payroll/runs') ?>>Payroll Runs</a>
-                    <a class="sidebar-module-link <?= $navIsSection('/payroll/attendance/import') ? 'active' : '' ?>" href="/payroll/attendance/import"<?= $navCurrentAttribute('/payroll/attendance/import') ?>>Attendance Import</a>
                 </div>
                 <?php endif; ?>
             </div>
