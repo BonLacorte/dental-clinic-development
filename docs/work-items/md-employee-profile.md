@@ -3,8 +3,9 @@
 ## Identity and status
 
 - **Task ID:** md-employee-profile
-- **Branch:** `feat/employee-profile`
-- **Status:** `READY_FOR_REVIEW` - user accepted the profile and requested publication to personal GitHub `main`; all three new profile SELECTs now match the supplied schema. Current syntax, SELECT-only regression and local HTTP checks pass. Shared date-validator warnings and earlier browser coverage gaps remain separate follow-up items.
+- **Branch:** `main`; feature integrated from `feat/employee-profile`.
+- **Published feature commit:** `7cfe72db92a409c3d4d872c8a91a7a500f7190c3`.
+- **Status:** `DONE` for the user-accepted Employee Profile publication to personal GitHub `main`. Remote main was verified at feature commit `7cfe72d`; all three new profile SELECTs now match the supplied schema. Current syntax, SELECT-only regression and local HTTP checks pass. Shared date-validator warnings and earlier browser coverage gaps remain separate follow-up items.
 - **Last reviewed (Manila):** 2026-11-07
 - **Source baseline:** `b39bfed`; initial tree was clean on `main`.
 - **Authorization:** User approved the functional profile scope, inline JavaScript and local testing, and on 2026-11-07 explicitly requested committing/pushing the completed profile including query fixes into the personal repository main branch. Publication is authorized for this task; production access/deployment remains outside scope.
@@ -107,7 +108,7 @@ The [frontend skill](../../.agents/skills/montero-dental-frontend-design/SKILL.m
 
 ## Next concrete steps
 
-1. Finish the authorized personal-repository publication and verify remote `main` contains the reviewed feature commit. The publication result will be reported in the chat; this pre-commit handoff does not claim it already happened.
+1. Publication completed: `feat/employee-profile` was fast-forwarded into local `main`, pushed to `origin/main`, and verified by `git ls-remote origin refs/heads/main` at `7cfe72d`. GitHub connector independently retrieved that commit. No forced update or deployment occurred.
 2. Review [the navigation-permissions comparison](md-navigation-permissions-review.md) with the senior developer. Its listed restricted-role AJAX mismatch and snapshot authentication differences are separate work, not changes included in this feature.
 3. Address the shared date-validator warning only under a separately approved helper fix; repeat fictional save/restore and restricted-role/browser checks before expanding verification claims.
 

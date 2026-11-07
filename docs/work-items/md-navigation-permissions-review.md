@@ -5,7 +5,7 @@
 - Task: `md-navigation-permissions-review`; reviewed 2026-11-07 (Asia/Manila).
 - Status: `DONE` for source/history analysis. This is not a completed security audit or live-server test.
 - Initial GitHub baseline: `c99ded60c92b33ba18f21a62a1461763fc779caa`, 2026-10-13.
-- Current comparison: `b39bfed` plus the Employee Profile changes on `feat/employee-profile`.
+- Current comparison: published feature commit `7cfe72d` on personal GitHub `main` (baseline `b39bfed` plus Employee Profile). Authentication files reviewed below remain unchanged by the feature.
 - Additional context: selected source files from the user-authorized local production snapshot. No production connection, private records, credentials or database import was used.
 - User requested both Employee Profile publication to the personal repository's `main` and this historical explanation. No message to the senior developer or production deployment is authorized.
 
