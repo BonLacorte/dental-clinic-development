@@ -22,6 +22,7 @@ $app->group(['AuthMiddleware', 'TenantMiddleware', 'ModuleMiddleware:module=HRIS
 
     //web pages
     $app->get('/hris/employees', 'hris/EmployeeController@index', ['PermissionMiddleware:permission=hris.employee.view']);
+    $app->get('/hris/employees/profile/{id}', 'hris/EmployeeController@profile', ['PermissionMiddleware:permission=hris.employee.view']);
     $app->get('/hris/offices', 'hris/OrgUnitsController@index', ['PermissionMiddleware:permission=hris.view']);
     $app->get('/hris/branches', 'hris/BranchController@index', ['PermissionMiddleware:permission=hris.view']);
     $app->get('/hris/positions', 'hris/PositionsController@index', ['PermissionMiddleware:permission=hris.view']);

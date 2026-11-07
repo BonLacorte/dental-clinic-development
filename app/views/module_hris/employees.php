@@ -271,7 +271,7 @@ $employeeActions = [
         return {
             id: String(emp.id), attributes: identity, index,
             name: esc(name), number: esc(emp.employee_no) || '—', branch: esc(emp.branch_name) || '—',
-            identity: employeeActions.view ? `<button type="button" class="employee-name viewEmployeeBtn" data-employee-action="viewEmployeeBtn" ${identity}>${esc(name)}</button>` : `<span class="employee-name">${esc(name)}</span>`,
+            identity: employeeActions.view ? `<a class="employee-name" href="/hris/employees/profile/${encodeURIComponent(emp.id)}">${esc(name)}</a>` : `<span class="employee-name">${esc(name)}</span>`,
             position: !Object.hasOwn(emp, 'position') || (emp.position !== null && typeof emp.position !== 'string') ? 'Position unavailable' : (esc(emp.position?.trim()) || 'Not assigned'),
             employmentType: esc(emp.employment_type) || '—',
             dateHired: esc(emp.date_hired) || '—', actions,
@@ -281,7 +281,7 @@ $employeeActions = [
 
     function employeeTableRow(record) {
         // Keep the original print fields while restoring the six screen columns.
-        return `<tr><td class="d-none d-print-table-cell">${record.number}</td><td class="employee-identity-cell"><div class="employee-identity"><span class="d-print-none">${record.identity}</span><span class="d-none d-print-inline">${record.name}</span><span class="employee-number d-print-none">${record.number}</span></div></td><td class="employee-position-cell d-print-none">${record.position}</td><td>${record.branch}</td><td class="d-print-none">${record.employmentType}</td><td class="d-none d-print-table-cell">${record.dateHired}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions d-print-none">${employeeMenuTrigger(record, 'table')}</div></td></tr>`;
+        return `<tr${employeeActions.view ? ` data-profile-id="${esc(record.id)}" class="employee-profile-row"` : ''}><td class="d-none d-print-table-cell">${record.number}</td><td class="employee-identity-cell"><div class="employee-identity"><span class="d-print-none">${record.identity}</span><span class="d-none d-print-inline">${record.name}</span><span class="employee-number d-print-none">${record.number}</span></div></td><td class="employee-position-cell d-print-none">${record.position}</td><td>${record.branch}</td><td class="d-print-none">${record.employmentType}</td><td class="d-none d-print-table-cell">${record.dateHired}</td><td>${record.status}</td><td class="text-end"><div class="employee-row-actions d-print-none">${employeeMenuTrigger(record, 'table')}</div></td></tr>`;
     }
 
     function employeeCard(record) {
@@ -648,10 +648,18 @@ $employeeActions = [
             getAllEmployees(1);
         });
         $(document).on('click.employeeActions', '.employee-page [data-employee-action], #employeeActionMenu [data-employee-action]', function () {
-            const id = $(this).hasClass('viewEmployeeBtn') ? '#viewEmployeeModal' : $(this).hasClass('editEmployeeBtn') ? '#editEmployeeModal' : $(this).hasClass('deleteEmployeeBtn') ? '#deleteEmployeeModal' : '#compensationModal';
+            if ($(this).hasClass('viewEmployeeBtn')) {
+                window.location.assign('/hris/employees/profile/' + encodeURIComponent($(this).attr('data-id')));
+                return;
+            }
+            const id = $(this).hasClass('editEmployeeBtn') ? '#editEmployeeModal' : $(this).hasClass('deleteEmployeeBtn') ? '#deleteEmployeeModal' : '#compensationModal';
             const returnTrigger = employeeMenu?.trigger || this;
             closeEmployeeMenu(false);
             openEmployeeDialog(id, returnTrigger);
+        });
+        $('#employeesTable').on('click', 'tr[data-profile-id]', function (event) {
+            if ($(event.target).closest('button, a, input, select, textarea').length || window.getSelection()?.toString()) return;
+            window.location.assign('/hris/employees/profile/' + encodeURIComponent(this.dataset.profileId));
         });
         $('.employee-page').on('click', '.employee-menu-trigger', function () { openEmployeeMenu(this); });
         $('.employee-page').on('keydown', '.employee-menu-trigger', function (event) {

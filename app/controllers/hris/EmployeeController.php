@@ -31,6 +31,33 @@ class EmployeeController extends Controller
         $this->view('module_hris/employees', $data);
     }
 
+    public function profile($id)
+    {
+        $employeeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $tenantId = (int) $_SESSION['user']['tenant_id'];
+        $employee = $employeeId ? $this->employeeModel->getProfileEmployee($employeeId, $tenantId) : false;
+        $allowedBranches = $_SESSION['user']['branches'] ?? [];
+        // Match the existing branch policy: an empty assignment list means all branches.
+        if ($employee && empty($_SESSION['user']['is_super_admin']) && $allowedBranches
+            && !in_array((int) $employee['branch_id'], array_map('intval', $allowedBranches), true)) {
+            $employee = false;
+        }
+        if (!$employee) {
+            http_response_code(404);
+        }
+        $user = $_SESSION['user'];
+        $canEdit = !empty($user['is_super_admin']) || isset($user['permission_map']['hris.employee.edit']);
+        $this->view('module_hris/employee_profile', [
+            'title' => 'Employee profile',
+            'name' => $user['name'],
+            'employee' => $employee,
+            'canEdit' => $canEdit,
+            'csrf_token' => $employee && $canEdit ? Csrf::generate() : '',
+            'compensation' => $employee ? $this->employeeModel->getProfileCompensation($employeeId, $tenantId) : false,
+            'shift' => $employee ? $this->employeeModel->getProfileShift($employeeId, $tenantId, (int) $employee['branch_id']) : false,
+        ]);
+    }
+
     public function getAllEmployees()
     {
         $tenant_id = $_SESSION['user']['tenant_id'];

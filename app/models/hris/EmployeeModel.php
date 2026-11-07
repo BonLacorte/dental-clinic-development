@@ -91,6 +91,70 @@ class EmployeeModel extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /** Profile reads are separate from legacy AJAX contracts. */
+    public function getProfileEmployee(int $id, int $tenantId): array|false
+    {
+        $stmt = $this->db->prepare("
+            SELECT e.*, b.name AS branch_name, p.name AS position, ou.name AS org_unit,
+                et.name AS employment_type, es.name AS employment_status
+            FROM hris_employees e
+            LEFT JOIN tenant_branches b ON b.id = e.branch_id AND b.tenant_id = e.tenant_id
+            LEFT JOIN hris_positions p ON p.id = e.position_id AND p.tenant_id = e.tenant_id
+            LEFT JOIN hris_org_units ou ON ou.id = e.org_unit_id AND ou.tenant_id = e.tenant_id
+            LEFT JOIN hris_employment_types et ON et.id = e.employment_type_id
+                AND (et.tenant_id = e.tenant_id OR et.tenant_id IS NULL)
+            LEFT JOIN hris_employment_statuses es ON es.id = e.employment_status_id
+                AND (es.tenant_id = e.tenant_id OR es.tenant_id IS NULL)
+            WHERE e.id = :id AND e.tenant_id = :tenant_id AND e.deleted_at IS NULL
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getProfileCompensation(int $id, int $tenantId): array|false
+    {
+        $stmt = $this->db->prepare("
+            SELECT salary_type, salary_rate, payroll_frequency, effective_from, effective_to
+            FROM payroll_employee_compensations
+            WHERE employee_id = :id AND tenant_id = :tenant_id
+                AND effective_from <= :today_from AND (effective_to IS NULL OR effective_to >= :today_to)
+            ORDER BY effective_from DESC, id DESC LIMIT 1
+        ");
+        $today = date('Y-m-d');
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId, 'today_from' => $today, 'today_to' => $today]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getProfileShift(int $id, int $tenantId, int $branchId): array|false
+    {
+        $stmt = $this->db->prepare("
+            SELECT s.name, s.shift_type, s.start_time, s.end_time, s.required_hours,
+                s.break_minutes, 'Employee assignment' AS source
+            FROM hris_employee_shift_schedules a
+            INNER JOIN hris_shifts s ON s.id = a.shift_id AND s.tenant_id = a.tenant_id
+            WHERE a.employee_id = :id AND a.tenant_id = :tenant_id
+                AND a.effective_from <= :today_from AND (a.effective_to IS NULL OR a.effective_to >= :today_to)
+            ORDER BY a.effective_from DESC, a.id DESC LIMIT 1
+        ");
+        $today = date('Y-m-d');
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId, 'today_from' => $today, 'today_to' => $today]);
+        $shift = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($shift) {
+            return $shift;
+        }
+        $stmt = $this->db->prepare("
+            SELECT s.name, s.shift_type, s.start_time, s.end_time, s.required_hours,
+                s.break_minutes, 'Branch default' AS source
+            FROM hris_branch_shifts a
+            INNER JOIN hris_shifts s ON s.id = a.shift_id AND s.tenant_id = a.tenant_id
+            WHERE a.branch_id = :branch_id AND a.tenant_id = :tenant_id AND a.is_active = 1
+            ORDER BY a.id DESC LIMIT 1
+        ");
+        $stmt->execute(['branch_id' => $branchId, 'tenant_id' => $tenantId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getLastEmployeeNoByBranch(int $branch_id, int $tenant_id): string|false
     {
         $stmt = $this->db->prepare("

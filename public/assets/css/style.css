@@ -4405,3 +4405,65 @@
     .payroll-home-page .payroll-home-summary-grid { grid-template-columns: minmax(0, 1fr); }
   }
 }
+
+/* Employee profile: Pearl & Teal, scoped to the new profile and row affordance. */
+.employee-profile { color: #193330; min-width: 0; }
+.employee-profile .profile-header { margin-bottom: 24px; }
+.employee-profile .profile-breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0 0 24px; color: #5C716D; font-size: .875rem; overflow-wrap: anywhere; }
+.employee-profile .profile-breadcrumb li + li::before { content: '·'; margin-right: 8px; }
+.employee-profile a { color: #11685D; }
+.employee-profile .profile-heading-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.employee-profile .profile-person { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.employee-profile .profile-person > div { min-width: 0; overflow-wrap: anywhere; }
+.employee-profile h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 8px; font-weight: 650; }
+.employee-profile .profile-person p { color: #5C716D; margin-bottom: 8px; }
+.employee-profile .profile-avatar { display: grid; place-items: center; flex: 0 0 72px; width: 72px; height: 72px; border-radius: 20px; background: #E6F3EF; color: #11685D; font-size: 1.5rem; font-weight: 650; }
+.employee-profile .profile-status { display: inline-block; padding: 4px 12px; background: #F4F7F7; border: 1px solid #D9E4E1; border-radius: 8px; font-size: .875rem; }
+.employee-profile .profile-tabs { display: flex; flex-wrap: wrap; gap: 4px 16px; border-bottom: 1px solid #D9E4E1; }
+.employee-profile .profile-tabs > * { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 4px; text-decoration: none; border-bottom: 3px solid transparent; }
+.employee-profile .profile-tabs [aria-current] { color: #11685D; border-color: #11685D; font-weight: 650; }
+.employee-profile .profile-tab-disabled { color: #5C716D; cursor: default; }
+.employee-profile .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.employee-profile .profile-overview { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.employee-profile .profile-section { min-width: 0; border: 1px solid #D9E4E1; border-radius: 14px; padding: 24px; background: #fff; box-shadow: 0 2px 8px rgb(25 51 48 / 4%); }
+.employee-profile .profile-section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.employee-profile .profile-section-title h2, .employee-profile .profile-section-title h3 { font-size: 1rem; font-weight: 650; margin: 0; }
+.employee-profile .profile-section-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #E6F3EF; color: #11685D; font-size: 1.125rem; flex-shrink: 0; }
+.employee-profile .profile-facts { margin: 0; }
+.employee-profile .profile-facts > div { padding: 16px 0; border-bottom: 1px solid #D9E4E1; min-width: 0; }
+.employee-profile .profile-facts dt { color: #5C716D; font-size: .875rem; font-weight: 400; }
+.employee-profile .profile-facts dd { margin: 4px 0 0; font-weight: 550; overflow-wrap: anywhere; }
+.employee-profile .profile-facts-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.employee-profile .profile-facts-inline > div { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.employee-profile .profile-facts-inline dd { margin: 0; text-align: right; }
+.employee-profile .profile-facts-inline > div:last-child { border-bottom: 0; }
+.employee-profile .profile-caption, .employee-profile .profile-empty, .employee-profile .profile-content-heading p { color: #5C716D; }
+.employee-profile .profile-empty { margin-bottom: 0; line-height: 1.6; }
+.employee-profile .profile-assignment-value { font-size: 1.25rem; font-weight: 600; overflow-wrap: anywhere; }
+.employee-profile .profile-section-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; }
+.employee-profile .profile-content-heading { margin-bottom: 24px; }
+.employee-profile .profile-content-heading h2 { font-size: 1.25rem; margin-bottom: 8px; }
+.employee-profile .profile-details fieldset.profile-section { display: block; margin-bottom: 24px; }
+.employee-profile .profile-details legend { float: none; width: auto; padding: 0 8px; font-size: 1rem; font-weight: 650; }
+.employee-profile .profile-save-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 16px 24px; background: #fff; border: 1px solid #D9E4E1; border-radius: 14px; }
+.employee-profile .form-control, .employee-profile .form-select { border-color: #738C85; border-radius: 8px; min-height: 44px; font-size: 1rem; }
+.employee-profile .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.employee-profile .btn-primary { color: #fff; --bs-btn-bg: #11685D; --bs-btn-border-color: #11685D; --bs-btn-hover-bg: #0D544B; --bs-btn-hover-border-color: #0D544B; --bs-btn-active-bg: #09473F; --bs-btn-active-border-color: #09473F; --bs-btn-disabled-bg: #11685D; --bs-btn-disabled-border-color: #11685D; }
+.employee-profile .btn-outline-primary { --bs-btn-color: #11685D; --bs-btn-border-color: #11685D; --bs-btn-hover-bg: #11685D; --bs-btn-hover-border-color: #11685D; --bs-btn-active-bg: #09473F; --bs-btn-active-border-color: #09473F; }
+.employee-profile :is(a, button, input, select):focus-visible { outline: 3px solid #087F8C; outline-offset: 3px; box-shadow: none; }
+@media screen {
+    .employee-page .employee-profile-row { cursor: pointer; }
+}
+@media (max-width: 767.98px) {
+    .employee-profile .profile-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .employee-profile .profile-heading-row { align-items: flex-start; flex-direction: column; gap: 16px; }
+    .employee-profile .profile-section { padding: 16px; }
+    .employee-profile .profile-avatar { flex-basis: 56px; width: 56px; height: 56px; border-radius: 14px; }
+    .employee-profile .profile-tabs { gap: 0 12px; }
+    .employee-profile .profile-save-bar { padding: 16px; }
+}
+@media (max-width: 399.98px) {
+    .employee-profile .profile-facts-columns { grid-template-columns: minmax(0, 1fr); }
+    .employee-profile .profile-facts-inline > div { flex-direction: column; gap: 4px; }
+    .employee-profile .profile-facts-inline dd { text-align: left; }
+}
