@@ -13,7 +13,7 @@
     $rate = $compensation ? '₱' . number_format((float) $compensation['salary_rate'], 2) : null;
     $profileUrl = '/hris/employees/profile/' . (int) $employee['id'];
     $requestedTab = $_GET['tab'] ?? 'overview';
-    $activeTab = in_array($requestedTab, ['overview', 'assignments', 'details'], true) ? $requestedTab : 'overview';
+    $activeTab = in_array($requestedTab, ['overview', 'assignments', 'financial', 'details'], true) ? $requestedTab : 'overview';
     $initials = mb_substr($employee['firstname'], 0, 1) . mb_substr($employee['lastname'], 0, 1);
 ?>
     <header class="profile-header">
@@ -23,10 +23,10 @@
             <?php if ($canEdit): ?><a class="btn btn-primary profile-edit-link" href="<?= e($profileUrl) ?>?tab=details">Edit employee <i class="bi bi-pencil-square" aria-hidden="true"></i></a><?php endif; ?>
         </div>
         <nav class="profile-tabs" aria-label="Employee profile sections">
-            <?php foreach (['overview' => 'Overview', 'assignments' => 'Assignments', 'attendance' => 'Attendance', 'leave' => 'Leave', 'payslips' => 'Payslips', 'financial' => 'Financial', 'details' => 'Details & Edit'] as $key => $label): ?>
-                <?php if (in_array($key, ['overview', 'assignments', 'details'], true)): ?>
+            <?php foreach (['overview' => 'Overview', 'assignments' => 'Assignments', 'attendance' => 'Attendance', 'leave' => 'Leave', 'payslips' => 'Payslips', 'financial' => 'Financials', 'details' => 'Details & Edit'] as $key => $label): ?>
+                <?php if (in_array($key, ['overview', 'assignments', 'details'], true) || ($key === 'financial' && $canViewFinancials)): ?>
                 <a href="<?= e($profileUrl) ?>?tab=<?= e($key) ?>"<?= $activeTab === $key ? ' aria-current="page"' : '' ?>><?= e($label) ?></a>
-                <?php else: ?><span class="profile-tab-disabled" aria-disabled="true"><?= e($label) ?><span class="visually-hidden"> - not available yet</span></span><?php endif; ?>
+                <?php else: ?><span class="profile-tab-disabled" aria-disabled="true"><?= e($label) ?><span class="visually-hidden"><?= $key === 'financial' ? ' - payroll access required' : ' - not available yet' ?></span></span><?php endif; ?>
             <?php endforeach; ?>
         </nav>
     </header>
@@ -59,6 +59,12 @@
         <section class="card profile-section"><div class="profile-section-title"><span class="profile-section-icon bi bi-calendar3" aria-hidden="true"></span><h3>Payroll schedule</h3></div><p class="profile-assignment-value"><?= $display($frequency) ?></p><dl class="profile-facts profile-facts-inline"><div><dt>Pay type</dt><dd><?= $display($compensation ? ($salaryLabels[$compensation['salary_type']] ?? $compensation['salary_type']) : null) ?></dd></div><div><dt>Effective from</dt><dd><?= $display($compensation['effective_from'] ?? null) ?></dd></div></dl></section>
         <section class="card profile-section"><div class="profile-section-title"><span class="profile-section-icon bi bi-shield-check" aria-hidden="true"></span><h3>Permission group</h3></div><p class="profile-empty">Permission group assignments are not available in the current employee records.</p></section>
     </div>
+    <?php elseif ($activeTab === 'financial'): ?>
+        <?php if ($canViewFinancials): ?>
+            <?php include __DIR__ . '/partials/employee_financials.php'; ?>
+        <?php else: ?>
+            <div class="alert alert-info">Payroll access is required to view employee financial records.</div>
+        <?php endif; ?>
     <?php else: ?>
     <section class="profile-details" aria-labelledby="detailsHeading">
         <div class="profile-content-heading"><h2 id="detailsHeading">Details &amp; Edit</h2><p>Keep identity, contact and employment information up to date.</p></div>
@@ -97,6 +103,9 @@
 <?php endif; ?>
 </main>
 <?php include '../app/views/partials/admin-footer.php'; ?>
+<?php if ($employee && $activeTab === 'financial' && $canViewFinancials): ?>
+    <?php include __DIR__ . '/partials/employee_financials_script.php'; ?>
+<?php endif; ?>
 <?php if ($employee && $activeTab === 'details' && $canEdit): ?>
 <script>
 /* Employee profile editing uses the existing employee update and lookup contracts. */

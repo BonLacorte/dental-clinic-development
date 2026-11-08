@@ -47,11 +47,14 @@ class EmployeeController extends Controller
         }
         $user = $_SESSION['user'];
         $canEdit = !empty($user['is_super_admin']) || isset($user['permission_map']['hris.employee.edit']);
+        $canViewFinancials = !empty($user['is_super_admin'])
+            || (isset($user['modules']['PAYROLL']) && isset($user['permission_map']['payroll.view']));
         $this->view('module_hris/employee_profile', [
             'title' => 'Employee profile',
             'name' => $user['name'],
             'employee' => $employee,
             'canEdit' => $canEdit,
+            'canViewFinancials' => $canViewFinancials,
             'csrf_token' => $employee && $canEdit ? Csrf::generate() : '',
             'compensation' => $employee ? $this->employeeModel->getProfileCompensation($employeeId, $tenantId) : false,
             'shift' => $employee ? $this->employeeModel->getProfileShift($employeeId, $tenantId, (int) $employee['branch_id']) : false,

@@ -23,6 +23,17 @@ $app->group(['AuthMiddleware', 'TenantMiddleware', 'ModuleMiddleware:module=HRIS
     //web pages
     $app->get('/hris/employees', 'hris/EmployeeController@index', ['PermissionMiddleware:permission=hris.employee.view']);
     $app->get('/hris/employees/profile/{id}', 'hris/EmployeeController@profile', ['PermissionMiddleware:permission=hris.employee.view']);
+
+    // Employee-bound payroll input management. Legacy Payroll Items endpoints remain unchanged.
+    $app->group(['ModuleMiddleware:module=PAYROLL', 'PermissionMiddleware:permission=payroll.view', 'PermissionMiddleware:permission=hris.employee.view'], function ($app) {
+        $app->get('/hris/employees/{employeeId}/financials/{category}/records', 'hris/EmployeeFinancialsController@records');
+        $app->get('/hris/employees/{employeeId}/financials/{category}/records/{id}', 'hris/EmployeeFinancialsController@record');
+        $app->group(['PermissionMiddleware:permission=hris.employee.edit'], function ($app) {
+            $app->post('/hris/employees/{employeeId}/financials/{category}/create', 'hris/EmployeeFinancialsController@create');
+            $app->post('/hris/employees/{employeeId}/financials/{category}/update/{id}', 'hris/EmployeeFinancialsController@update');
+            $app->post('/hris/employees/{employeeId}/financials/{category}/delete/{id}', 'hris/EmployeeFinancialsController@delete');
+        });
+    });
     $app->get('/hris/offices', 'hris/OrgUnitsController@index', ['PermissionMiddleware:permission=hris.view']);
     $app->get('/hris/branches', 'hris/BranchController@index', ['PermissionMiddleware:permission=hris.view']);
     $app->get('/hris/positions', 'hris/PositionsController@index', ['PermissionMiddleware:permission=hris.view']);

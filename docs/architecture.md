@@ -66,6 +66,7 @@ The built-in dev router, `public/dev-router.php`, serves actual public assets an
 | HRIS | `app/controllers/hris/`, `app/models/hris/`, `app/views/module_hris/`; employees, organizational units, positions, employment types, shifts, holidays, leave requests |
 | Attendance | `AttendanceLogController` and `AttendanceLogModel`; logs, DTR, summaries, scanner-related endpoints |
 | Payroll configuration | Allowance, commission, incentive, deduction, compensation, and cash-advance controller/model pairs |
+| Employee Financials | The employee profile's Financials tab uses `EmployeeFinancialsController`, `EmployeeFinancialsModel` and the `EmployeeFinancials` field/validation catalog for employee-bound payroll input CRUD. New `/hris/employees/{employeeId}/financials/{category}/...` endpoints require HRIS and Payroll modules, employee view and payroll view permissions; mutations additionally require employee edit permission and CSRF. SQL binds the session tenant, route employee and assigned branches on record reads/writes. Legacy Payroll Items endpoints remain separate. |
 | Payroll runs | `PayrollRunController`/`PayrollRunModel`; run creation, loading employee/day snapshots, processing, detail views, cancellation/reset operations |
 | Biometric imports | `BiometricController`; PhpSpreadsheet-backed import workflow |
 
